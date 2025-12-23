@@ -3,10 +3,6 @@ import chalk from "chalk";
 import logger from '../utils/appLogger.js';
 
 export const loadSecrets = async () => {
-  if (process.env.NODE_ENV !== 'production') {
-    logger.info('Not in production, skipping AWS Secrets Manager.', 'SECRETS');
-    return;
-  }
 
   const secretName = "prod/be-prod-microservices"
   const region = "ap-south-1";
