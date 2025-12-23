@@ -33,3 +33,4 @@ For **development**, the application uses the variables defined in the `.env` fi
 3.  **Run in development:** `npm run dev`
 4.  **Access API Docs:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 # be_health_service
+# be_healthcare_service
