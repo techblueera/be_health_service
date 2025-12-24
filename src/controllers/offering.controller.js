@@ -78,7 +78,6 @@ export const createOffering = async (req, res) => {
       });
     }
 
-    /* 🔧 UPDATED: normalize serviceablePincodes (single / array / CSV) */
     let parsedPincodes;
 
     if (typeof serviceablePincodes === "string") {

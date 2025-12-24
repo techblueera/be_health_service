@@ -39,7 +39,7 @@ export const getCatalogForLocation = async (req, res) => {
 
 export const getOfferingsForNode = async (req, res) => {
   const { nodeId } = req.params;
-  const location = req.location; // resolved earlier
+  const location = req.location; 
 
   try {
     if (!location) {
