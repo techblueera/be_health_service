@@ -52,6 +52,4 @@ const locationSchema = new mongoose.Schema(
   }
 );
 
-locationSchema.index({ pincode: 1 });
-
 export default mongoose.model('Location', locationSchema);
