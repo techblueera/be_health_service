@@ -1,3 +1,3 @@
-import Category from './category.model.js';
+import Category from "./category.model.js";
 
 export { Category };

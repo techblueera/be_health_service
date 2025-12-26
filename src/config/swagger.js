@@ -15,20 +15,7 @@ const options = {
         name: "Modules",
         description: "Platform modules and feature configuration",
       },
-      {
-        name: "Locations",
-        description: "Serviceability and location management",
-      },
       { name: "CatalogNodes", description: "Catalog node management" },
-      {
-        name: "Offerings",
-        description: "Sellable offerings and service definitions",
-      },
-      { name: "Catalog", description: "Catalog aggregation and search APIs" },
-      {
-        name: "Packages",
-        description: "Package composition and bundled offerings",
-      },
     ],
   },
   apis: ["./src/routes/*.js"],

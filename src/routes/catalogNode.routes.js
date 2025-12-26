@@ -5,8 +5,17 @@ import {
   getCatalogNodes,
   getCatalogNodeChildren,
   getCatalogTree,
+  getCatalogNodeById,
+  updateCatalogNode,
+  deactivateCatalogNode,
 } from "../controllers/catalogNode.controller.js";
-import { attachLocation } from "../middlewares/location.middleware.js";
+import {
+  createCatalogNodeSchema,
+  getCatalogNodeChildrenSchema,
+  getCatalogTreeSchema,
+  updateCatalogNodeSchema,
+} from "../validations/catalogNode.validataion.js";
+import { validate } from "../middlewares/validate.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -24,15 +33,6 @@ const router = express.Router();
  * @swagger
  * components:
  *   parameters:
- *     PincodeHeader:
- *       in: header
- *       name: x-pincode
- *       required: true
- *       schema:
- *         type: string
- *         example: "560001"
- *       description: User serviceable pincode resolved by location middleware
- *
  *   schemas:
  *     CatalogNode:
  *       type: object
@@ -49,9 +49,6 @@ const router = express.Router();
  *         type:
  *           type: string
  *           example: DEPARTMENT
- *         level:
- *           type: number
- *           example: 1
  *         order:
  *           type: number
  *           example: 0
@@ -80,7 +77,7 @@ const router = express.Router();
  *             required:
  *               - name
  *               - key
- *               - module
+ *               - moduleId
  *             properties:
  *               name:
  *                 type: string
@@ -94,9 +91,9 @@ const router = express.Router();
  *               description:
  *                 type: string
  *                 example: Diagnostic and lab services
- *               module:
+ *               moduleId:
  *                 type: string
- *                 example: OPD
+ *                 example: 694c8b5df37f5a8dbfd534d0
  *               parentId:
  *                 type: string
  *                 nullable: true
@@ -119,7 +116,12 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post("/", upload.single("image"), createCatalogNode);
+router.post(
+  "/",
+  upload.single("image"),
+  validate(createCatalogNodeSchema),
+  createCatalogNode
+);
 
 /**
  * @swagger
@@ -191,7 +193,11 @@ router.get("/", getCatalogNodes);
  *       500:
  *         description: Server error
  */
-router.get("/:id/children", getCatalogNodeChildren);
+router.get(
+  "/:id/children",
+  validate(getCatalogNodeChildrenSchema),
+  getCatalogNodeChildren
+);
 
 /**
  * @swagger
@@ -201,8 +207,8 @@ router.get("/:id/children", getCatalogNodeChildren);
  *     description: >
  *       Returns the nested catalog hierarchy (categories and subcategories)
  *       for a given module. This API is used for navigation and category
- *       selection. Location is resolved via x-pincode header.
- *     tags: [Catalog]
+ *       selection.
+ *     tags: [CatalogNodes]
  *     parameters:
  *       - in: query
  *         name: moduleId
@@ -210,8 +216,7 @@ router.get("/:id/children", getCatalogNodeChildren);
  *         schema:
  *           type: string
  *           example: 694b80799a5aeba18fb87226
- *         description: Module ObjectId (e.g. Hospital, Lab, Medical Store)
- *       - $ref: '#/components/parameters/PincodeHeader'
+ *         description: Module ObjectId (e.g. 694d2a4ce5a14ce0aaaa40d9)
  *     responses:
  *       200:
  *         description: Catalog tree fetched successfully
@@ -246,11 +251,85 @@ router.get("/:id/children", getCatalogNodeChildren);
  *                         type: array
  *                         items:
  *                           $ref: '#/components/schemas/CatalogNode'
- *       400:
- *         description: Missing or invalid moduleId or pincode
  *       500:
  *         description: Server error
  */
-router.get("/tree", attachLocation, getCatalogTree);
+router.get("/tree", validate(getCatalogTreeSchema), getCatalogTree);
+/**
+ * @swagger
+ * /api/catalog-nodes/{id}:
+ *   get:
+ *     tags: [CatalogNodes]
+ *     summary: Get catalog node by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Catalog node fetched successfully
+ *       404:
+ *         description: Catalog node not found
+ *       500:
+ *         description: Server error
+ *
+ *   patch:
+ *     tags: [CatalogNodes]
+ *     summary: Update catalog node
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               order:
+ *                 type: number
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Catalog node updated successfully
+ *       404:
+ *         description: Catalog node not found
+ *       500:
+ *         description: Server error
+ */
+router.get("/:id", getCatalogNodeById);
+router.patch("/:id", validate(updateCatalogNodeSchema), updateCatalogNode);
+
+/**
+ * @swagger
+ * /api/catalog-nodes/{id}/deactivate:
+ *   patch:
+ *     tags: [CatalogNodes]
+ *     summary: Deactivate catalog node
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Catalog node deactivated successfully
+ *       404:
+ *         description: Catalog node not found
+ *       500:
+ *         description: Server error
+ */
+router.patch("/:id/deactivate", deactivateCatalogNode);
 
 export default router;

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const catalogNodeSchema = new mongoose.Schema(
   {
-    module: {
+    moduleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Module",
       required: true,
@@ -47,7 +47,6 @@ const catalogNodeSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // ✅ THIS WAS MISSING — SHOULD STAY
     rules: {
       allowChildren: {
         type: Boolean,
@@ -62,7 +61,7 @@ const catalogNodeSchema = new mongoose.Schema(
         default: false,
       },
       visibilityRestrictions: {
-        type: [String], // e.g. ['SCHEDULE_H', 'ANTIBIOTIC']
+        type: [String],
         default: [],
       },
     },
@@ -84,6 +83,6 @@ const catalogNodeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-catalogNodeSchema.index({ module: 1, key: 1 }, { unique: true });
+catalogNodeSchema.index({ moduleId: 1, key: 1 }, { unique: true });
 
 export default mongoose.model("CatalogNode", catalogNodeSchema);

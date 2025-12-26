@@ -4,7 +4,10 @@ import {
   getModules,
   getModuleById,
   updateModule,
+  getCatalogTreeByModuleKey,
 } from '../controllers/module.controller.js';
+import { validate } from '../middlewares/validate.js';
+import { createModuleSchema, getModuleByIdSchema, updateModuleSchema } from '../validations/module.validation.js';
 
 const router = express.Router();
 
@@ -65,7 +68,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post('/', createModule);
+router.post('/',  validate(createModuleSchema),createModule);
 
 /**
  * @swagger
@@ -123,7 +126,7 @@ router.get('/', getModules);
  *       500:
  *         description: Server error
  */
-router.get('/:id', getModuleById);
+router.get('/:id',validate(getModuleByIdSchema), getModuleById);
 
 /**
  * @swagger
@@ -173,6 +176,54 @@ router.get('/:id', getModuleById);
  *       500:
  *         description: Server error
  */
-router.patch('/:id', updateModule);
+router.patch('/:id',validate(updateModuleSchema), updateModule);
+
+
+/**
+ * @swagger
+ * /api/modules/tree/module/{moduleKey}:
+ *   get:
+ *     tags: [Modules]
+ *     summary: Get catalog tree by module key
+ *     description: >
+ *       Returns the full hierarchical catalog tree (parent-child structure)
+ *       for a given module key. Only active catalog nodes are included.
+ *     parameters:
+ *       - in: path
+ *         name: moduleKey
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: LAB
+ *         description: Unique key of the module
+ *     responses:
+ *       200:
+ *         description: Catalog tree fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Catalog tree fetched successfully
+ *                 count:
+ *                   type: number
+ *                   example: 3
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CatalogNode'
+ *       400:
+ *         description: moduleKey is missing or invalid
+ *       404:
+ *         description: Module not found
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/tree/module/:moduleKey",
+  getCatalogTreeByModuleKey
+);
 
 export default router;

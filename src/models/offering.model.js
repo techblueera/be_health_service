@@ -2,7 +2,13 @@ import mongoose from "mongoose";
 
 const offeringSchema = new mongoose.Schema(
   {
-    module: {
+    businessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
+
+    moduleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Module",
       required: true,
@@ -19,35 +25,20 @@ const offeringSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
 
-    // key: {
-    //   type: String,
-    //   required: true,
-    //   uppercase: true,
-    //   trim: true,
-    // },
-
     type: {
-      type: String, // PRODUCT | SERVICE | PACKAGE | PROFESSIONAL | FACILITY
+      type: String,
+      enum: ["PRODUCT", "SERVICE", "PACKAGE", "PROFESSIONAL", "FACILITY"],
       required: true,
     },
 
     description: String,
 
     pricing: {
-      basePrice: Number,
+      basePrice: { type: Number, required: true },
       discountedPrice: Number,
-      currency: {
-        type: String,
-        default: "INR",
-      },
-    },
-
-    inventory: {
-      stock: Number,
-      unit: String,
+      currency: { type: String, default: "INR" },
     },
 
     availability: {
@@ -64,18 +55,17 @@ const offeringSchema = new mongoose.Schema(
 
     image: String,
 
-    serviceablePincodes: {
-      type: [String],
-      index: true,
-      required: true,
-    },
-
     isActive: {
       type: Boolean,
       default: true,
     },
   },
   { timestamps: true }
+);
+
+offeringSchema.index(
+  { businessId: 1, catalogNodeId: 1, name: 1 },
+  { unique: true }
 );
 
 export default mongoose.model("Offering", offeringSchema);
