@@ -7,6 +7,7 @@
     "test": "jest",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "seed": "node src/seeders/seed.js",
     "lint": "eslint ."
   },
   "keywords": [],
@@ -14,15 +15,21 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.957.0",
+    "@aws-sdk/client-s3": "^3.957.0",
     "@aws-sdk/client-secrets-manager": "^3.922.0",
+    "@aws-sdk/s3-request-presigner": "^3.957.0",
     "chalk": "^5.6.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "joi": "^18.0.2",
     "moment-timezone": "^0.6.0",
     "mongoose": "^8.19.3",
+    "multer": "^2.0.2",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.2.0",

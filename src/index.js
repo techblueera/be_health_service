@@ -15,7 +15,7 @@ const startServer = async () => {
   dotenv.config();
 
   // Load secrets from AWS Secrets Manager if in production
-  await loadSecrets();
+  // await loadSecrets();
 
   // Display the ASCII banner
   await asciiLogger();
