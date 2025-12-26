@@ -8,6 +8,7 @@ const options = {
       description: "API documentation for the be_health_service application.",
     },
     servers: [
+      { url: "http://43.205.164.89:3002", description: "Production server" },
       { url: "http://localhost:3000", description: "Development server" },
     ],
     tags: [
