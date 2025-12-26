@@ -16,7 +16,7 @@ export const loadSecrets = async () => {
   logger.info('Attempting to load secrets from AWS Secrets Manager...', 'SECRETS');
   logger.debug(`Secret Name: ${secretName}`, 'SECRETS');
   logger.debug(`Region: ${region}`, 'SECRETS');
-
+ 
   try {
     const command = new GetSecretValueCommand({ SecretId: secretName });
     const data = await client.send(command);
