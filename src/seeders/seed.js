@@ -6,7 +6,7 @@ import seedModules from './module.seeder.js';
 import seedCatalogNodes from './catalogNode.seeder.js';
 
 const runSeed = async () => {
-  await mongoose.connect(`mongodb+srv://user:gBRn8BztnvLcMatV@healthcare-service.xhpng05.mongodb.net/?appName=HealthCare-service`);
+  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE); 
 
   const modules = JSON.parse(
     fs.readFileSync('src/seeders/seed-data/modules.json', 'utf-8')
