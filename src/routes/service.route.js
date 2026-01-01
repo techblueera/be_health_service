@@ -1,6 +1,8 @@
+import multer from 'multer';
 import express from "express";
 import * as serviceController from "../controllers/service.controller.js";
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @swagger
@@ -49,7 +51,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/", serviceController.createService);
+router.post("/",upload.any(), serviceController.createService);
 
 /**
  * @swagger

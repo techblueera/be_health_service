@@ -22,18 +22,16 @@ const upload = multer({ storage: multer.memoryStorage() });
 /**
  * @swagger
  * tags:
- *   name: Products
+ *   name: Offerings
  *   description: Product management for admins and businesses
  */
 
-// ... (existing search and create routes are fine)
-
 /**
  * @swagger
- * /api/products/user/search:
+ * /api/offerings/user/search:
  *   get:
  *     summary: "[User] Search for available products in a pincode"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -114,10 +112,10 @@ router.get('/user/search', protect, searchProductsForUser);
 
 /**
  * @swagger
- * /api/products/search:
+ * /api/offerings/search:
  *   get:
  *     summary: "[Business] Search for products to add to inventory"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -185,10 +183,10 @@ router.get('/search', protect, searchProducts);
 
 /**
  * @swagger
- * /api/products/{productId}:
+ * /api/offerings/{productId}:
  *   get:
  *     summary: "[Public] Get a single product by its ID, with all its variants"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     parameters:
  *       - in: path
  *         name: productId
@@ -217,10 +215,10 @@ router.get('/:productId', getProductById);
 
 /**
  * @swagger
- * /api/products/admin:
+ * /api/offerings/admin:
  *   post:
  *     summary: "[Admin] Create a new product and its variants"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -274,10 +272,10 @@ router.post(
 
 /**
  * @swagger
- * /api/products/admin/{productId}:
+ * /api/offerings/admin/{productId}:
  *   put:
  *     summary: "[Admin] Update a product and its variants"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -347,10 +345,10 @@ router.put(
 
 /**
  * @swagger
- * /api/products/admin/all:
+ * /api/offerings/admin/all:
  *   get:
  *     summary: "[Admin] Get all products with pagination"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -405,10 +403,10 @@ router.get(
 
 /**
  * @swagger
- * /api/products/{productId}/variants:
+ * /api/offerings/{productId}/variants:
  *   post:
  *     summary: "[Admin/Business] Create a new variant for a product"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -465,11 +463,11 @@ router.post(
 
 /**
  * @swagger
- * /api/products/variants/{variantId}:
+ * /api/offerings/variants/{variantId}:
  *   put:
  *     summary: "[Admin/Business] Update a product variant or submit for approval"
  *     description: "Admins can update directly. Business users will submit a change request for admin approval."
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -516,10 +514,10 @@ router.put(
 
 /**
  * @swagger
- * /api/products/variants/{variantId}:
+ * /api/offerings/variants/{variantId}:
  *   delete:
  *     summary: "[Admin] Delete a product variant"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -550,10 +548,10 @@ router.delete(
 
 /**
  * @swagger
- * /api/products/variants/change-requests:
+ * /api/offerings/variants/change-requests:
  *   get:
  *     summary: "[Admin] Get product variant change requests"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -593,10 +591,10 @@ router.get(
 
 /**
  * @swagger
- * /api/products/variants/change-requests/{requestId}/approve:
+ * /api/offerings/variants/change-requests/{requestId}/approve:
  *   post:
  *     summary: "[Admin] Approve a product variant change request"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -629,10 +627,10 @@ router.post(
 
 /**
  * @swagger
- * /api/products/variants/change-requests/{requestId}/reject:
+ * /api/offerings/variants/change-requests/{requestId}/reject:
  *   post:
  *     summary: "[Admin] Reject a product variant change request"
- *     tags: [Products]
+ *     tags: [Offerings]
  *     security:
  *       - bearerAuth: []
  *     parameters:

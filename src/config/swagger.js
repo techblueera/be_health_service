@@ -242,8 +242,8 @@ const options = {
       },
       { name: "Categories", description: "Catalog node management" },
       {
-        name: "Products",
-        description: "Service and product offerings management",
+        name: "Offerings",
+        description: "Offerings for Hospitals and Pharmacies",
       },
       { name: "Inventory", description: "Inventory management for businesses" },
       { name: "Services", description: "Healthcare services management" },
