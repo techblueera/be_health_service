@@ -1362,6 +1362,674 @@
             }
           }
         ]
+      },
+      {
+        "name": "Vitamin And Nutrition Tests",
+        "key": "VITAMIN_AND_NUTRITION_TESTS",
+        "type": "CATEGORY",
+        "description": "Vitamin and nutrition tests",
+        "order": 9,
+        "ui": {
+          "icon": "vitamins",
+          "layout": "list"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": false,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Vitamin D (25 OH) Test",
+            "key": "VITAMIN_D_TEST",
+            "type": "LEAF",
+            "description": "Vitamin D test",
+            "order": 1,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Vitamin B12",
+            "key": "VITAMIN_B12_TEST",
+            "type": "",
+            "description": "",
+            "order": 2,
+            "ui": {
+              "layout": ""
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Iron Studies",
+            "key": "IRON_STUDIES_TEST",
+            "type": "LEAF",
+            "description": "Iron studies test",
+            "order": 3,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Ferritin",
+            "key": "FERRITIN_TEST",
+            "type": "LEAF",
+            "description": "Ferritin test",
+            "order": 4,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Calcium",
+            "key": "CALCIUM_TEST",
+            "type": "LEAF",
+            "description": "Calcium level test",
+            "order": 5,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Phosphorus",
+            "key": "PHOSPHORUS_TEST",
+            "type": "LEAF",
+            "description": "Phosphorus level test",
+            "order": 6,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Magnesium",
+            "key": "MAGNESIUM_TEST",
+            "type": "LEAF",
+            "description": "Magnesium level test",
+            "order": 7,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hormone Tests",
+        "key": "HORMONE_TESTS",
+        "type": "CATEGORY",
+        "description": "Hormone level tests",
+        "order": 10,
+        "ui": {
+          "icon": "hormone",
+          "layout": "list"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": false,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Testosterone",
+            "key": "TESTOSTERONE_TEST",
+            "type": "LEAF",
+            "description": "Testosterone level test",
+            "order": 1,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Estrogen",
+            "key": "ESTROGEN_TEST",
+            "type": "LEAF",
+            "description": "Estrogen level test",
+            "order": 2,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Progesterone",
+            "key": "PROGESTERONE_TEST",
+            "type": "LEAF",
+            "description": "Progesterone level test",
+            "order": 3,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "LH (Luteinizing Hormone)",
+            "key": "LH_TEST",
+            "type": "LEAF",
+            "description": "Luteinizing Hormone (LH) test",
+            "order": 4,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "FSH (Follicle Stimulating Hormone)",
+            "key": "FSH_TEST",
+            "type": "LEAF",
+            "description": "Follicle Stimulating Hormone (FSH) test",
+            "order": 5,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Prolactin",
+            "key": "PROLACTIN_TEST",
+            "type": "LEAF",
+            "description": "Prolactin level test",
+            "order": 6,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Cortisol",
+            "key": "CORTISOL_TEST",
+            "type": "LEAF",
+            "description": "Cortisol level test",
+            "order": 7,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "AMH",
+            "key": "AMH_TEST",
+            "type": "LEAF",
+            "description": "Anti-Mullerian Hormone (AMH) test",
+            "order": 8,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "DHEAS",
+            "key": "DHEAS_TEST",
+            "type": "LEAF",
+            "description": "Dehydroepiandrosterone Sulfate (DHEAS) test",
+            "order": 9,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Pregnancy And Fertility Tests",
+        "key": "PREGNANCY_AND_FERTILITY_TESTS",
+        "type": "CATEGORY",
+        "description": "Pregnancy and fertility related tests",
+        "order": 11,
+        "ui": {
+          "layout": "list"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": false,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Pregnancy Test",
+            "key": "PREGNANCY_TEST",
+            "type": "LEAF",
+            "description": "Pregnancy test",
+            "order": 1,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Double Marker",
+            "key": "DOUBLE_MARKER",
+            "type": "LEAF",
+            "description": "Double Market Test",
+            "order": 2,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Triple Marker",
+            "key": "TRIPLE_MARKER",
+            "type": "LEAF",
+            "description": "Triple Marker Test",
+            "order": 3,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "AMH Test",
+            "key": "AMH_FERTILITY_TEST",
+            "type": "LEAF",
+            "description": "Anti-Mullerian Hormone (AMH) fertility test",
+            "order": 4,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Semen Analysis",
+            "key": "SEMEN_ANALYSIS_TEST",
+            "type": "LEAF",
+            "description": "Semen analysis test",
+            "order": 5,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Quadruple Marker",
+            "key": "QUADRUPLE_MARKER",
+            "type": "LEAF",
+            "description": "Quadruple Marker Test",
+            "order": 6,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Torch Profile",
+            "key": "TORCH_PROFILE_TEST",
+            "type": "LEAF",
+            "description": "TORCH profile test",
+            "order": 7,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Urine Tests",
+        "key": "URINE_TESTS",
+        "type": "CATEGORY",
+        "description": "Urine analysis and related tests",
+        "order": 12,
+        "ui": {
+          "layout": "list"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": false,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Urine Routine",
+            "key": "URINE_ROUTINE_TEST",
+            "type": "LEAF",
+            "description": "Routine urine analysis test",
+            "order": 1,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Microalbuminuria",
+            "key": "MICROALBUMINURIA_TEST",
+            "type": "LEAF",
+            "description": "Microalbuminuria test",
+            "order": 2,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Urine Culture",
+            "key": "URINE_CULTURE_TEST",
+            "type": "LEAF",
+            "description": "Urine culture test",
+            "order": 3,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "24-Hour Urine Test",
+            "key": "24_HOUR_URINE_TEST",
+            "type": "LEAF",
+            "description": "24-hour urine collection test",
+            "order": 4,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Urine Microscopy",
+            "key": "URINE_MICROSCOPY_TEST",
+            "type": "LEAF",
+            "description": "Urine microscopy test",
+            "order": 5,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Urine Sugar",
+            "key": "URINE_SUGAR_TEST",
+            "type": "LEAF",
+            "description": "Urine sugar test",
+            "order": 6,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Urine Ketone",
+            "key": "URINE_KETONE_TEST",
+            "type": "LEAF",
+            "description": "Urine ketone test",
+            "order": 7,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Pregnancy Urine Test",
+            "key": "PREGNANCY_URINE_TEST",
+            "type": "LEAF",
+            "description": "Pregnancy urine test",
+            "order": 8,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Stool Tests",
+        "key": "STOOL_TESTS",
+        "type": "CATEGORY",
+        "description": "Stool tests",
+        "order": 13,
+        "ui": {
+          "layout": "card"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": false,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Occult Blood Test",
+            "key": "OCCULT_BLOOD_TEST",
+            "type": "LEAF",
+            "description": "Occult blood test in stool",
+            "order": 1,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Stool Routine",
+            "key": "STOOL_ROUTINE_TEST",
+            "type": "LEAF",
+            "description": "Routine stool analysis test",
+            "order": 2,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Stool Culture",
+            "key": "STOOL_CULTURE_TEST",
+            "type": "LEAF",
+            "description": "Stool culture test",
+            "order": 3,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Ova And Parasite",
+            "key": "PARASITE_TEST",
+            "type": "LEAF",
+            "description": "Stool parasite test",
+            "order": 4,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "H. Pylori (Stool)",
+            "key": "H_PYLORI_STOOL_TEST",
+            "type": "LEAF",
+            "description": "H. Pylori stool test",
+            "order": 5,
+            "ui": {
+              "layout": "card"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
       }
     ]
   },
@@ -1382,7 +2050,854 @@
       "prescriptionRequired": true,
       "visibilityRestrictions": []
     },
-    "children": []
+    "children": [
+      {
+        "name": "X-Ray",
+        "key": "X_RAY",
+        "type": "CATEGORY",
+        "description": "X-Ray imaging services",
+        "order": 1,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Orthopedic X-Ray",
+            "key": "ORTHOPEDIC_X_RAY",
+            "type": "LEAF",
+            "description": "Orthopedic X-Ray imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Dental X-Ray",
+            "key": "DENTAL_X_RAY",
+            "type": "LEAF",
+            "description": "Dental X-Ray imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "General X-Ray",
+            "key": "GENERAL_X_RAY",
+            "type": "LEAF",
+            "description": "General X-Ray imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "MRI (Magnetic Resonance Imaging)",
+        "key": "MRI_MAGNETIC_RESONANCE_IMAGING",
+        "type": "CATEGORY",
+        "description": "MRI imaging services",
+        "order": 2,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Brain MRI",
+            "key": "BRAIN_MRI",
+            "type": "LEAF",
+            "description": "Brain MRI imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Spine MRI",
+            "key": "SPINE_MRI",
+            "type": "LEAF",
+            "description": "Spine MRI imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Brain with Contrast",
+            "key": "MRI_BRAIN_WITH_CONTRAST",
+            "type": "LEAF",
+            "description": "MRI Brain with Contrast imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Knee",
+            "key": "MRI_KNEE",
+            "type": "LEAF",
+            "description": "MRI Knee imaging service",
+            "order": 4,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Shoulder",
+            "key": "MRI_SHOULDER",
+            "type": "LEAF",
+            "description": "MRI Shoulder imaging service",
+            "order": 5,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Hip",
+            "key": "MRI_HIP",
+            "type": "LEAF",
+            "description": "MRI Hip imaging service",
+            "order": 6,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Abdomen",
+            "key": "MRI_ABDOMEN",
+            "type": "LEAF",
+            "description": "MRI Abdomen imaging service",
+            "order": 7,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Pelvis",
+            "key": "MRI_PELVIS",
+            "type": "LEAF",
+            "description": "MRI Pelvis imaging service",
+            "order": 8,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Whole Spine",
+            "key": "MRI_WHOLE_SPINE",
+            "type": "LEAF",
+            "description": "MRI Whole Spine imaging service",
+            "order": 9,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Angiography",
+            "key": "MRI_ANGIOGRAPHY",
+            "type": "LEAF",
+            "description": "MRI Angiography imaging service",
+            "order": 10,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "MRI Venography",
+            "key": "MRI_VENOGRAPHY",
+            "type": "LEAF",
+            "description": "MRI Venography imaging service",
+            "order": 11,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Functional MRI",
+            "key": "FUNCTIONAL_MRI",
+            "type": "LEAF",
+            "description": "Functional MRI imaging service",
+            "order": 12,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "CT Scan(Computed Tomography)",
+        "key": "CT_SCAN",
+        "type": "CATEGORY",
+        "description": "CT Scan imaging services",
+        "order": 3,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "CT Brain",
+            "key": "CT_BRAIN",
+            "type": "LEAF",
+            "description": "CT Brain imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Chest",
+            "key": "CT_CHEST",
+            "type": "LEAF",
+            "description": "CT Chest imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Abdomen",
+            "key": "CT_ABDOMEN",
+            "type": "LEAF",
+            "description": "CT Abdomen imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Pelvis",
+            "key": "CT_PELVIS",
+            "type": "LEAF",
+            "description": "CT Pelvis imaging service",
+            "order": 4,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Angiography",
+            "key": "CT_ANGIOGRAPHY",
+            "type": "LEAF",
+            "description": "CT Angiography imaging service",
+            "order": 5,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Spine",
+            "key": "CT_SPINE",
+            "type": "LEAF",
+            "description": "CT Spine imaging service",
+            "order": 6,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Sinus",
+            "key": "CT_SINUS",
+            "type": "LEAF",
+            "description": "CT Sinus imaging service",
+            "order": 7,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT KUB",
+            "key": "CT_KUB",
+            "type": "LEAF",
+            "description": "CT KUB imaging service",
+            "order": 8,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Whole Abdomen",
+            "key": "CT_WHOLE_ABDOMEN",
+            "type": "LEAF",
+            "description": "CT Whole Abdomen imaging service",
+            "order": 9,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Temporal Bone",
+            "key": "CT_TEMPORAL_BONE",
+            "type": "LEAF",
+            "description": "CT Temporal Bone imaging service",
+            "order": 10,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "HRCT Chest",
+            "key": "HRCT_CHEST",
+            "type": "LEAF",
+            "description": "HRCT Chest imaging service",
+            "order": 11,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Ultrasound",
+        "key": "ULTRASOUND",
+        "type": "CATEGORY",
+        "description": "Ultrasound imaging services",
+        "order": 4,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "USG Whole Abdomen",
+            "key": "USG_WHOLE_ABDOMEN",
+            "type": "LEAF",
+            "description": "USG Whole Abdomen imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG Pelvis",
+            "key": "USG_PELVIS",
+            "type": "LEAF",
+            "description": "USG Pelvis imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG KUB",
+            "key": "USG_KUB",
+            "type": "LEAF",
+            "description": "USG KUB imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG Thyroid",
+            "key": "USG_THYROID",
+            "type": "LEAF",
+            "description": "USG Thyroid imaging service",
+            "order": 4,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG Scrotum",
+            "key": "USG_SCROTUM",
+            "type": "LEAF",
+            "description": "USG Scrotum imaging service",
+            "order": 5,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG Breast",
+            "key": "USG_BREAST",
+            "type": "LEAF",
+            "description": "USG Breast imaging service",
+            "order": 6,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG Pregnancy",
+            "key": "USG_PREGNANCY",
+            "type": "LEAF",
+            "description": "USG Pregnancy imaging service",
+            "order": 7,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Doppler Ultrasound",
+            "key": "DOPPLER_ULTRASOUND",
+            "type": "LEAF",
+            "description": "Doppler Ultrasound imaging service",
+            "order": 8,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "USG NT Scan",
+            "key": "USG_NT_SCAN",
+            "type": "LEAF",
+            "description": "USG NT Scan imaging service",
+            "order": 9,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Doppler Studies",
+        "key": "DOPPLER_STUDIES",
+        "type": "CATEGORY",
+        "description": "Doppler Studies imaging service",
+        "order": 5,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Carotid Doppler",
+            "key": "CAROTID_DOPPLER",
+            "type": "LEAF",
+            "description": "Carotid Doppler imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Colour Doppler",
+            "key": "COLOUR_DOPPLER",
+            "type": "LEAF",
+            "description": "Colour Doppler imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Venous Doppler",
+            "key": "VENOUS_DOPPLER",
+            "type": "LEAF",
+            "description": "Venous Doppler imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Renal Doppler",
+            "key": "RENAL_DOPPLER",
+            "type": "LEAF",
+            "description": "Renal Doppler imaging service",
+            "order": 4,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Obstetric Doppler",
+            "key": "OBSTETRIC_DOPPLER",
+            "type": "LEAF",
+            "description": "Obstetric Doppler imaging service",
+            "order": 5,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "Peripheral Vascular",
+            "key": "PERIPHERAL_VASCULAR_DOPPLER",
+            "type": "LEAF",
+            "description": "Peripheral Vascular Doppler imaging service",
+            "order": 6,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Pulmonary/ Lung Imaging",
+        "key": "PULMONARY_LUNG_IMAGING",
+        "type": "CATEGORY",
+        "description": "Pulmonary/ Lung Imaging services",
+        "order": 6,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "Chest X-Ray",
+            "key": "CHEST_X_RAY",
+            "type": "LEAF",
+            "description": "Chest X-Ray imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "HRCT Chest",
+            "key": "HRCT_CHEST_IMAGING",
+            "type": "LEAF",
+            "description": "HRCT Chest imaging service",
+            "order": 2,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          },
+          {
+            "name": "CT Pulmonary Angiography",
+            "key": "CT_PULMONARY_ANGIOGRAPHY",
+            "type": "LEAF",
+            "description": "CT Pulmonary Angiography imaging service",
+            "order": 3,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Neuro Imaging",
+        "key": "NEURO_IMAGING",
+        "type": "CATEGORY",
+        "description": "Neuro Imaging services",
+        "order": 7,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": true,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        },
+        "children": [
+          {
+            "name": "MRI Brain",
+            "key": "MRI_BRAIN",
+            "type": "LEAF",
+            "description": "MRI Brain imaging service",
+            "order": 1,
+            "ui": {
+              "layout": "grid"
+            },
+            "rules": {
+              "allowChildren": false,
+              "allowOfferings": true,
+              "prescriptionRequired": true,
+              "visibilityRestrictions": []
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "moduleCode": "LAB",
@@ -1620,7 +3135,7 @@
       "visibilityRestrictions": []
     },
     "children": [
-       {
+      {
         "name": "General Ward (Male/Female)",
         "key": "GENERAL_WARD",
         "type": "LEAF",
@@ -1736,7 +3251,7 @@
       "visibilityRestrictions": []
     },
     "children": [
-     {
+      {
         "name": "Emergency/Casualty",
         "key": "EMERGENTCY_CASUALTY",
         "type": "LEAF",
@@ -1751,86 +3266,86 @@
           "prescriptionRequired": true,
           "visibilityRestrictions": []
         }
-     },
-      {
-          "name": "ICU (Intensive Care Unit)",
-          "key": "ICU_INTENSIVE_CARE_UNIT",
-          "type": "LEAF",
-          "description": "ICU services",
-          "order": 2,
-          "ui": {
-            "layout": "grid"
-          },
-          "rules": {
-            "allowChildren": false,
-            "allowOfferings": true,
-            "prescriptionRequired": true,
-            "visibilityRestrictions": []
-          }
       },
       {
-          "name": "CCU (Critical Care Unit)",
-          "key": "CCU_CRITICAL_CARE_UNIT",
-          "type": "LEAF",
-          "description": "CCU services",
-          "order": 3,
-          "ui": {
-            "layout": "grid"
-          },
-          "rules": {
-            "allowChildren": false,
-            "allowOfferings": true,
-            "prescriptionRequired": true,
-            "visibilityRestrictions": []
-          }
+        "name": "ICU (Intensive Care Unit)",
+        "key": "ICU_INTENSIVE_CARE_UNIT",
+        "type": "LEAF",
+        "description": "ICU services",
+        "order": 2,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
       },
       {
-          "name": "NICU (Neonatal Intensive Care Unit)",
-          "key": "NICU_NEONATAL_INTENSIVE_CARE_UNIT",
-          "type": "LEAF",
-          "description": "NICU services",
-          "order": 4,
-          "ui": {
-            "layout": "grid"
-          },
-          "rules": {
-            "allowChildren": false,
-            "allowOfferings": true,
-            "prescriptionRequired": true,
-            "visibilityRestrictions": []
-          }
+        "name": "CCU (Critical Care Unit)",
+        "key": "CCU_CRITICAL_CARE_UNIT",
+        "type": "LEAF",
+        "description": "CCU services",
+        "order": 3,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
       },
       {
-          "name": "Trauma Care",
-          "key": "TRAUMA_CARE",
-          "type": "LEAF",
-          "description": "Trauma Care services",
-          "order": 5,
-          "ui": {
-            "layout": "grid"
-          },
-          "rules": {
-            "allowChildren": false,
-            "allowOfferings": true,
-            "prescriptionRequired": true,
-            "visibilityRestrictions": []
-          }
+        "name": "NICU (Neonatal Intensive Care Unit)",
+        "key": "NICU_NEONATAL_INTENSIVE_CARE_UNIT",
+        "type": "LEAF",
+        "description": "NICU services",
+        "order": 4,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
       },
       {
-          "name": "PICU (Pediatric Intensive Care Unit)",
-          "key": "PICU_PEDIATRIC_INTENSIVE_CARE_UNIT",
-          "type": "LEAF",
-          "description": "PICU services",
-          "order": 6,
-          "ui": {
-            "layout": "grid"
-          },
-          "rules": {
-            "allowChildren": false,
-            "allowOfferings": true,
-            "prescriptionRequired": true,
-            "visibilityRestrictions": []
-          }
+        "name": "Trauma Care",
+        "key": "TRAUMA_CARE",
+        "type": "LEAF",
+        "description": "Trauma Care services",
+        "order": 5,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
+      },
+      {
+        "name": "PICU (Pediatric Intensive Care Unit)",
+        "key": "PICU_PEDIATRIC_INTENSIVE_CARE_UNIT",
+        "type": "LEAF",
+        "description": "PICU services",
+        "order": 6,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
       }
     ]
   },
@@ -2008,9 +3523,9 @@
           "allowChildren": false,
           "allowOfferings": true,
           "prescriptionRequired": true,
-          "visibilityRestrictions": []  
+          "visibilityRestrictions": []
+        }
       }
-    }
     ]
   }
 ]

@@ -1,13 +1,18 @@
-import express from 'express';
-
-import helloRouter from './hello.route.js';
-import catalogNodeRouter from './catalogNode.routes.js';
-import moduleRouter from './module.routes.js';
+import express from "express";
+import helloRouter from "./hello.route.js";
+import categoryRouter from "./category.route.js";
+import productRouter from "./product.route.js";
+import inventoryRouter from "./inventory.route.js";
+import moduleRouter from "./module.route.js";
+import serviceRouter from "./service.route.js";
 
 const router = express.Router();
 
-router.use('/hello', helloRouter);
-router.use('/catalog-nodes', catalogNodeRouter);
-router.use('/modules', moduleRouter);
+router.use("/hello", helloRouter);
+router.use("/categories", categoryRouter);
+router.use("/offerings", productRouter);
+router.use("/inventory", inventoryRouter);
+router.use("/modules", moduleRouter);
+router.use("/services", serviceRouter);
 
 export default router;

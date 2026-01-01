@@ -1,70 +1,66 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
-const inventorySchema = new mongoose.Schema(
-  {
-    offeringId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Offering",
-      required: true,
-      index: true,
-    },
-
+const inventorySchema = new Schema({
     businessId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Business",
+      type: Schema.Types.ObjectId,
       required: true,
       index: true,
     },
-
-    catalogNodeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CatalogNode",
-      required: true,
-      index: true,
+    productVariant: {
+        type: Schema.Types.ObjectId,
+        ref: 'ProductVariant',
+        required: true,
     },
-
-    moduleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Module",
-      required: true,
-      index: true,
-    },
-
     pincode: {
-      type: Number,
-      required: true,
-      index: true,
-    },
-
-    stock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    unit: {
       type: String,
       required: true,
-      trim: true,
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
       index: true,
     },
-  },
-  { timestamps: true }
-);
+    cityName: {
+      type: String,
+      required: true,
+    },
+        batches: [{
+            batchNumber: { type: String, required: true },
+            quantity: { type: Number, required: true, min: 0 },
+            mfgDate: { type: Date },
+            expiryDate: { type: Date, required: true },
+            mrp: {
+                price: { type: Number, required: true },
+                unit: { type: String, required: true }
+            },
+            purchasePrice: {
+                price: { type: Number },
+                unit: { type: String }
+            },
+            sellingPrice: {
+                price: { type: Number, required: true },
+                unit: { type: String, required: true }
+            },
+        }],
+    supplierInfo: {
+      name: String,
+      contact: String,
+    },
+    location: {
+        aisle: String,
+        shelf: String,
+    },
+    reorderPoint: {
+        type: Number,
+        default: 10,
+    }
+}, { timestamps: true });
 
-inventorySchema.index(
-  {
-    offeringId: 1,
-    businessId: 1,
-    catalogNodeId: 1,
-    pincode: 1,
-  },
-  { unique: true }
-);
+// An inventory record must be unique for a product variant in a specific location (pincode) for a business
+inventorySchema.index({ businessId: 1, productVariant: 1, pincode: 1 }, { unique: true });
 
-export default mongoose.model("Inventory", inventorySchema);
+inventorySchema.virtual('totalStock').get(function() {
+    return this.batches.reduce((total, batch) => total + batch.quantity, 0);
+});
+
+inventorySchema.set('toJSON', { virtuals: true });
+inventorySchema.set('toObject', { virtuals: true });
+
+export default mongoose.model('Inventory', inventorySchema);

@@ -8,45 +8,46 @@ const catalogNodeSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
     name: {
       type: String,
       required: true,
       trim: true,
     },
-
     key: {
       type: String,
       required: true,
+      unique: true,
       uppercase: true,
       trim: true,
     },
-
-    type: {
-      type: String, // CATEGORY | GROUP | SUBGROUP | LEAF
-      required: true,
-    },
-
     description: {
       type: String,
     },
-
+    image: {
+      type: String,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CatalogNode",
       default: null,
     },
-
     level: {
       type: Number,
+      required: true,
       default: 0,
     },
-
+    type: {
+      type: String, // CATEGORY | GROUP | SUBGROUP | LEAF
+      required: true,
+    },
     order: {
       type: Number,
       default: 0,
     },
-
     rules: {
       allowChildren: {
         type: Boolean,
@@ -65,19 +66,9 @@ const catalogNodeSchema = new mongoose.Schema(
         default: [],
       },
     },
-
     ui: {
       icon: String,
       layout: String, // list | grid | card
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    image: {
-      type: String,
     },
   },
   { timestamps: true }

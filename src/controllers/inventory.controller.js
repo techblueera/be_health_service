@@ -1,173 +1,333 @@
-import mongoose from "mongoose";
-import Inventory from "../models/inventory.model.js";
-import Offering from "../models/offering.model.js";
+import { Inventory, ProductVariant } from '../models/index.js';
+import logger from '../utils/appLogger.js';
+import mongoose from 'mongoose';
 
-export const createInventory = async (req, res) => {
-  try {
-    const businessId = req.user.businessId;
-    const { offeringId, pincode, stock, unit } = req.body;
-
-    /* -------- Auth -------- */
-    if (!businessId) {
-      return res.status(401).json({ message: "Unauthorized" });
+const createBusinessInventory = async (req, res) => {
+    const businessId = req.user._id;
+    const inventoryItems = req.body;
+    
+    if (!Array.isArray(inventoryItems) || inventoryItems.length === 0) {
+        return res.status(400).json({ message: 'Request body must be a non-empty array of inventory items.' });
     }
 
-    const offering = await Offering.findOne({
-      _id: offeringId,
-      businessId,
-      isActive: true,
-    });
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (!offering) {
-      return res.status(404).json({
-        message: "Offering not found or inactive",
-      });
+    try {
+        const createdInventories = [];
+
+        for (const item of inventoryItems) {
+            const { productVariant: productVariantId, pincode, cityName, batches, supplierInfo, location, reorderPoint } = item;
+
+            if (!productVariantId || !pincode || !cityName || !batches) {
+                throw new Error('Each inventory item must include productVariant, pincode, cityName, and batches.');
+            }
+
+            const variant = await ProductVariant.findById(productVariantId).session(session);
+            if (!variant) {
+                throw new Error(`ProductVariant with id ${productVariantId} not found.`);
+            }
+
+            // Find existing inventory or create a new one
+            let inventory = await Inventory.findOne({
+                businessId,
+                productVariant: productVariantId,
+                pincode,
+            }).session(session);
+
+            if (inventory) {
+                // If it exists, push the new batches
+                inventory.batches.push(...batches);
+            } else {
+                // If not, create a new inventory document
+                inventory = new Inventory({
+                    businessId,
+                    productVariant: productVariantId,
+                    pincode,
+                    cityName,
+                    batches,
+                    supplierInfo,
+                    location,
+                    reorderPoint,
+                });
+            }
+            
+            const savedInventory = await inventory.save({ session });
+            createdInventories.push(savedInventory);
+
+        }
+
+        await session.commitTransaction();
+        res.status(201).json(createdInventories);
+
+    } catch (error) {
+        await session.abortTransaction();
+        logger.error('Error creating business inventory', 'createBusinessInventory', error);
+
+        if (error.message.includes('not found')) {
+            return res.status(404).json({ message: error.message });
+        }
+        if (error.code === 11000) {
+            return res.status(409).json({ message: 'Duplicate inventory item detected. An inventory record for one of the product variants at the same pincode already exists.' });
+        }
+        res.status(500).json({ message: 'Error creating inventory', error: error.message });
+    } finally {
+        session.endSession();
     }
-
-    /* -------- Create inventory -------- */
-    const inventory = await Inventory.create({
-      offeringId,
-      businessId,
-      catalogNodeId: offering.catalogNodeId,
-      moduleId: offering.moduleId,
-      pincode,
-      stock,
-      unit,
-    });
-
-    return res.status(201).json({
-      message: "Inventory created successfully",
-      data: inventory,
-    });
-
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: "Inventory already exists for this pincode",
-      });
-    }
-
-    return res.status(500).json({
-      message: "Error creating inventory",
-      error: error.message,
-    });
-  }
 };
 
 
-export const updateInventory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const businessId = req.user.businessId;
 
-    if (!businessId) {
-      return res.status(401).json({ message: "Unauthorized" });
+const getBusinessProducts = async (req, res) => {
+    try {
+        const businessId = req.user._id;
+        const { categoryId, page = 1, limit = 10 } = req.query;
+
+        const pageNum = parseInt(page, 10);
+        const limitNum = parseInt(limit, 10);
+        const skip = (pageNum - 1) * limitNum;
+
+        let pipeline = [];
+
+        // 1. Match inventory for the specific business
+        pipeline.push({
+            $match: {
+                businessId: new mongoose.Types.ObjectId(businessId)
+            }
+        });
+
+        // 2. Lookup related documents
+        pipeline.push(
+            { $lookup: { from: 'productvariants', localField: 'productVariant', foreignField: '_id', as: 'productVariant' } },
+            { $unwind: '$productVariant' },
+            { $lookup: { from: 'products', localField: 'productVariant.product', foreignField: '_id', as: 'product' } },
+            { $unwind: '$product' }
+        );
+
+        // 3. Filter by category if provided
+        if (categoryId) {
+            // Find all descendants of the given categoryId to include in the filter
+            const categoryWithDescendants = await mongoose.model('Category').aggregate([
+                { $match: { _id: new mongoose.Types.ObjectId(categoryId) } },
+                {
+                    $graphLookup: {
+                        from: 'categories',
+                        startWith: '$_id',
+                        connectFromField: '_id',
+                        connectToField: 'parentId',
+                        as: 'descendants'
+                    }
+                }
+            ]);
+
+            let categoryIdsToFilter = [new mongoose.Types.ObjectId(categoryId)];
+            if (categoryWithDescendants.length > 0 && categoryWithDescendants[0].descendants.length > 0) {
+                categoryIdsToFilter = categoryIdsToFilter.concat(categoryWithDescendants[0].descendants.map(d => d._id));
+            }
+
+            pipeline.push({
+                $match: { 'product.category': { $in: categoryIdsToFilter } }
+            });
+        }
+
+        // 4. Find the main category for each product
+        pipeline.push(
+            { $lookup: { from: 'categories', localField: 'product.category', foreignField: '_id', as: 'category' } },
+            { $unwind: '$category' },
+            {
+                $graphLookup: {
+                    from: 'categories',
+                    startWith: '$category._id',
+                    connectFromField: 'parentId',
+                    connectToField: '_id',
+                    as: 'categoryHierarchy'
+                }
+            },
+            {
+                $addFields: {
+                    mainCategory: {
+                        $ifNull: [
+                            {
+                                $arrayElemAt: [
+                                    { $filter: { input: '$categoryHierarchy', as: 'cat', cond: { $eq: ['$$cat.level', 0] } } },
+                                    0
+                                ]
+                            },
+                            { $cond: { if: { $eq: ['$category.level', 0] }, then: '$category', else: null } }
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    mainCategory: { $ifNull: ['$mainCategory', { _id: null, name: 'Uncategorized' }] }
+                }
+            }
+        );
+        
+        // 5. Group by main category and product to collect variants and their inventory
+        pipeline.push(
+            {
+                $group: {
+                    _id: {
+                        mainCategory: '$mainCategory._id',
+                        product: '$product._id'
+                    },
+                    mainCategory: { $first: '$mainCategory' },
+                    product: { $first: '$product' },
+                    variants: {
+                        $push: {
+                            _id: '$productVariant._id',
+                            variantName: '$productVariant.variantName',
+                            unit: '$productVariant.unit',
+                            sku: '$productVariant.sku',
+                            pricing: '$productVariant.pricing',
+                            images: '$productVariant.images',
+                            weight: '$productVariant.weight',
+                            inventory: {
+                                inventoryId: '$_id',
+                                pincode: '$pincode',
+                                cityName: '$cityName',
+                                batches: '$batches',
+                                totalStock: '$totalStock' // virtual field
+                            }
+                        }
+                    },
+                    productLastUpdate: { $max: '$updatedAt' }
+                }
+            },
+            // 6. Group again by main category to nest products
+            {
+                $group: {
+                    _id: '$_id.mainCategory',
+                    name: { $first: '$mainCategory.name' },
+                    image: { $first: '$mainCategory.image' },
+                    products: {
+                        $push: {
+                            _id: '$product._id',
+                            name: '$product.name',
+                            description: '$product.description',
+                            brand: '$product.brand',
+                            images: '$product.images',
+                            variants: '$variants'
+                        }
+                    },
+                    lastUpdate: { $max: '$productLastUpdate' }
+                }
+            },
+            // 7. Count total variants in the category
+            {
+                $addFields: {
+                    productVariantCount: {
+                        $sum: {
+                            $map: {
+                                input: '$products',
+                                as: 'p',
+                                in: { $size: '$$p.variants' }
+                            }
+                        }
+                    }
+                }
+            },
+            // 8. Shape the final output
+            {
+                $project: {
+                    _id: 0,
+                    category: {
+                        _id: '$_id',
+                        name: '$name',
+                        image: '$image',
+                        lastUpdate: '$lastUpdate',
+                        productVariantCount: '$productVariantCount',
+                        products: '$products'
+                    }
+                }
+            }
+        );
+
+        // 9. Pagination
+        pipeline.push(
+            {
+                $facet: {
+                    metadata: [{ $count: 'total' }],
+                    data: [{ $skip: skip }, { $limit: limitNum }]
+                }
+            }
+        );
+
+        const result = await Inventory.aggregate(pipeline);
+
+        const data = result[0].data;
+        const total = result[0].metadata[0] ? result[0].metadata[0].total : 0;
+
+        res.status(200).json({
+            data,
+            pagination: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum),
+            },
+        });
+
+    } catch (error) {
+        logger.error('Error fetching business products', 'getBusinessProducts', error);
+        res.status(500).json({ message: 'Error fetching business products', error: error.message });
     }
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid inventoryId" });
-    }
-
-    const allowedUpdates = ["stock", "unit", "isActive"];
-    const updates = {};
-
-    for (const key of allowedUpdates) {
-      if (req.body[key] !== undefined) {
-        updates[key] = req.body[key];
-      }
-    }
-
-    const inventory = await Inventory.findOneAndUpdate(
-      { _id: id, businessId },
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
-
-    if (!inventory) {
-      return res.status(404).json({
-        message: "Inventory not found or access denied",
-      });
-    }
-
-    return res.json({
-      message: "Inventory updated successfully",
-      data: inventory,
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error updating inventory",
-      error: error.message,
-    });
-  }
 };
 
-export const getInventoryByOffering = async (req, res) => {
-  const { offeringId } = req.params;
-  const businessId = req.user.businessId;
 
-  if (!mongoose.Types.ObjectId.isValid(offeringId)) {
-    return res.status(400).json({ message: "Invalid offeringId" });
-  }
+const updateInventory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const businessId = req.user._id;
+        const updateData = req.body;
 
-  const inventories = await Inventory.find({
-    offeringId,
-    businessId,
-  }).sort({ pincode: 1 });
+        // Optionally, if productVariant is updated, ensure it exists
+        if (updateData.productVariant) {
+            const variant = await ProductVariant.findById(updateData.productVariant);
+            if (!variant) {
+                return res.status(404).json({ message: `ProductVariant with id ${updateData.productVariant} not found.` });
+            }
+        }
 
-  return res.json({
-    message: "Inventory fetched successfully",
-    count: inventories.length,
-    data: inventories,
-  });
+        const inventory = await Inventory.findOneAndUpdate(
+            { _id: id, businessId: businessId },
+            { $set: updateData }, // $set replaces existing batches if updateData.batches is present
+            { new: true, runValidators: true }
+        );
+
+        if (!inventory) {
+            return res.status(404).json({ message: 'Inventory not found or you do not have permission to update it.' });
+        }
+
+        res.status(200).json(inventory);
+
+    } catch (error) {
+        logger.error(`Error updating inventory ${req.params.id}`, 'updateInventory', error);
+        res.status(500).json({ message: 'Error updating inventory', error: error.message });
+    }
 };
 
-export const searchInventoryByPincode = async (req, res) => {
-  const { pincode, catalogNodeId } = req.query;
 
-  if (!pincode) {
-    return res.status(400).json({ message: "pincode is required" });
-  }
 
-  const filter = {
-    pincode: Number(pincode),
-    stock: { $gt: 0 },
-    isActive: true,
-  };
+const deleteInventory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const businessId = req.user._id;
 
-  if (catalogNodeId) {
-    filter.catalogNodeId = catalogNodeId;
-  }
+        const inventory = await Inventory.findOneAndDelete({ _id: id, businessId: businessId });
 
-  const inventories = await Inventory.find(filter)
-    .populate("offeringId", "name pricing type")
-    .lean();
+        if (!inventory) {
+            return res.status(404).json({ message: 'Inventory not found or you do not have permission to delete it.' });
+        }
 
-  return res.json({
-    message: "Available inventory fetched",
-    count: inventories.length,
-    data: inventories,
-  });
+        res.status(200).json({ message: 'Inventory deleted successfully.' });
+
+    } catch (error) {
+        logger.error(`Error deleting inventory ${req.params.id}`, 'deleteInventory', error);
+        res.status(500).json({ message: 'Error deleting inventory', error: error.message });
+    }
 };
 
-export const toggleInventory = async (req, res) => {
-  const { id } = req.params;
-  const businessId = req.user.businessId;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid inventoryId" });
-  }
-
-  const inventory = await Inventory.findOne({ _id: id, businessId });
-
-  if (!inventory) {
-    return res.status(404).json({ message: "Inventory not found" });
-  }
-
-  inventory.isActive = !inventory.isActive;
-  await inventory.save();
-
-  return res.json({
-    message: `Inventory ${inventory.isActive ? "activated" : "deactivated"} successfully`,
-  });
-};
+export { createBusinessInventory, getBusinessProducts, updateInventory, deleteInventory };

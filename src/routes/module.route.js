@@ -1,31 +1,29 @@
-import express from 'express';
+import express from "express";
 import {
   createModule,
   getModules,
   getModuleById,
   updateModule,
-  getCatalogTreeByModuleKey,
-} from '../controllers/module.controller.js';
-import { validate } from '../middlewares/validate.js';
-import { createModuleSchema, getModuleByIdSchema, updateModuleSchema } from '../validations/module.validation.js';
+} from "../controllers/module.controller.js";
+import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: Modules
- *   description: Platform modules and feature configuration
+ *  name: Modules
+ *  description: Platform modules and feature configuration
  */
-
 
 /**
  * @swagger
  * /api/modules:
  *   post:
- *     summary: Create a new module
- *     description: Defines a new platform module and its feature capabilities.
+ *     summary: "[Admin/Business] Create a new module"
  *     tags: [Modules]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -38,44 +36,43 @@ const router = express.Router();
  *             properties:
  *               code:
  *                 type: string
- *                 example: LAB
+ *                 example: HOSPITAL
  *               name:
  *                 type: string
- *                 example: Laboratory Services
+ *                 example: Hospital Module
+ *               description:
+ *                 type: string
+ *                 example: Handles hospital-related services
  *               enabled:
  *                 type: boolean
  *                 example: true
+ *                 description: Maps internally to isActive
  *               config:
  *                 type: object
  *                 properties:
  *                   allowsInventory:
  *                     type: boolean
- *                     example: false
  *                   allowsPrescription:
  *                     type: boolean
- *                     example: true
  *                   allowsAppointments:
  *                     type: boolean
- *                     example: false
  *                   allowsPackages:
  *                     type: boolean
- *                     example: true
  *     responses:
  *       201:
  *         description: Module created successfully
- *       400:
- *         description: Validation error or duplicate module code
+ *       409:
+ *         description: Module with this code already exists
  *       500:
- *         description: Server error
+ *         description: Internal Server Error
  */
-router.post('/',  validate(createModuleSchema),createModule);
+router.post("/", protect, authorizeRoles("BUSINESS", "ADMIN"), createModule);
 
 /**
  * @swagger
  * /api/modules:
  *   get:
  *     summary: Get all modules
- *     description: Fetches all platform modules.
  *     tags: [Modules]
  *     responses:
  *       200:
@@ -87,25 +84,22 @@ router.post('/',  validate(createModuleSchema),createModule);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Modules fetched successfully
  *                 count:
- *                   type: number
- *                   example: 4
+ *                   type: integer
  *                 data:
  *                   type: array
  *                   items:
  *                     type: object
  *       500:
- *         description: Server error
+ *         description: Internal Server Error
  */
-router.get('/', getModules);
+router.get("/", getModules);
 
 /**
  * @swagger
  * /api/modules/{id}:
  *   get:
- *     summary: Get a module by ID
- *     description: Retrieves module details by module ID.
+ *     summary: Get module by ID
  *     tags: [Modules]
  *     parameters:
  *       - in: path
@@ -117,24 +111,22 @@ router.get('/', getModules);
  *     responses:
  *       200:
  *         description: Module fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
  *       404:
  *         description: Module not found
  *       500:
- *         description: Server error
+ *         description: Internal Server Error
  */
-router.get('/:id',validate(getModuleByIdSchema), getModuleById);
+router.get("/:id", getModuleById);
 
 /**
  * @swagger
  * /api/modules/{id}:
  *   patch:
- *     summary: Update a module
- *     description: Updates module metadata or feature configuration.
+ *     summary: "[Admin/Business] Update module details"
+ *     description: Module code cannot be updated. Use `enabled` to toggle active state.
  *     tags: [Modules]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -151,10 +143,11 @@ router.get('/:id',validate(getModuleByIdSchema), getModuleById);
  *             properties:
  *               name:
  *                 type: string
- *                 example: Updated Module Name
+ *               description:
+ *                 type: string
  *               enabled:
  *                 type: boolean
- *                 example: true
+ *                 description: Maps internally to isActive
  *               config:
  *                 type: object
  *                 properties:
@@ -170,60 +163,17 @@ router.get('/:id',validate(getModuleByIdSchema), getModuleById);
  *       200:
  *         description: Module updated successfully
  *       400:
- *         description: Invalid update payload
+ *         description: Module code cannot be updated
  *       404:
  *         description: Module not found
  *       500:
- *         description: Server error
+ *         description: Internal Server Error
  */
-router.patch('/:id',validate(updateModuleSchema), updateModule);
-
-
-/**
- * @swagger
- * /api/modules/tree/module/{moduleKey}:
- *   get:
- *     tags: [Modules]
- *     summary: Get catalog tree by module key
- *     description: >
- *       Returns the full hierarchical catalog tree (parent-child structure)
- *       for a given module key. Only active catalog nodes are included.
- *     parameters:
- *       - in: path
- *         name: moduleKey
- *         required: true
- *         schema:
- *           type: string
- *           example: LAB
- *         description: Unique key of the module
- *     responses:
- *       200:
- *         description: Catalog tree fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Catalog tree fetched successfully
- *                 count:
- *                   type: number
- *                   example: 3
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/CatalogNode'
- *       400:
- *         description: moduleKey is missing or invalid
- *       404:
- *         description: Module not found
- *       500:
- *         description: Server error
- */
-router.get(
-  "/tree/module/:moduleKey",
-  getCatalogTreeByModuleKey
+router.patch(
+  "/:id",
+  protect,
+  authorizeRoles("BUSINESS", "ADMIN"),
+  updateModule
 );
 
 export default router;
