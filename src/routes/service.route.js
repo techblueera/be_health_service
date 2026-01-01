@@ -3,6 +3,7 @@ import express from "express";
 import * as serviceController from "../controllers/service.controller.js";
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+import { protect } from '../middlewares/auth.middleware.js';
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  *       500:
  *         description: Internal server error
  */
-router.post("/",upload.any(), serviceController.createService);
+router.post("/", protect, upload.any(), serviceController.createService);
 
 /**
  * @swagger
@@ -161,7 +162,7 @@ router.get("/:id", serviceController.getServiceById);
  *       500:
  *         description: Internal server error
  */
-router.put("/:id", serviceController.updateService);
+router.put("/:id", protect, serviceController.updateService);
 
 /**
  * @swagger
@@ -186,7 +187,6 @@ router.put("/:id", serviceController.updateService);
  *       500:
  *         description: Internal server error
  */
-router.delete("/:id", serviceController.deleteService);
-;
+router.delete("/:id", protect, serviceController.deleteService);
 
 export default router;
