@@ -232,7 +232,7 @@ const options = {
       },
     },
     servers: [
-      { url: "http://43.205.164.89:3002", description: "Production server" },
+      { url: "https://43.205.164.89:3002", description: "Production server" },
       { url: "http://localhost:3000", description: "Development server" },
     ],
     tags: [
