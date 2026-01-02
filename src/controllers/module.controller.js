@@ -1,6 +1,7 @@
 import Module from '../models/module.model.js';
 import logger from '../utils/appLogger.js';
 import CatalogNode from "../models/catalogNode.model.js";
+import mongoose from 'mongoose';
 /**
  * POST /modules
  */
@@ -189,6 +190,69 @@ export const getCatalogTreeByModuleKey = async (req, res) => {
     logger.error("Error fetching catalog tree by moduleKey", error);
     return res.status(500).json({
       message: "Error fetching catalog tree by moduleKey",
+      error: error.message,
+    });
+  }
+};
+
+export const getNestedCategoriesByModuleKey = async (req, res) => {
+  try {
+    const moduleKey = req.params.key;
+
+    if (!moduleKey) {
+      return res.status(400).json({ message: "Module key is required" });
+    }
+
+    const module = await Module.findOne({
+      code: moduleKey.toUpperCase(),
+      isActive: true,
+    }).select("_id code");
+
+    if (!module) {
+      return res.status(404).json({ message: "Module not found" });
+    }
+
+    const nodes = await CatalogNode.aggregate([
+      {
+        $match: {
+          moduleId: module._id,
+          isActive: true,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          key: 1,
+          parentId: 1,
+          moduleId: 1,
+        },
+      },
+    ]);
+
+    const map = {};
+    const tree = [];
+
+    nodes.forEach((node) => {
+      map[node._id] = { ...node, children: [] };
+    });
+
+    nodes.forEach((node) => {
+      if (node.parentId) {
+        map[node.parentId]?.children.push(map[node._id]);
+      } else {
+        tree.push(map[node._id]);
+      }
+    });
+
+    return res.status(200).json({
+      message: "Nested categories fetched successfully",
+      module: module.code,
+      count: tree.length,
+      data: tree,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching nested categories by module key",
       error: error.message,
     });
   }

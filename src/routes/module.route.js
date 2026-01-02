@@ -4,6 +4,7 @@ import {
   getModules,
   getModuleById,
   updateModule,
+  getNestedCategoriesByModuleKey,
 } from "../controllers/module.controller.js";
 import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
 
@@ -174,6 +175,70 @@ router.patch(
   protect,
   authorizeRoles("BUSINESS", "ADMIN"),
   updateModule
+);
+
+/**
+ * @swagger
+ * /api/modules/tree/{key}:
+ *   get:
+ *     summary: Get nested catalog categories by module key
+ *     tags: [Modules]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: key
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: HOSPITAL
+ *         description: Module code (e.g. HOSPITAL, PHARMACY)
+ *     responses:
+ *       200:
+ *         description: Nested categories fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Nested categories fetched successfully
+ *                 module:
+ *                   type: string
+ *                   example: HOSPITAL
+ *                 count:
+ *                   type: number
+ *                   example: 2
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 65ab12f3c9a1
+ *                       name:
+ *                         type: string
+ *                         example: Diagnostics
+ *                       key:
+ *                         type: string
+ *                         example: DIAGNOSTICS
+ *                       children:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *       400:
+ *         description: Module key is required
+ *       404:
+ *         description: Module not found
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get(
+  "/tree/:key",
+  protect,
+  getNestedCategoriesByModuleKey
 );
 
 export default router;
