@@ -1,20 +1,21 @@
-import express from 'express';
-import multer from 'multer';
-import { 
-    createProductAdmin,
-    updateProductAdmin,
-    searchProducts,
-    searchProductsForUser,
-    getProductById,
-    createProductVariant, 
-    updateProductVariant, 
-    deleteProductVariant,
-    getChangeRequests,
-    approveChangeRequest,
-    rejectChangeRequest,
-    getAllProductsAdmin
-} from '../controllers/product.controller.js';
-import { protect, authorizeRoles } from '../middlewares/auth.middleware.js';
+import express from "express";
+import multer from "multer";
+import {
+  createProductAdmin,
+  updateProductAdmin,
+  searchProducts,
+  searchProductsForUser,
+  getProductById,
+  createProductVariant,
+  updateProductVariant,
+  deleteProductVariant,
+  getChangeRequests,
+  approveChangeRequest,
+  rejectChangeRequest,
+  getAllProductsAdmin,
+  getPostedOfferingsByCategoryNode,
+} from "../controllers/product.controller.js";
+import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -25,6 +26,64 @@ const upload = multer({ storage: multer.memoryStorage() });
  *   name: Offerings
  *   description: Product management for admins and businesses
  */
+
+/**
+ * @swagger
+ * /api/offerings/category/{categoryNodeId}:
+ *   get:
+ *     summary: '[Admin] Get posted products by category node'
+ *     tags: [Offerings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: categoryNodeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: 65ab12f3c9a1b23d45ef6789
+ *         description: Catalog / Category node ID
+ *     responses:
+ *       200:
+ *         description: Posted products fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Posted products fetched successfully
+ *                 count:
+ *                   type: number
+ *                   example: 2
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 65bc98a2f1c3
+ *                       name:
+ *                         type: string
+ *                         example: CBC Blood Test
+ *                       status:
+ *                         type: string
+ *                         example: POSTED
+ *                       isActive:
+ *                         type: boolean
+ *                         example: true
+ *       400:
+ *         description: Invalid category node ID format
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get(
+  "/category/:categoryNodeId",
+  protect,
+  getPostedOfferingsByCategoryNode
+);
 
 /**
  * @swagger
@@ -108,7 +167,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  *       500:
  *         description: Internal Server Error.
  */
-router.get('/user/search', protect, searchProductsForUser);
+router.get("/user/search", protect, searchProductsForUser);
 
 /**
  * @swagger
@@ -179,7 +238,7 @@ router.get('/user/search', protect, searchProductsForUser);
  *       500:
  *         description: Internal Server Error.
  */
-router.get('/search', protect, searchProducts);
+router.get("/search", protect, searchProducts);
 
 /**
  * @swagger
@@ -211,7 +270,7 @@ router.get('/search', protect, searchProducts);
  *       500:
  *         description: Internal Server Error.
  */
-router.get('/:productId', getProductById);
+router.get("/:productId", getProductById);
 
 /**
  * @swagger
@@ -263,11 +322,11 @@ router.get('/:productId', getProductById);
  *         description: Internal Server Error.
  */
 router.post(
-    '/admin',
-    protect, 
-    authorizeRoles('ADMIN'),
-    upload.any(),
-    createProductAdmin
+  "/admin",
+  protect,
+  authorizeRoles("ADMIN"),
+  upload.any(),
+  createProductAdmin
 );
 
 /**
@@ -336,11 +395,11 @@ router.post(
  *         description: Internal Server Error.
  */
 router.put(
-    '/admin/:productId',
-    protect,
-    authorizeRoles('ADMIN'),
-    upload.any(),
-    updateProductAdmin
+  "/admin/:productId",
+  protect,
+  authorizeRoles("ADMIN"),
+  upload.any(),
+  updateProductAdmin
 );
 
 /**
@@ -394,12 +453,7 @@ router.put(
  *       500:
  *         description: Internal Server Error.
  */
-router.get(
-    '/admin/all',
-    protect,
-    authorizeRoles('ADMIN'),
-    getAllProductsAdmin
-);
+router.get("/admin/all", protect, authorizeRoles("ADMIN"), getAllProductsAdmin);
 
 /**
  * @swagger
@@ -452,13 +506,11 @@ router.get(
  *         description: Internal Server Error.
  */
 router.post(
-    '/:productId/variants',
-    protect,
-    authorizeRoles('ADMIN', 'BUSINESS'),
-    upload.fields([
-        { name: 'variantImages', maxCount: 5 }
-    ]),
-    createProductVariant
+  "/:productId/variants",
+  protect,
+  authorizeRoles("ADMIN", "BUSINESS"),
+  upload.fields([{ name: "variantImages", maxCount: 5 }]),
+  createProductVariant
 );
 
 /**
@@ -506,10 +558,10 @@ router.post(
  *         description: Internal Server Error.
  */
 router.put(
-    '/variants/:variantId',
-    protect,
-    authorizeRoles('ADMIN', 'BUSINESS'),
-    updateProductVariant
+  "/variants/:variantId",
+  protect,
+  authorizeRoles("ADMIN", "BUSINESS"),
+  updateProductVariant
 );
 
 /**
@@ -540,10 +592,10 @@ router.put(
  *         description: Internal Server Error.
  */
 router.delete(
-    '/variants/:variantId',
-    protect,
-    authorizeRoles('ADMIN'),
-    deleteProductVariant
+  "/variants/:variantId",
+  protect,
+  authorizeRoles("ADMIN"),
+  deleteProductVariant
 );
 
 /**
@@ -583,10 +635,10 @@ router.delete(
  *         description: Internal Server Error.
  */
 router.get(
-    '/variants/change-requests',
-    protect,
-    authorizeRoles('ADMIN'),
-    getChangeRequests
+  "/variants/change-requests",
+  protect,
+  authorizeRoles("ADMIN"),
+  getChangeRequests
 );
 
 /**
@@ -619,10 +671,10 @@ router.get(
  *         description: Internal Server Error.
  */
 router.post(
-    '/variants/change-requests/:requestId/approve',
-    protect,
-    authorizeRoles('ADMIN'),
-    approveChangeRequest
+  "/variants/change-requests/:requestId/approve",
+  protect,
+  authorizeRoles("ADMIN"),
+  approveChangeRequest
 );
 
 /**
@@ -666,11 +718,10 @@ router.post(
  *         description: Internal Server Error.
  */
 router.post(
-    '/variants/change-requests/:requestId/reject',
-    protect,
-    authorizeRoles('ADMIN'),
-    rejectChangeRequest
+  "/variants/change-requests/:requestId/reject",
+  protect,
+  authorizeRoles("ADMIN"),
+  rejectChangeRequest
 );
-
 
 export default router;
