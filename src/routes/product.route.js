@@ -180,7 +180,7 @@ router.patch(
  *         name: type
  *         schema:
  *           type: string
- *           enum: [DOCTOR, WARD, FACILITY]
+ *           enum: [DOCTOR, WARD, FACILITY, CONTACT]
  *         description: Listing type
  *       - in: query
  *         name: isActive
