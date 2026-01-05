@@ -7,6 +7,90 @@ import { protect } from '../middlewares/auth.middleware.js';
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     BaseService:
+ *       type: object
+ *       required:
+ *         - catalogNodeId
+ *         - name
+ *         - serviceType
+ *         - pricing
+ *       properties:
+ *         catalogNodeId:
+ *           type: string
+ *           example: 64fa1234abcd1234abcd1234
+ *         name:
+ *           type: string
+ *           example: Complete Blood Count
+ *         serviceType:
+ *           type: string
+ *           enum: [LAB_TEST, LAB_PACKAGE]
+ *         pricing:
+ *           type: array
+ *           minItems: 1
+ *           items:
+ *             type: object
+ *             required: [pincode, cityName, mrp, sellingPrice]
+ *             properties:
+ *               pincode:
+ *                 type: string
+ *                 example: "560001"
+ *               cityName:
+ *                 type: string
+ *                 example: Bangalore
+ *               mrp:
+ *                 type: number
+ *                 example: 1200
+ *               sellingPrice:
+ *                 type: number
+ *                 example: 900
+ *
+ *     LabTestService:
+ *       allOf:
+ *         - $ref: '#/components/schemas/BaseService'
+ *         - type: object
+ *           required:
+ *             - labDetails
+ *           properties:
+ *             serviceType:
+ *               type: string
+ *               enum: [LAB_TEST]
+ *             labDetails:
+ *               type: object
+ *               required: [sampleType, fastingRequired, tatHours]
+ *               properties:
+ *                 sampleType:
+ *                   type: string
+ *                   example: BLOOD
+ *                 fastingRequired:
+ *                   type: boolean
+ *                   example: false
+ *                 tatHours:
+ *                   type: number
+ *                   example: 24
+ *
+ *     LabPackageService:
+ *       allOf:
+ *         - $ref: '#/components/schemas/BaseService'
+ *         - type: object
+ *           required:
+ *             - includedServices
+ *           properties:
+ *             serviceType:
+ *               type: string
+ *               enum: [LAB_PACKAGE]
+ *             includedServices:
+ *               type: array
+ *               minItems: 1
+ *               items:
+ *                 type: string
+ *                 example: 64fa9999abcd1234abcd5678
+ */
+
+
+/**
+ * @swagger
  * /api/services:
  *   post:
  *     summary: Create a new service (LAB_TEST or LAB_PACKAGE)
@@ -21,27 +105,14 @@ import { protect } from '../middlewares/auth.middleware.js';
  *               - productData
  *             properties:
  *               productData:
- *                 type: string
- *                 description: JSON string containing service data
- *                 example: >
- *                   {
- *                     "catalogNodeId": "64fa1234abcd1234abcd1234",
- *                     "name": "Complete Blood Count",
- *                     "serviceType": "LAB_TEST",
- *                     "labDetails": {
- *                       "sampleType": "BLOOD",
- *                       "fastingRequired": false,
- *                       "tatHours": 24
- *                     },
- *                     "pricing": [
- *                       {
- *                         "pincode": "560001",
- *                         "cityName": "Bangalore",
- *                         "mrp": 1200,
- *                         "sellingPrice": 900
- *                       }
- *                     ]
- *                   }
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/LabTestService'
+ *                   - $ref: '#/components/schemas/LabPackageService'
+ *                 discriminator:
+ *                   propertyName: serviceType
+ *                   mapping:
+ *                     LAB_TEST: '#/components/schemas/LabTestService'
+ *                     LAB_PACKAGE: '#/components/schemas/LabPackageService'
  *     responses:
  *       201:
  *         description: Service created successfully

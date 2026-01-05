@@ -16,9 +16,117 @@ import {
   getPostedOfferingsByCategoryNode,
 } from "../controllers/product.controller.js";
 import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
+import { createListing, fetchListings } from "../controllers/hospital.controller.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ListingBase:
+ *       type: object
+ *       required:
+ *         - catalogNodeId
+ *         - type
+ *         - title
+ *       properties:
+ *         catalogNodeId:
+ *           type: string
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *         order:
+ *           type: number
+ *         isActive:
+ *           type: boolean
+ *
+ *     DoctorListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           required:
+ *             - type
+ *             - data
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [DOCTOR]
+ *             data:
+ *               type: object
+ *               required:
+ *                 - availability
+ *                 - fees
+ *               properties:
+ *                 availability:
+ *                   type: object
+ *                 fees:
+ *                   type: number
+ *
+ *     WardListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [WARD]
+ *             data:
+ *               type: object
+ *               properties:
+ *                 beds:
+ *                   type: number
+ *                 pricePerDay:
+ *                   type: number
+ *
+ *     FacilityListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [FACILITY]
+ *             data:
+ *               type: object
+ *               properties:
+ *                 enabled:
+ *                   type: boolean
+ */
+
+/**
+ * @swagger
+ * /api/offerings/fetch-listings:
+ *   get:
+ *     summary: Fetch listings (Doctor, Ward, Facility, etc.)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: catalogNodeId
+ *         schema:
+ *           type: string
+ *         description: Catalog node ID
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [DOCTOR, WARD, FACILITY]
+ *         description: Listing type
+ *       - in: query
+ *         name: isActive
+ *         schema:
+ *           type: boolean
+ *         description: Active status
+ *     responses:
+ *       200:
+ *         description: Listings fetched successfully
+ *       500:
+ *         description: Server error
+ */
+router.get("/fetch-listings", fetchListings);
 
 /**
  * @swagger
@@ -723,5 +831,39 @@ router.post(
   authorizeRoles("ADMIN"),
   rejectChangeRequest
 );
+
+/**
+ * @swagger
+ * /api/offerings/listings:
+ *   post:
+ *     summary: Create a listing (Doctor, Ward, Facility, etc.)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/DoctorListing'
+ *               - $ref: '#/components/schemas/WardListing'
+ *               - $ref: '#/components/schemas/FacilityListing'
+ *             discriminator:
+ *               propertyName: type
+ *               mapping:
+ *                 DOCTOR: '#/components/schemas/DoctorListing'
+ *                 WARD: '#/components/schemas/WardListing'
+ *                 FACILITY: '#/components/schemas/FacilityListing'
+ *     responses:
+ *       201:
+ *         description: Listing created successfully
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/listings", protect, createListing);
+
 
 export default router;

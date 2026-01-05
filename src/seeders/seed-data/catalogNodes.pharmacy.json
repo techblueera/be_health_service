@@ -11,311 +11,11 @@
       "layout": "list"
     },
     "rules": {
-      "allowChildren": true,
+      "allowChildren": false,
       "allowOfferings": false,
       "prescriptionRequired": false,
       "visibilityRestrictions": []
-    },
-    "children": [
-      {
-        "name": "Pain Relief And Cold Relief",
-        "key": "PAIN_COLD_RELIEF",
-        "type": "GROUP",
-        "description": "Commonly used medicines for daily health needs",
-        "order": 1,
-        "ui": {
-          "layout": "card"
-        },
-        "rules": {
-          "allowChildren": true,
-          "allowOfferings": false,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": ["ANTIBIOTIC", "PRESCRIPTION"]
-        },
-        "children": [
-          {
-            "name": "Pain Relief Tablets",
-            "key": "PAIN_RELIEF_TABLETS",
-            "type": "LEAF",
-            "description": "Medicines for pain relief",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Fever Tablets",
-            "key": "FEVER_TABLETS",
-            "type": "LEAF",
-            "description": "Medicines for fever symptoms",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Headache Tablets",
-            "key": "HEADACHE_TABLETS",
-            "type": "LEAF",
-            "description": "Medicines for headache symptoms",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Body Pain Tablets",
-            "key": "BODY_PAIN_TABLETS",
-            "type": "LEAF",
-            "description": "Medicines for body pain symptoms",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Beans And Peas",
-            "key": "BEANS_AND_PEAS",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Cabbage, Cauliflower & Broccoli",
-            "key": "CABBAGE_CAULIFLOWER_BROCCOLI",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Capsicum, Chilli And Corn",
-            "key": "CAPSICUM_CHILLI_CORN",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Exotic Vegetables",
-            "key": "EXOTIC_VEGETABLES",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          }
-        ]
-      },
-      {
-        "name": "Green And Leafy",
-        "key": "GREEN_AND_LEAFY",
-        "type": "GROUP",
-        "description": "Green Leafy Vegetables",
-        "order": 2,
-        "ui": {
-          "layout": "card"
-        },
-        "rules": {
-          "allowChildren": true,
-          "allowOfferings": false,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": []
-        },
-        "children": [
-          {
-            "name": "Spinach(Palak)",
-            "key": "SPINACH_PALAK",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Fenugreek(Methi)",
-            "key": "FENUGREEK_METHI",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Coriander And Mint",
-            "key": "CORIANDER_MINT",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Lettuce And Green Salad",
-            "key": "LETTUCE_GREEN_SALAD",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Spring Onion",
-            "key": "SPRING_ONION",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          }
-        ]
-      },
-      {
-        "name": "Seasonal Vegetables",
-        "key": "SEASONAL_VEGETABLES",
-        "type": "GROUP",
-        "description": "Seasonal vegetables",
-        "order": 3,
-        "ui": {
-          "layout": "card"
-        },
-        "rules": {
-          "allowChildren": true,
-          "allowOfferings": false,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": []
-        },
-        "children": [
-          {
-            "name": "Summer Vegetables",
-            "key": "SUMMER_VEGETABLES",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Winter Vegetables",
-            "key": "WINTER_VEGETABLES",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          },
-          {
-            "name": "Monsoon Vegetables",
-            "key": "MONSOON_VEGETABLES",
-            "type": "LEAF",
-            "order": 1,
-            "ui": {
-              "layout": "grid"
-            },
-            "rules": {
-              "allowChildren": false,
-              "allowOfferings": true,
-              "prescriptionRequired": false,
-              "visibilityRestrictions": []
-            }
-          }
-        ]
-      }
-    ]
+    }
   },
   {
     "moduleCode": "PHARMACY",
@@ -365,29 +65,11 @@
       "layout": "list"
     },
     "rules": {
-      "allowChildren": true,
+      "allowChildren": false,
       "allowOfferings": false,
       "prescriptionRequired": false,
       "visibilityRestrictions": []
-    },
-    "children": [
-      {
-        "name": "Patanjali Health Products",
-        "key": "PATANJALI_HEALTH_PRODUCTS",
-        "type": "LEAF",
-        "description": "Health and wellness products by Patanjali",
-        "order": 1,
-        "ui": {
-          "layout": "grid"
-        },
-        "rules": {
-          "allowChildren": false,
-          "allowOfferings": true,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": []
-        }
-      }
-    ]
+    }
   },
   {
     "moduleCode": "PHARMACY",
@@ -401,34 +83,16 @@
       "layout": "list"
     },
     "rules": {
-      "allowChildren": true,
+      "allowChildren": false,
       "allowOfferings": false,
       "prescriptionRequired": false,
       "visibilityRestrictions": []
-    },
-    "children": [
-      {
-        "name": "Blood Pressure Monitors",
-        "key": "BLOOD_PRESSURE_MONITORS",
-        "type": "LEAF",
-        "description": "Blood pressure monitoring devices",
-        "order": 1,
-        "ui": {
-          "layout": "grid"
-        },
-        "rules": {
-          "allowChildren": false,
-          "allowOfferings": true,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": []
-        }
-      }
-    ]
+    }
   },
   {
     "moduleCode": "PHARMACY",
-    "name": "General Medicine",
-    "key": "GENERAL_MEDICINE",
+    "name": "General Medicine Pharmacy",
+    "key": "GENERAL_MEDICINE_PHARMACY",
     "type": "CATEGORY",
     "description": "General medical medicines and treatments",
     "order": 5,
@@ -441,25 +105,61 @@
       "allowOfferings": false,
       "prescriptionRequired": false,
       "visibilityRestrictions": []
+    }
+  },
+  {
+    "moduleCode": "PHARMACY",
+    "name": "Beauty And Health Care",
+    "key": "BEAUTY_AND_HEALTH_CARE",
+    "type": "CATEGORY",
+    "description": "Beauty and health care products",
+    "order": 6,
+    "ui": {
+      "icon": "diabetic",
+      "layout": "list"
     },
-    "children": [
-      {
-        "name": "Pain Relief Medicines",
-        "key": "PAIN_RELIEF_MEDICINES",
-        "type": "LEAF",
-        "description": "Medicines for pain relief",
-        "order": 1,
-        "ui": {
-          "layout": "grid"
-        },
-        "rules": {
-          "allowChildren": false,
-          "allowOfferings": true,
-          "prescriptionRequired": false,
-          "visibilityRestrictions": []
-        }
-      }
-    ]
+    "rules": {
+      "allowChildren": false,
+      "allowOfferings": false,
+      "prescriptionRequired": false,
+      "visibilityRestrictions": []
+    }
+  },
+  {
+    "moduleCode": "PHARMACY",
+    "name": "Services",
+    "key": "SERVICES",
+    "type": "CATEGORY",
+    "description": "Services offered by the pharmacy",
+    "order": 7,
+    "ui": {
+      "icon": "diabetic",
+      "layout": "list"
+    },
+    "rules": {
+      "allowChildren": false,
+      "allowOfferings": false,
+      "prescriptionRequired": false,
+      "visibilityRestrictions": []
+    }
+  },
+  {
+    "moduleCode": "PHARMACY",
+    "name": "Staff",
+    "key": "STAFF",
+    "type": "CATEGORY",
+    "description": "Staff services and management",
+    "order": 0,
+    "ui": {
+      "icon": "blood-collection",
+      "layout": "list"
+    },
+    "rules": {
+      "allowChildren": false,
+      "allowOfferings": true,
+      "prescriptionRequired": false,
+      "visibilityRestrictions": []
+    }
   },
   {
     "moduleCode": "LAB",
@@ -1399,11 +1099,11 @@
           {
             "name": "Vitamin B12",
             "key": "VITAMIN_B12_TEST",
-            "type": "",
-            "description": "",
+            "type": "LEAF",
+            "description": "Vitamin B12 test",
             "order": 2,
             "ui": {
-              "layout": ""
+              "layout": "card"
             },
             "rules": {
               "allowChildren": false,
@@ -3119,6 +2819,73 @@
   },
   {
     "moduleCode": "HOSPITAL",
+    "name": "About Us",
+    "key": "ABOUT_US",
+    "type": "LEAF",
+    "description": "About Us services",
+    "order": 0,
+    "ui": {
+      "layout": "grid"
+    },
+    "rules": {
+      "allowChildren": true,
+      "allowOfferings": true,
+      "prescriptionRequired": true,
+      "visibilityRestrictions": []
+    },
+    "children": [
+      {
+        "name": "History",
+        "key": "HISTORY",
+        "type": "LEAF",
+        "description": "Our Story information",
+        "order": 1,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
+      },
+      {
+        "name": "Mission and Vision",
+        "key": "MISSION_AND_VISION",
+        "type": "LEAF",
+        "description": "Mission and Vision information",
+        "order": 2,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
+      },
+      {
+        "name": "Management Team",
+        "key": "TEAM",
+        "type": "LEAF",
+        "description": "Our Team information",
+        "order": 3,
+        "ui": {
+          "layout": "grid"
+        },
+        "rules": {
+          "allowChildren": false,
+          "allowOfferings": true,
+          "prescriptionRequired": true,
+          "visibilityRestrictions": []
+        }
+      }
+    ]
+  },
+  {
+    "moduleCode": "HOSPITAL",
     "name": "IPD (In-Patient Department)",
     "key": "IPD_INPATIENT_DEPARTMENT",
     "type": "CATEGORY",
@@ -3389,25 +3156,6 @@
   },
   {
     "moduleCode": "HOSPITAL",
-    "name": "Other Facilities",
-    "key": "OTHER_FACILITIES",
-    "type": "CATEGORY",
-    "description": "Other hospital facilities",
-    "order": 6,
-    "ui": {
-      "icon": "maternity",
-      "layout": "list"
-    },
-    "rules": {
-      "allowChildren": true,
-      "allowOfferings": false,
-      "prescriptionRequired": true,
-      "visibilityRestrictions": []
-    },
-    "children": []
-  },
-  {
-    "moduleCode": "HOSPITAL",
     "name": "Career",
     "key": "CAREER",
     "type": "CATEGORY",
@@ -3427,10 +3175,10 @@
   },
   {
     "moduleCode": "HOSPITAL",
-    "name": "Management",
-    "key": "MANAGEMENT",
+    "name": "Contact Us",
+    "key": "CONTACT_US",
     "type": "CATEGORY",
-    "description": "Management services",
+    "description": "Contact Us services",
     "order": 8,
     "ui": {
       "icon": "maternity",
@@ -3446,10 +3194,10 @@
   },
   {
     "moduleCode": "HOSPITAL",
-    "name": "Other Services",
-    "key": "OTHER_SERVICES",
+    "name": "Other Facilities",
+    "key": "OTHER_FACILITIES",
     "type": "CATEGORY",
-    "description": "Other hospital services",
+    "description": "Other hospital facilities",
     "order": 9,
     "ui": {
       "icon": "maternity",

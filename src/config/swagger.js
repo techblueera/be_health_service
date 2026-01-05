@@ -254,7 +254,7 @@ const options = {
       },
     ],
   },
-  apis: ["./src/routes/*.js"],
+  apis: ["./src/routes/*.js", "./src/swagger.schemas.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
 export default swaggerSpec;

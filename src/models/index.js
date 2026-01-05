@@ -4,6 +4,7 @@ import ProductVariant from './productVariant.model.js';
 import Inventory from './inventory.model.js';
 import ProductVariantChangeRequest from './productVariantChangeRequest.model.js';
 import Service from './service.model.js';
+import Listing from './listing.model.js'
 
 export {
     Catalog,
@@ -12,4 +13,5 @@ export {
     Inventory,
     ProductVariantChangeRequest,
     Service,
+    Listing
 };
