@@ -61,6 +61,68 @@ const createListing = async (req, res) => {
   }
 };
 
+export const updateDoctorLeave = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { from, to } = req.body;
+
+    /* ---------- Guards ---------- */
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid listing ID format" });
+    }
+
+    if (!from || !to) {
+      return res.status(400).json({
+        message: "from and to dates are required",
+      });
+    }
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
+    if (isNaN(fromDate) || isNaN(toDate) || fromDate > toDate) {
+      return res.status(400).json({
+        message: "Invalid leave date range",
+      });
+    }
+
+    const doctor = await Listing.findOne({
+      _id: id,
+      type: "DOCTOR",
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        message: "Doctor listing not found",
+      });
+    }
+
+    /* ---------- SAFE update ---------- */
+    doctor.data = doctor.data || {};
+    doctor.data.availability = doctor.data.availability || {};
+
+    doctor.data.availability.leave = {
+      from: fromDate,
+      to: toDate,
+    };
+
+    doctor.markModified("data");
+    await doctor.save();
+
+    return res.status(200).json({
+      message: "Doctor leave updated successfully",
+      data: doctor,
+    });
+  } catch (error) {
+    logger.error("Error updating doctor leave", error);
+    return res.status(500).json({
+      message: "Error updating doctor leave",
+      error: error.message,
+    });
+  }
+};
+
+
 const fetchListings = async (req, res) => {
   try {
     const { catalogNodeId, type, isActive } = req.query;

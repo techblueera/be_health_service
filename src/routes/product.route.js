@@ -16,7 +16,7 @@ import {
   getPostedOfferingsByCategoryNode,
 } from "../controllers/product.controller.js";
 import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
-import { createListing, fetchListings } from "../controllers/hospital.controller.js";
+import { createListing, fetchListings, updateDoctorLeave } from "../controllers/hospital.controller.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -94,6 +94,73 @@ const upload = multer({ storage: multer.memoryStorage() });
  *                 enabled:
  *                   type: boolean
  */
+
+/**
+ * @swagger
+ * /api/offerings/{id}/doctor/leave:
+ *   patch:
+ *     summary: Set doctor leave period
+ *     description: |
+ *       Updates the leave period for an existing DOCTOR listing.
+ *       This does NOT create a new listing.
+ *
+ *       Rules:
+ *       - Only listings with type = DOCTOR are allowed
+ *       - Leave is stored inside data.availability
+ *       - Leave will be auto-cleared after the end date (via cron)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor listing ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - from
+ *               - to
+ *             properties:
+ *               from:
+ *                 type: string
+ *                 format: date
+ *                 example: 2026-02-01
+ *               to:
+ *                 type: string
+ *                 format: date
+ *                 example: 2026-02-05
+ *     responses:
+ *       200:
+ *         description: Doctor leave updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Doctor leave updated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Listing'
+ *       400:
+ *         description: Invalid input (ID format, missing dates, invalid range)
+ *       404:
+ *         description: Doctor listing not found
+ *       500:
+ *         description: Server error
+ */
+router.patch(
+  "/:id/doctor/leave",
+  protect,
+  updateDoctorLeave
+);
 
 /**
  * @swagger

@@ -95,7 +95,7 @@ const getCategoryById = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   const { id } = req.params;
-  const { name, key, description, parentId, level, isActive } = req.body;
+  const { name, key, description, type, parentId, level, isActive } = req.body;
 
   try {
     const category = await Catalog.findById(id);
@@ -436,6 +436,50 @@ const getBusinessCategoriesWithInventory = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching categories", error: error.message });
+  }
+};
+
+export const updateCatalogNodeStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    /* ---------- Guard: id ---------- */
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid catalogNodeId format",
+      });
+    }
+
+    /* ---------- Guard: isActive ---------- */
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({
+        message: "isActive must be a boolean (true or false)",
+      });
+    }
+
+    const node = await Catalog.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+
+    if (!node) {
+      return res.status(404).json({
+        message: "Catalog node not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: `Catalog node ${isActive ? "activated" : "deactivated"} successfully`,
+      data: node,
+    });
+  } catch (error) {
+    logger.error("Error updating catalog node status", error);
+    return res.status(500).json({
+      message: "Error updating catalog node status",
+      error: error.message,
+    });
   }
 };
 

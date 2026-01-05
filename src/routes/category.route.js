@@ -10,7 +10,8 @@ import {
     getChildrenByCategoryId,
     getChildrenByCategoryKey,
     searchCategories,
-    getBusinessCategoriesWithInventory
+    getBusinessCategoriesWithInventory,
+    updateCatalogNodeStatus
 } from '../controllers/catalog.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
@@ -235,6 +236,50 @@ router.get('/:id/children', getChildrenByCategoryId);
 
 /**
  * @swagger
+ * /api/categories/{id}/status:
+ *   patch:
+ *     summary: Activate or deactivate a catalog node
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Catalog node ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - isActive
+ *             properties:
+ *               isActive:
+ *                 type: boolean
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Catalog node status updated successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Catalog node not found
+ *       500:
+ *         description: Server error
+ */
+
+router.patch(
+  "/:id/status",
+  protect,
+  updateCatalogNodeStatus
+);
+
+/**
+ * @swagger
  * /api/categories/key/{key}/children:
  *   get:
  *     summary: Retrieve all direct child categories for a given category key
@@ -290,6 +335,8 @@ router.get('/key/:key/children', getChildrenByCategoryKey);
  *                 type: string
  *               parentId:
  *                 type: string
+ *               type:
+ *                type: string
  *               level:
  *                 type: integer
  *               isActive:
