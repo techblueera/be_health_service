@@ -216,7 +216,7 @@ export const getNestedCategoriesByModuleKey = async (req, res) => {
       {
         $match: {
           moduleId: module._id,
-          isActive: true,
+          // isActive: true,
         },
       },
       {
@@ -225,6 +225,7 @@ export const getNestedCategoriesByModuleKey = async (req, res) => {
           key: 1,
           parentId: 1,
           moduleId: 1,
+          isActive: 1,
         },
       },
     ]);
