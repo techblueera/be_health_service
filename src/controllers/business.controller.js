@@ -26,6 +26,7 @@ export const createBusiness = async (req, res) => {
       type,
       locations: locations || [],
       isActive: isActive ?? true,
+      createdBy: req.user._id,
     });
 
     return res.status(201).json({
@@ -98,6 +99,28 @@ export const deleteBusiness = async (req, res) => {
     logger.error("Error deleting business", error);
     return res.status(500).json({
       message: "Error deleting business",
+      error: error.message,
+    });
+  }
+};
+
+export const getMyBusiness = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log('this is the userId_+___',userId)
+    const business = await Business.findOne({ createdBy: userId });
+
+    if (!business) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    return res.status(200).json({
+      message: "Business fetched successfully",
+      data: business,
+    });
+  } catch (error) {
+    logger.error("Error fetching business for user", error);
+    return res.status(500).json({
+      message: "Error fetching business",
       error: error.message,
     });
   }
@@ -188,32 +211,27 @@ export const getBusinessesByPincode = async (req, res) => {
 
 export const fetchHospitalDetails = async (req, res) => {
   try {
-    const { businessId, pincode } = req.query;
+    const userId = req.user._id;
 
-    /* ---------- Guards ---------- */
-    if (!businessId || !mongoose.Types.ObjectId.isValid(businessId)) {
-      return res.status(400).json({
-        message: "Valid businessId is required",
+    /* ---------- Resolve business from token ---------- */
+    const business = await Business.findOne({
+      createdBy: userId,
+      isActive: true,
+    }).lean();
+
+    if (!business) {
+      return res.status(404).json({
+        message: "Business not found for this user",
       });
     }
 
-    const business = await Business.findById(businessId);
-    if (!business) {
-      return res.status(404).json({ message: "Business not found" });
-    }
+    const businessId = business._id;
 
     /* ---------- Filter ---------- */
     const filter = {
       businessId,
       isActive: true,
     };
-
-    if (pincode) {
-      filter.$or = [
-        { "availability.pincodes": { $exists: false } }, // no pincode restriction
-        { "availability.pincodes": pincode },
-      ];
-    }
 
     /* ---------- Fetch offerings ---------- */
     const listings = await Listing.find(filter)
@@ -230,11 +248,11 @@ export const fetchHospitalDetails = async (req, res) => {
       STATIC_PAGE: [],
     };
 
-    listings.forEach((item) => {
+    for (const item of listings) {
       if (grouped[item.type]) {
         grouped[item.type].push(item);
       }
-    });
+    }
 
     return res.status(200).json({
       success: true,

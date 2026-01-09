@@ -1,7 +1,7 @@
 import Module from '../models/module.model.js';
 import logger from '../utils/appLogger.js';
 import CatalogNode from "../models/catalogNode.model.js";
-import mongoose from 'mongoose';
+
 /**
  * POST /modules
  */

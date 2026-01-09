@@ -33,6 +33,12 @@ const businessSchema = new mongoose.Schema(
         state: String,
       },
     ],
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Business, Catalog, Inventory, Listing } from "../models/index.js";
+import { Business, Catalog, Inventory, Listing, Module } from "../models/index.js";
 import { uploadToS3, deleteFromS3 } from "../utils/s3Uploader.js";
 import { moderateContentFromUrl } from "../utils/s3-moderator.js";
 import logger from "../utils/appLogger.js";
@@ -602,25 +602,45 @@ export const getOrCreateCatalogNode = async ({
 
 const saveHospitalOfferings = async (req, res) => {
   try {
-    const { businessId, moduleId, data } = req.body;
-
-    /* ---------- Guards ---------- */
-    if (!mongoose.Types.ObjectId.isValid(businessId)) {
-      return res.status(400).json({ message: "Invalid businessId" });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(moduleId)) {
-      return res.status(400).json({ message: "Invalid moduleId" });
-    }
+    const { data } = req.body;
 
     if (!data || typeof data !== "object") {
       return res.status(400).json({ message: "data payload is required" });
     }
 
-    const business = await Business.findById(businessId);
+    const userId = req.user._id;
+
+    const business = await Business.findOne({
+      createdBy: userId,
+      isActive: true,
+    });
+
     if (!business) {
-      return res.status(404).json({ message: "Business not found" });
+      return res.status(404).json({
+        message: "Business not found for this user",
+      });
     }
+
+    if (!business.type) {
+      return res.status(400).json({
+        message: "Business type is not configured",
+      });
+    }
+
+    const businessId = business._id;
+
+    const module = await Module.findOne({
+      code: business.type,
+      isActive: true,
+    });
+
+    if (!module) {
+      return res.status(400).json({
+        message: `No active module found for business type ${business.type}`,
+      });
+    }
+
+    const moduleId = module._id;
 
     /* ---------- Required root catalog keys ---------- */
     const ROOT_KEYS = [

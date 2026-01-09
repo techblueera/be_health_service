@@ -7,6 +7,7 @@ import {
   listBusinesses,
   getBusinessesByPincode,
   fetchHospitalDetails,
+  getMyBusiness,
 } from "../controllers/business.controller.js";
 import { saveHospitalOfferings } from "../controllers/catalog.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
@@ -26,6 +27,8 @@ const router = express.Router();
  *   post:
  *     summary: Create a new business (hospital / clinic / lab)
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -68,7 +71,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post("/", createBusiness);
+router.post("/", protect, createBusiness);
 
 /**
  * @swagger
@@ -76,6 +79,8 @@ router.post("/", createBusiness);
  *   get:
  *     summary: List all businesses
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: type
@@ -94,7 +99,7 @@ router.post("/", createBusiness);
  *       500:
  *         description: Server error
  */
-router.get("/", listBusinesses);
+router.get("/", protect, listBusinesses);
 
 /**
  * @swagger
@@ -102,6 +107,8 @@ router.get("/", listBusinesses);
  *   get:
  *     summary: Fetch businesses available in a specific pincode
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: pincode
@@ -118,7 +125,7 @@ router.get("/", listBusinesses);
  *       500:
  *         description: Server error
  */
-router.get("/by-pincode", getBusinessesByPincode);
+router.get("/by-pincode", protect, getBusinessesByPincode);
 
 /**
  * @swagger
@@ -126,6 +133,8 @@ router.get("/by-pincode", getBusinessesByPincode);
  *   get:
  *     summary: Get a business by ID
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -143,7 +152,7 @@ router.get("/by-pincode", getBusinessesByPincode);
  *       500:
  *         description: Server error
  */
-router.get("/:id", getBusinessById);
+router.get("/:id", protect, getBusinessById);
 
 /**
  * @swagger
@@ -151,6 +160,8 @@ router.get("/:id", getBusinessById);
  *   put:
  *     summary: Update business details
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -193,7 +204,7 @@ router.get("/:id", getBusinessById);
  *       500:
  *         description: Server error
  */
-router.put("/:id", updateBusiness);
+router.put("/:id", protect, updateBusiness);
 
 /**
  * @swagger
@@ -201,6 +212,8 @@ router.put("/:id", updateBusiness);
  *   delete:
  *     summary: Deactivate a business (soft delete)
  *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -218,34 +231,71 @@ router.put("/:id", updateBusiness);
  *       500:
  *         description: Server error
  */
-router.delete("/:id", deleteBusiness);
+router.delete("/:id", protect, deleteBusiness);
+
+/**
+ * @swagger
+ * /api/businesses/me:
+ *   get:
+ *     summary: Get logged-in user's business
+ *     description: Fetch the business (hotel) associated with the authenticated user. Only one business is allowed per user.
+ *     tags:
+ *       - Business
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Business fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Business fetched successfully
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       404:
+ *         description: Business not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Business not found for this user
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get("/me", protect, getMyBusiness);
 
 /**
  * @swagger
  * /api/businesses/ai-hospital/fetch-details:
  *   get:
- *     summary: Fetch all offerings for a specific hospital
+ *     summary: Fetch hospital offerings for the authenticated hospital
  *     description: >
  *       Fetches all offerings (contacts, doctors, facilities, wards, static pages, etc.)
- *       for a given hospital (business). Results are grouped by offering type
- *       and filtered by pincode if provided.
+ *       for the hospital associated with the authenticated user.
+ *
+ *       The hospital (business) is resolved automatically from the JWT token.
+ *       No businessId or pincode is required or accepted.
+ *
+ *       Results are grouped by offering type for easy UI consumption.
  *     tags: [AI Hospital]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: businessId
- *         required: true
- *         schema:
- *           type: string
- *         description: Hospital (Business) ID
- *
- *       - in: query
- *         name: pincode
- *         required: false
- *         schema:
- *           type: string
- *         description: Optional pincode to filter offerings by availability
  *     responses:
  *       200:
  *         description: Hospital offerings fetched successfully
@@ -254,6 +304,9 @@ router.delete("/:id", deleteBusiness);
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *                   example: Hospital offerings fetched successfully
@@ -299,16 +352,14 @@ router.delete("/:id", deleteBusiness);
  *                           type: array
  *                           items:
  *                             $ref: '#/components/schemas/ListingBase'
- *       400:
- *         description: Validation error
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized (invalid or missing token)
  *       404:
- *         description: Business not found
+ *         description: Business not found for authenticated user
  *       500:
  *         description: Internal server error
  */
-router.get("/ai-hospital/fetch-details", fetchHospitalDetails);
+router.get("/ai-hospital/fetch-details", protect, fetchHospitalDetails);
 
 /**
  * @swagger
@@ -316,11 +367,16 @@ router.get("/ai-hospital/fetch-details", fetchHospitalDetails);
  *   post:
  *     summary: Save hospital offerings using hierarchical catalog keys
  *     description: >
- *       Saves hospital offerings by resolving catalog nodes hierarchically.
- *       For each level, the system checks catalog nodes using
- *       (moduleId + parentId + key). If a child node does not exist,
- *       it is created automatically. Offerings are then saved
- *       against the resolved catalog node IDs.
+ *       Saves hospital offerings for the authenticated hospital.
+ *
+ *       The business and module are resolved automatically from the
+ *       authenticated user's JWT token.
+ *
+ *       - businessId is derived from the logged-in user
+ *       - moduleId is derived from the business type (HOSPITAL)
+ *
+ *       Clients must only send structured hospital data
+ *       matching predefined catalog keys.
  *
  *       Root catalog nodes must already exist.
  *     tags: [AI Hospital]
@@ -333,18 +389,8 @@ router.get("/ai-hospital/fetch-details", fetchHospitalDetails);
  *           schema:
  *             type: object
  *             required:
- *               - businessId
- *               - moduleId
  *               - data
  *             properties:
- *               businessId:
- *                 type: string
- *                 description: Business (Hospital) ID
- *                 example: 6650f2b5c9b8f1a2c8a3b123
- *               moduleId:
- *                 type: string
- *                 description: Hospital module ID
- *                 example: 6650f1a9c9b8f1a2c8a3a999
  *               data:
  *                 type: object
  *                 description: >
@@ -380,18 +426,12 @@ router.get("/ai-hospital/fetch-details", fetchHospitalDetails);
  *       400:
  *         description: Validation error or missing catalog root
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized (invalid or missing token)
  *       404:
- *         description: Business not found
+ *         description: Business not found for authenticated user
  *       500:
  *         description: Internal server error
  */
-router.post(
-  "/ai-hospital/offerings/save",
-  protect,
-  saveHospitalOfferings
-);
-
-
+router.post("/ai-hospital/offerings/save", protect, saveHospitalOfferings);
 
 export default router;

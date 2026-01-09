@@ -5,6 +5,7 @@ import Inventory from './inventory.model.js';
 import ProductVariantChangeRequest from './productVariantChangeRequest.model.js';
 import Service from './service.model.js';
 import Listing from './listing.model.js'
+import Module from './module.model.js';
 import Business from './business.model.js';
 
 export {
@@ -15,6 +16,6 @@ export {
     ProductVariantChangeRequest,
     Service,
     Listing,
-    Business
-
+    Business,
+    Module
 };
