@@ -24,23 +24,41 @@ const upload = multer({ storage: multer.memoryStorage() });
  * @swagger
  * components:
  *   schemas:
+ *
  *     ListingBase:
  *       type: object
  *       required:
+ *         - businessId
  *         - catalogNodeId
  *         - type
  *         - title
  *       properties:
+ *         businessId:
+ *           type: string
+ *           example: "6650f2b5c9b8f1a2c8a3b123"
  *         catalogNodeId:
  *           type: string
+ *           example: "6650f30bc9b8f1a2c8a3b456"
+ *         type:
+ *           type: string
+ *           example: DOCTOR
  *         title:
  *           type: string
+ *           example: "Dr. Amit Sharma"
  *         description:
  *           type: string
+ *           example: "Senior Cardiologist"
+ *         pincodes:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["560037", "560038"]
  *         order:
  *           type: number
+ *           example: 1
  *         isActive:
  *           type: boolean
+ *           example: true
  *
  *     DoctorListing:
  *       allOf:
@@ -61,38 +79,116 @@ const upload = multer({ storage: multer.memoryStorage() });
  *               properties:
  *                 availability:
  *                   type: object
+ *                   example:
+ *                     days: ["Mon", "Wed", "Fri"]
+ *                     time: "10:00-14:00"
  *                 fees:
  *                   type: number
+ *                   example: 500
  *
  *     WardListing:
  *       allOf:
  *         - $ref: '#/components/schemas/ListingBase'
  *         - type: object
+ *           required:
+ *             - type
+ *             - data
  *           properties:
  *             type:
  *               type: string
  *               enum: [WARD]
  *             data:
  *               type: object
+ *               required:
+ *                 - beds
+ *                 - pricePerDay
  *               properties:
  *                 beds:
  *                   type: number
+ *                   example: 20
  *                 pricePerDay:
  *                   type: number
+ *                   example: 2500
  *
  *     FacilityListing:
  *       allOf:
  *         - $ref: '#/components/schemas/ListingBase'
  *         - type: object
+ *           required:
+ *             - type
+ *             - data
  *           properties:
  *             type:
  *               type: string
  *               enum: [FACILITY]
  *             data:
  *               type: object
+ *               required:
+ *                 - enabled
  *               properties:
  *                 enabled:
  *                   type: boolean
+ *                   example: true
+ *
+ *     ManagementListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           required:
+ *             - type
+ *             - data
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [MANAGEMENT]
+ *             data:
+ *               type: object
+ *               required:
+ *                 - designation
+ *               properties:
+ *                 designation:
+ *                   type: string
+ *                   example: "Medical Director"
+ *
+ *     ContactListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           required:
+ *             - type
+ *             - data
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [CONTACT]
+ *             data:
+ *               type: object
+ *               required:
+ *                 - phone
+ *               properties:
+ *                 phone:
+ *                   type: string
+ *                   example: "+91-9876543210"
+ *
+ *     StaticPageListing:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ListingBase'
+ *         - type: object
+ *           required:
+ *             - type
+ *             - data
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [STATIC_PAGE]
+ *             data:
+ *               type: object
+ *               required:
+ *                 - content
+ *               properties:
+ *                 content:
+ *                   type: string
+ *                   example: "<p>About our hospital...</p>"
  */
 
 /**
@@ -166,30 +262,76 @@ router.patch(
  * @swagger
  * /api/offerings/fetch-listings:
  *   get:
- *     summary: Fetch listings (Doctor, Ward, Facility, etc.)
+ *     summary: Fetch listings for a business (Doctor, Ward, Facility, etc.)
+ *     description: >
+ *       Returns listings scoped to a specific business.
+ *       Listings can be filtered by catalog node, listing type,
+ *       pincode availability, and active status.
  *     tags: [Listings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: catalogNodeId
+ *         name: businessId
+ *         required: true
  *         schema:
  *           type: string
- *         description: Catalog node ID
+ *         description: Business (hospital) ID
+ *
+ *       - in: query
+ *         name: catalogNodeId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Catalog node ID to filter listings
+ *
  *       - in: query
  *         name: type
+ *         required: false
  *         schema:
  *           type: string
- *           enum: [DOCTOR, WARD, FACILITY, CONTACT]
+ *           enum:
+ *             - DOCTOR
+ *             - WARD
+ *             - FACILITY
+ *             - MANAGEMENT
+ *             - CONTACT
+ *             - STATIC_PAGE
  *         description: Listing type
+ *
+ *       - in: query
+ *         name: pincode
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Pincode to filter listings by availability
+ *
  *       - in: query
  *         name: isActive
+ *         required: false
  *         schema:
  *           type: boolean
- *         description: Active status
+ *         description: Filter by active status
+ *
  *     responses:
  *       200:
  *         description: Listings fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Listings fetched successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ListingBase'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Server error
  */
@@ -903,7 +1045,7 @@ router.post(
  * @swagger
  * /api/offerings/listings:
  *   post:
- *     summary: Create a listing (Doctor, Ward, Facility, etc.)
+ *     summary: Create a listing for a business (Doctor, Ward, Facility, etc.)
  *     tags: [Listings]
  *     security:
  *       - bearerAuth: []
@@ -916,21 +1058,30 @@ router.post(
  *               - $ref: '#/components/schemas/DoctorListing'
  *               - $ref: '#/components/schemas/WardListing'
  *               - $ref: '#/components/schemas/FacilityListing'
+ *               - $ref: '#/components/schemas/ManagementListing'
+ *               - $ref: '#/components/schemas/ContactListing'
+ *               - $ref: '#/components/schemas/StaticPageListing'
  *             discriminator:
  *               propertyName: type
  *               mapping:
  *                 DOCTOR: '#/components/schemas/DoctorListing'
  *                 WARD: '#/components/schemas/WardListing'
  *                 FACILITY: '#/components/schemas/FacilityListing'
+ *                 MANAGEMENT: '#/components/schemas/ManagementListing'
+ *                 CONTACT: '#/components/schemas/ContactListing'
+ *                 STATIC_PAGE: '#/components/schemas/StaticPageListing'
  *     responses:
  *       201:
  *         description: Listing created successfully
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
 router.post("/listings", protect, createListing);
+
 
 
 export default router;

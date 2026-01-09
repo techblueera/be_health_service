@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Catalog, Inventory } from "../models/index.js";
+import { Business, Catalog, Inventory, Listing } from "../models/index.js";
 import { uploadToS3, deleteFromS3 } from "../utils/s3Uploader.js";
 import { moderateContentFromUrl } from "../utils/s3-moderator.js";
 import logger from "../utils/appLogger.js";
@@ -439,7 +439,7 @@ const getBusinessCategoriesWithInventory = async (req, res) => {
   }
 };
 
-export const updateCatalogNodeStatus = async (req, res) => {
+const updateCatalogNodeStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
@@ -483,6 +483,315 @@ export const updateCatalogNodeStatus = async (req, res) => {
   }
 };
 
+const fetchCatalogForBusiness = async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const { moduleId } = req.query;
+
+    /* ---------- Guards ---------- */
+    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+      return res.status(400).json({ message: "Invalid businessId" });
+    }
+
+    if (moduleId && !mongoose.Types.ObjectId.isValid(moduleId)) {
+      return res.status(400).json({ message: "Invalid moduleId" });
+    }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+
+    /* ---------- Aggregation ---------- */
+    const catalog = await Catalog.aggregate([
+      /* 1. System-level active nodes */
+      {
+        $match: {
+          isActive: true,
+          ...(moduleId && {
+            moduleId: new mongoose.Types.ObjectId(moduleId),
+          }),
+        },
+      },
+
+      /* 2. Join business-specific overrides */
+      {
+        $lookup: {
+          from: "businesscatalognodes",
+          let: { nodeId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                businessId: new mongoose.Types.ObjectId(businessId),
+                $expr: { $eq: ["$catalogNodeId", "$$nodeId"] },
+              },
+            },
+          ],
+          as: "override",
+        },
+      },
+
+      /* 3. Compute effective enabled flag */
+      {
+        $addFields: {
+          isEnabledForBusiness: {
+            $cond: [
+              { $gt: [{ $size: "$override" }, 0] },
+              { $arrayElemAt: ["$override.isEnabled", 0] },
+              true, // default
+            ],
+          },
+        },
+      },
+
+      /* 4. Cleanup */
+      {
+        $project: {
+          override: 0,
+        },
+      },
+
+      /* 5. Ordering */
+      {
+        $sort: {
+          level: 1,
+          order: 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      message: "Catalog fetched successfully for business",
+      data: catalog,
+    });
+  } catch (error) {
+    logger.error("Error fetching catalog for business", error);
+    return res.status(500).json({
+      message: "Error fetching catalog",
+      error: error.message,
+    });
+  }
+};
+
+export const getOrCreateCatalogNode = async ({
+  moduleId,
+  parentId,
+  key,
+  name,
+  level,
+}) => {
+  return Catalog.findOneAndUpdate(
+    {
+      moduleId,
+      parentId,
+      key,
+    },
+    {
+      $setOnInsert: {
+        name,
+        level,
+        isActive: true,
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+};
+
+const saveHospitalOfferings = async (req, res) => {
+  try {
+    const { businessId, moduleId, data } = req.body;
+
+    /* ---------- Guards ---------- */
+    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+      return res.status(400).json({ message: "Invalid businessId" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(moduleId)) {
+      return res.status(400).json({ message: "Invalid moduleId" });
+    }
+
+    if (!data || typeof data !== "object") {
+      return res.status(400).json({ message: "data payload is required" });
+    }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+
+    /* ---------- Required root catalog keys ---------- */
+    const ROOT_KEYS = [
+      "OPT_OUTPATIENT_DEPARTMENT",
+      "IPD_INPATIENT_DEPARTMENT",
+      "EMERGENCY_AND_CRITICAL_CARE",
+      "DIAGNOSTIC_DEPARTMENTS",
+      "OTHER_FACILITIES",
+      "ABOUT_US",
+      "CONTACT_US",
+      "CAREER",
+      "MEDICAL_STORE",
+    ];
+
+    /* ---------- Load root catalog nodes ---------- */
+    const rootNodes = await Catalog.find({
+      moduleId,
+      parentId: null,
+      key: { $in: ROOT_KEYS },
+      isActive: true,
+    });
+
+    const rootMap = {};
+    rootNodes.forEach((n) => {
+      rootMap[n.key] = n;
+    });
+
+    /* ---------- Validate roots ---------- */
+    for (const key of Object.keys(data)) {
+      if (!rootMap[key]) {
+        return res.status(400).json({
+          message: `Root catalog node missing or invalid: ${key}`,
+        });
+      }
+    }
+
+    const listings = [];
+
+    /* ======================================================
+       CONTACT_US
+       ====================================================== */
+    if (data.CONTACT_US) {
+      listings.push({
+        businessId,
+        catalogNodeId: rootMap.CONTACT_US._id,
+        type: "CONTACT",
+        title: "Contact Us",
+        isActive: true,
+        data: data.CONTACT_US,
+      });
+    }
+
+    /* ======================================================
+       ABOUT_US
+       ====================================================== */
+    if (data.ABOUT_US) {
+      listings.push({
+        businessId,
+        catalogNodeId: rootMap.ABOUT_US._id,
+        type: "STATIC_PAGE",
+        title: "About Us",
+        isActive: true,
+        data: data.ABOUT_US,
+      });
+    }
+
+    /* ======================================================
+       CAREER
+       ====================================================== */
+    if (Array.isArray(data.CAREER)) {
+      for (const job of data.CAREER) {
+        listings.push({
+          businessId,
+          catalogNodeId: rootMap.CAREER._id,
+          type: "STATIC_PAGE",
+          title: job.position,
+          isActive: true,
+          data: job,
+        });
+      }
+    }
+
+    /* ======================================================
+       Generic section processor (OPD, IPD, Emergency, etc.)
+       ====================================================== */
+    const processSection = async (rootKey, listingType) => {
+      const rootNode = rootMap[rootKey];
+      const section = data[rootKey];
+      if (!section) return;
+
+      for (const childKey of Object.keys(section)) {
+        const childData = section[childKey];
+
+        const childNode = await getOrCreateCatalogNode({
+          moduleId,
+          parentId: rootNode._id,
+          key: childKey,
+          name: childKey.replace(/_/g, " "),
+          level: rootNode.level + 1,
+        });
+
+        /* ---- Facility / Ward listing ---- */
+        if (!childData.doctors && !childData.services) {
+          listings.push({
+            businessId,
+            catalogNodeId: childNode._id,
+            type: listingType,
+            title: childKey.replace(/_/g, " "),
+            isActive: true,
+            data: childData,
+          });
+        }
+
+        /* ---- Doctors under OPD ---- */
+        if (Array.isArray(childData.doctors)) {
+          for (const doctor of childData.doctors) {
+            listings.push({
+              businessId,
+              catalogNodeId: childNode._id,
+              type: "DOCTOR",
+              title: doctor.split("(")[0].trim(),
+              isActive: true,
+              data: {
+                raw: doctor,
+                timing: childData.timing,
+              },
+            });
+          }
+        }
+
+        /* ---- Diagnostic services ---- */
+        if (Array.isArray(childData.services)) {
+          for (const service of childData.services) {
+            listings.push({
+              businessId,
+              catalogNodeId: childNode._id,
+              type: "FACILITY",
+              title: service.name,
+              isActive: true,
+              data: service,
+            });
+          }
+        }
+      }
+    };
+
+    await processSection("OPT_OUTPATIENT_DEPARTMENT", "FACILITY");
+    await processSection("IPD_INPATIENT_DEPARTMENT", "WARD");
+    await processSection("EMERGENCY_AND_CRITICAL_CARE", "FACILITY");
+    await processSection("DIAGNOSTIC_DEPARTMENTS", "FACILITY");
+    await processSection("OTHER_FACILITIES", "FACILITY");
+
+    /* ---------- Persist listings ---------- */
+    if (listings.length) {
+      await Listing.insertMany(listings, { ordered: false });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Hospital offerings saved successfully",
+      createdListings: listings.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error saving hospital offerings",
+      error: error.message,
+    });
+  }
+};
+
 export {
   createCategory,
   getCategories,
@@ -494,4 +803,7 @@ export {
   getChildrenByCategoryKey,
   searchCategories,
   getBusinessCategoriesWithInventory,
+  updateCatalogNodeStatus,
+  fetchCatalogForBusiness,
+  saveHospitalOfferings,
 };

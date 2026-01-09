@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 const listingSchema = new mongoose.Schema(
   {
-    // serviceId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Service",
-    //   required: true,
-    //   index: true,
-    // },
+    businessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
+      index: true,
+    },
 
     catalogNodeId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -15,18 +15,18 @@ const listingSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    
+
     type: {
       type: String,
       required: true,
       enum: [
-        "DEPARTMENT",   // OPD, IPD, Emergency
-        "DOCTOR",       // OPD doctors
-        "WARD",         // IPD wards
-        "FACILITY",     // ICU, Ambulance, Blood Bank
-        "MANAGEMENT",   // Directors, admins
-        "STATIC_PAGE",  // About Us pages
-        "CONTACT",      // Contact details
+        "DEPARTMENT", // OPD, IPD, Emergency
+        "DOCTOR", // OPD doctors
+        "WARD", // IPD wards
+        "FACILITY", // ICU, Ambulance, Blood Bank
+        "MANAGEMENT", // Directors, admins
+        "STATIC_PAGE", // About Us pages
+        "CONTACT", // Contact details
       ],
       index: true,
     },

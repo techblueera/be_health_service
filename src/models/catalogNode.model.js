@@ -16,7 +16,7 @@ const catalogNodeSchema = new mongoose.Schema(
     key: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
       uppercase: true,
       trim: true,
     },
@@ -74,6 +74,8 @@ const catalogNodeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-catalogNodeSchema.index({ moduleId: 1, key: 1 }, { unique: true });
-
+catalogNodeSchema.index(
+  { moduleId: 1, parentId: 1, key: 1 },
+  { unique: true }
+);
 export default mongoose.model("CatalogNode", catalogNodeSchema);
