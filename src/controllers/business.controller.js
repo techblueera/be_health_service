@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Business from "../models/business.model.js";
 import logger from "../utils/appLogger.js";
-import { Listing } from "../models/index.js";
+import { Catalog, Listing, Module } from "../models/index.js";
 
 export const createBusiness = async (req, res) => {
   try {
@@ -107,7 +107,7 @@ export const deleteBusiness = async (req, res) => {
 export const getMyBusiness = async (req, res) => {
   try {
     const userId = req.user._id;
-    console.log('this is the userId_+___',userId)
+    console.log("this is the userId_+___", userId);
     const business = await Business.findOne({ createdBy: userId });
 
     if (!business) {
@@ -213,48 +213,122 @@ export const fetchHospitalDetails = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    /* ---------- Resolve business from token ---------- */
+    /* ================= BUSINESS ================= */
     const business = await Business.findOne({
       createdBy: userId,
       isActive: true,
     }).lean();
 
     if (!business) {
-      return res.status(404).json({
-        message: "Business not found for this user",
-      });
+      return res.status(404).json({ message: "Business not found" });
     }
 
-    const businessId = business._id;
-
-    /* ---------- Filter ---------- */
-    const filter = {
-      businessId,
+    /* ================= MODULE ================= */
+    const module = await Module.findOne({
+      code: business.type,
       isActive: true,
-    };
+    }).lean();
 
-    /* ---------- Fetch offerings ---------- */
-    const listings = await Listing.find(filter)
-      .sort({ order: 1, createdAt: 1 })
-      .lean();
-
-    /* ---------- Group for UI ---------- */
-    const grouped = {
-      CONTACT: [],
-      DOCTOR: [],
-      WARD: [],
-      FACILITY: [],
-      MANAGEMENT: [],
-      STATIC_PAGE: [],
-    };
-
-    for (const item of listings) {
-      if (grouped[item.type]) {
-        grouped[item.type].push(item);
-      }
+    if (!module) {
+      return res.status(400).json({ message: "Module not found" });
     }
 
-    return res.status(200).json({
+    /* ================= LOAD DATA ================= */
+    const catalogs = await Catalog.find({
+      moduleId: module._id,
+      isActive: true,
+    }).lean();
+
+    const listings = await Listing.find({
+      businessId: business._id,
+      isActive: true,
+    }).lean();
+
+    /* ================= MAPS ================= */
+    const catalogMap = {};
+    catalogs.forEach((c) => {
+      catalogMap[c._id.toString()] = { ...c, children: [] };
+    });
+
+    catalogs.forEach((c) => {
+      if (c.parentId) {
+        const parent = catalogMap[c.parentId.toString()];
+        if (parent) parent.children.push(c._id.toString());
+      }
+    });
+
+    const listingMap = {};
+    for (const l of listings) {
+      const key = l.catalogNodeId.toString();
+      if (!listingMap[key]) listingMap[key] = [];
+      listingMap[key].push(l);
+    }
+
+    /* ================= TREE BUILDER ================= */
+    const buildNode = (catalogId) => {
+      const node = catalogMap[catalogId];
+      const result = {};
+      const nodeListings = listingMap[catalogId] || [];
+
+      // ABOUT / CONTACT / MEDICAL STORE
+      if (
+        node.key === "ABOUT_US" ||
+        node.key === "CONTACT_US" ||
+        node.key === "MEDICAL_STORE"
+      ) {
+        return nodeListings[0]?.data || {};
+      }
+
+      // CAREER
+      if (node.key === "CAREER") {
+        return nodeListings.map((l) => l.data);
+      }
+
+      // DEPARTMENTS / WARDS / FACILITIES
+      for (const childId of node.children) {
+        const child = catalogMap[childId];
+        const childListings = listingMap[childId] || [];
+
+        const main = childListings.find(
+          (l) => !["DOCTOR", "SERVICE"].includes(l.type)
+        );
+
+        if (!main) continue;
+
+        const entry = { ...main.data };
+
+        const doctors = childListings
+          .filter((l) => l.type === "DOCTOR")
+          .map((l) =>
+            typeof l.data === "string"
+              ? { name: l.data }
+              : l.data
+          );
+
+        if (doctors.length) entry.doctors = doctors;
+
+        const services = childListings
+          .filter((l) => l.type === "SERVICE")
+          .map((l) => l.data);
+
+        if (services.length) entry.services = services;
+
+        result[child.key] = entry;
+      }
+
+      return result;
+    };
+
+    /* ================= ROOT NODES ================= */
+    const offerings = {};
+    const rootNodes = catalogs.filter((c) => !c.parentId);
+
+    for (const root of rootNodes) {
+      offerings[root.key] = buildNode(root._id.toString());
+    }
+
+    /* ================= RESPONSE ================= */
+    return res.json({
       success: true,
       message: "Hospital offerings fetched successfully",
       data: {
@@ -263,13 +337,14 @@ export const fetchHospitalDetails = async (req, res) => {
           name: business.name,
           type: business.type,
         },
-        offerings: grouped,
+        offerings,
       },
     });
   } catch (error) {
-    logger.error("Error fetching hospital details", error);
+    console.error(error);
     return res.status(500).json({
-      message: "Error fetching hospital details",
+      success: false,
+      message: "Failed to fetch hospital offerings",
       error: error.message,
     });
   }

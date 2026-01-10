@@ -603,11 +603,13 @@ export const getOrCreateCatalogNode = async ({
 const saveHospitalOfferings = async (req, res) => {
   try {
     const { data } = req.body;
-
     if (!data || typeof data !== "object") {
       return res.status(400).json({ message: "data payload is required" });
     }
 
+    /* =========================
+       BUSINESS + MODULE
+       ========================= */
     const userId = req.user._id;
 
     const business = await Business.findOne({
@@ -616,18 +618,8 @@ const saveHospitalOfferings = async (req, res) => {
     });
 
     if (!business) {
-      return res.status(404).json({
-        message: "Business not found for this user",
-      });
+      return res.status(404).json({ message: "Business not found" });
     }
-
-    if (!business.type) {
-      return res.status(400).json({
-        message: "Business type is not configured",
-      });
-    }
-
-    const businessId = business._id;
 
     const module = await Module.findOne({
       code: business.type,
@@ -636,26 +628,28 @@ const saveHospitalOfferings = async (req, res) => {
 
     if (!module) {
       return res.status(400).json({
-        message: `No active module found for business type ${business.type}`,
+        message: `No active module for business type ${business.type}`,
       });
     }
 
+    const businessId = business._id;
     const moduleId = module._id;
 
-    /* ---------- Required root catalog keys ---------- */
+    /* =========================
+       ROOT KEYS
+       ========================= */
     const ROOT_KEYS = [
       "OPT_OUTPATIENT_DEPARTMENT",
+      "ABOUT_US",
       "IPD_INPATIENT_DEPARTMENT",
       "EMERGENCY_AND_CRITICAL_CARE",
       "DIAGNOSTIC_DEPARTMENTS",
-      "OTHER_FACILITIES",
-      "ABOUT_US",
-      "CONTACT_US",
-      "CAREER",
       "MEDICAL_STORE",
+      "CAREER",
+      "CONTACT_US",
+      "OTHER_FACILITIES",
     ];
 
-    /* ---------- Load root catalog nodes ---------- */
     const rootNodes = await Catalog.find({
       moduleId,
       parentId: null,
@@ -664,72 +658,42 @@ const saveHospitalOfferings = async (req, res) => {
     });
 
     const rootMap = {};
-    rootNodes.forEach((n) => {
-      rootMap[n.key] = n;
-    });
+    rootNodes.forEach((n) => (rootMap[n.key] = n));
 
-    /* ---------- Validate roots ---------- */
     for (const key of Object.keys(data)) {
       if (!rootMap[key]) {
         return res.status(400).json({
-          message: `Root catalog node missing or invalid: ${key}`,
+          message: `Invalid root key: ${key}`,
         });
       }
     }
+
+    /* =========================
+       RESET EXISTING DATA
+       ========================= */
+    await Listing.deleteMany({ businessId });
 
     const listings = [];
 
-    /* ======================================================
-       CONTACT_US
-       ====================================================== */
-    if (data.CONTACT_US) {
-      listings.push({
-        businessId,
-        catalogNodeId: rootMap.CONTACT_US._id,
-        type: "CONTACT",
-        title: "Contact Us",
-        isActive: true,
-        data: data.CONTACT_US,
-      });
-    }
+    /* =========================
+       ROOT TYPE MAP
+       ========================= */
+    const ROOT_TYPE_MAP = {
+      OPT_OUTPATIENT_DEPARTMENT: "DEPARTMENT",
+      IPD_INPATIENT_DEPARTMENT: "WARD",
+      EMERGENCY_AND_CRITICAL_CARE: "FACILITY",
+      OTHER_FACILITIES: "FACILITY",
+      DIAGNOSTIC_DEPARTMENTS: "DIAGNOSTIC",
+    };
 
-    /* ======================================================
-       ABOUT_US
-       ====================================================== */
-    if (data.ABOUT_US) {
-      listings.push({
-        businessId,
-        catalogNodeId: rootMap.ABOUT_US._id,
-        type: "STATIC_PAGE",
-        title: "About Us",
-        isActive: true,
-        data: data.ABOUT_US,
-      });
-    }
-
-    /* ======================================================
-       CAREER
-       ====================================================== */
-    if (Array.isArray(data.CAREER)) {
-      for (const job of data.CAREER) {
-        listings.push({
-          businessId,
-          catalogNodeId: rootMap.CAREER._id,
-          type: "STATIC_PAGE",
-          title: job.position,
-          isActive: true,
-          data: job,
-        });
-      }
-    }
-
-    /* ======================================================
-       Generic section processor (OPD, IPD, Emergency, etc.)
-       ====================================================== */
-    const processSection = async (rootKey, listingType) => {
-      const rootNode = rootMap[rootKey];
+    /* =========================
+       GENERIC SECTION HANDLER
+       ========================= */
+    const processSection = async (rootKey) => {
       const section = data[rootKey];
       if (!section) return;
+
+      const rootNode = rootMap[rootKey];
 
       for (const childKey of Object.keys(section)) {
         const childData = section[childKey];
@@ -742,42 +706,37 @@ const saveHospitalOfferings = async (req, res) => {
           level: rootNode.level + 1,
         });
 
-        /* ---- Facility / Ward listing ---- */
-        if (!childData.doctors && !childData.services) {
-          listings.push({
-            businessId,
-            catalogNodeId: childNode._id,
-            type: listingType,
-            title: childKey.replace(/_/g, " "),
-            isActive: true,
-            data: childData,
-          });
-        }
+        /* ---------- Save main node ---------- */
+        listings.push({
+          businessId,
+          catalogNodeId: childNode._id,
+          type: ROOT_TYPE_MAP[rootKey],
+          title: childNode.name,
+          isActive: true,
+          data: childData,
+        });
 
-        /* ---- Doctors under OPD ---- */
+        /* ---------- Doctors (OPD) ---------- */
         if (Array.isArray(childData.doctors)) {
           for (const doctor of childData.doctors) {
             listings.push({
               businessId,
               catalogNodeId: childNode._id,
               type: "DOCTOR",
-              title: doctor.split("(")[0].trim(),
+              title: doctor.name || doctor,
               isActive: true,
-              data: {
-                raw: doctor,
-                timing: childData.timing,
-              },
+              data: doctor,
             });
           }
         }
 
-        /* ---- Diagnostic services ---- */
+        /* ---------- Diagnostic Services ---------- */
         if (Array.isArray(childData.services)) {
           for (const service of childData.services) {
             listings.push({
               businessId,
               catalogNodeId: childNode._id,
-              type: "FACILITY",
+              type: "SERVICE",
               title: service.name,
               isActive: true,
               data: service,
@@ -787,26 +746,79 @@ const saveHospitalOfferings = async (req, res) => {
       }
     };
 
-    await processSection("OPT_OUTPATIENT_DEPARTMENT", "FACILITY");
-    await processSection("IPD_INPATIENT_DEPARTMENT", "WARD");
-    await processSection("EMERGENCY_AND_CRITICAL_CARE", "FACILITY");
-    await processSection("DIAGNOSTIC_DEPARTMENTS", "FACILITY");
-    await processSection("OTHER_FACILITIES", "FACILITY");
+    /* =========================
+       PROCESS SECTIONS
+       ========================= */
+    await processSection("OPT_OUTPATIENT_DEPARTMENT");
+    await processSection("IPD_INPATIENT_DEPARTMENT");
+    await processSection("EMERGENCY_AND_CRITICAL_CARE");
+    await processSection("OTHER_FACILITIES");
+    await processSection("DIAGNOSTIC_DEPARTMENTS");
 
-    /* ---------- Persist listings ---------- */
-    if (listings.length) {
-      await Listing.insertMany(listings, { ordered: false });
+    /* =========================
+       STATIC / SPECIAL SECTIONS
+       ========================= */
+    if (data.ABOUT_US) {
+      listings.push({
+        businessId,
+        catalogNodeId: rootMap.ABOUT_US._id,
+        type: "STATIC_PAGE",
+        title: "About Us",
+        isActive: true,
+        data: data.ABOUT_US,
+      });
     }
+
+    if (data.MEDICAL_STORE) {
+      listings.push({
+        businessId,
+        catalogNodeId: rootMap.MEDICAL_STORE._id,
+        type: "FACILITY",
+        title: "Medical Store",
+        isActive: true,
+        data: data.MEDICAL_STORE,
+      });
+    }
+
+    if (Array.isArray(data.CAREER)) {
+      for (const job of data.CAREER) {
+        listings.push({
+          businessId,
+          catalogNodeId: rootMap.CAREER._id,
+          type: "JOB",
+          title: job.position,
+          isActive: true,
+          data: job,
+        });
+      }
+    }
+
+    if (data.CONTACT_US) {
+      listings.push({
+        businessId,
+        catalogNodeId: rootMap.CONTACT_US._id,
+        type: "CONTACT",
+        title: "Contact Us",
+        isActive: true,
+        data: data.CONTACT_US,
+      });
+    }
+
+    /* =========================
+       SAVE
+       ========================= */
+    await Listing.insertMany(listings, { ordered: false });
 
     return res.status(201).json({
       success: true,
       message: "Hospital offerings saved successfully",
-      createdListings: listings.length,
+      totalCreated: listings.length,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Error saving hospital offerings",
+      message: "Failed to save hospital offerings",
       error: error.message,
     });
   }
