@@ -9,6 +9,7 @@ import doctorRoutes from "./hospitalRoutes/doctor.routes.js";
 import emergencyServiceRoutes from "./hospitalRoutes/emergencyService.routes.js";
 import facilityRoutes from "./hospitalRoutes/facility.routes.js";
 import wardRoutes from "./hospitalRoutes/ward.routes.js";
+import aiRoutes from './hospitalRoutes/ai.routes.js'
 
 const router = express.Router();
 
@@ -22,4 +23,5 @@ router.use("/wards", wardRoutes);
 router.use("/emergency-services", emergencyServiceRoutes);
 router.use("/facilities", facilityRoutes);
 router.use("/contact", contactRoutes);
+router.use('/hospital-data', aiRoutes)
 export default router;
