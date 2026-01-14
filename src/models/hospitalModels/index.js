@@ -1,0 +1,10 @@
+export { default as AboutUs } from './aboutUs.model.js';
+export { default as Department } from './department.model.js';
+export { default as Doctor } from './doctor.model.js';
+export { default as Ward } from './ward.model.js';
+export { default as Bed } from './bed.model.js';
+export { default as EmergencyService } from './emergencyService.model.js';
+export { default as Facility } from './facility.model.js';
+export { default as Contact } from './contact.model.js';
+export { default as Branch } from './branch.model.js';
+export { default as Career } from './career.model.js';

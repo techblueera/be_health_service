@@ -248,24 +248,11 @@ const options = {
       },
     },
     servers: [
+      { url: "http://localhost:3000", description: "Development server" },
       {
         url: "https://be.blueera.ai/api/health-service/",
         description: "Production server",
       },
-      { url: "http://localhost:3000", description: "Development server" },
-    ],
-    tags: [
-      {
-        name: "Modules",
-        description: "Platform modules and feature configuration",
-      },
-      { name: "Categories", description: "Catalog node management" },
-      {
-        name: "Offerings",
-        description: "Offerings for Hospitals and Pharmacies",
-      },
-      { name: "Inventory", description: "Inventory management for businesses" },
-      { name: "Services", description: "Healthcare services management" },
     ],
     security: [
       {
@@ -273,7 +260,7 @@ const options = {
       },
     ],
   },
-  apis: ["./src/routes/*.js", "./src/swagger.schemas.js"],
+  apis: ["./src/routes/hospitalRoutes/*.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
 export default swaggerSpec;
