@@ -1,17 +1,25 @@
 // controllers/hospitalControllers/branchController.js
-import Branch from '../../models/hospitalModels/branch.model.js';
+import Branch from "../../models/hospitalModels/branch.model.js";
 
 // Create Branch
 export const createBranch = async (req, res) => {
   try {
     const branch = new Branch({
       businessId: req.user._id,
-      ...req.body
+      ...req.body,
     });
     await branch.save();
-    res.status(201).json(branch);
+    res.status(200).json({
+      success: true,
+      message: "Successfully created branch.",
+      data: branch,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create branch.",
+      error: error.message,
+    });
   }
 };
 
@@ -19,9 +27,17 @@ export const createBranch = async (req, res) => {
 export const getAllBranches = async (req, res) => {
   try {
     const branches = await Branch.find({ businessId: req.user._id });
-    res.json(branches);
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched all branches.",
+      data: branches,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch all branches.",
+      error: error.message,
+    });
   }
 };
 
@@ -30,14 +46,22 @@ export const getBranchById = async (req, res) => {
   try {
     const branch = await Branch.findOne({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!branch) {
-      return res.status(404).json({ message: 'Branch not found' });
+      return res.status(404).json({ message: "Branch not found" });
     }
-    res.json(branch);
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched branch by ID.",
+      data: branch,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to get branch by ID.",
+      error: error.message,
+    });
   }
 };
 
@@ -50,11 +74,19 @@ export const updateBranch = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!branch) {
-      return res.status(404).json({ message: 'Branch not found' });
+      return res.status(404).json({ message: "Branch not found" });
     }
-    res.json(branch);
+    res.status(200).json({
+      success: true,
+      message: "Successfully updated branch.",
+      data: branch,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update branch.",
+      error: error.message,
+    });
   }
 };
 
@@ -63,13 +95,17 @@ export const deleteBranch = async (req, res) => {
   try {
     const branch = await Branch.findOneAndDelete({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!branch) {
-      return res.status(404).json({ message: 'Branch not found' });
+      return res.status(404).json({ message: "Branch not found" });
     }
-    res.json({ message: 'Branch deleted successfully' });
+    res.json({ success: true, message: "Branch deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete branch.",
+      error: error.message,
+    });
   }
 };

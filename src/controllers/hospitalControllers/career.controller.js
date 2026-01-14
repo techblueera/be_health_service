@@ -11,7 +11,11 @@ export const createCareer = async (req, res) => {
     await career.save();
     res.status(201).json(career);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create career.",
+      error: error.message,
+    });
   }
 };
 
@@ -21,7 +25,11 @@ export const getAllCareers = async (req, res) => {
     const careers = await Career.find({ businessId: req.user._id });
     res.json(careers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to get all careers.",
+      error: error.message,
+    });
   }
 };
 
@@ -34,7 +42,11 @@ export const getActiveCareers = async (req, res) => {
     });
     res.json(careers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to get all active careers.",
+      error: error.message,
+    });
   }
 };
 
@@ -50,7 +62,11 @@ export const getCareerById = async (req, res) => {
     }
     res.json(career);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update career.",
+      error: error.message,
+    });
   }
 };
 
@@ -67,7 +83,11 @@ export const updateCareer = async (req, res) => {
     }
     res.json(career);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update career.",
+      error: error.message,
+    });
   }
 };
 
@@ -83,7 +103,11 @@ export const deleteCareer = async (req, res) => {
     }
     res.json({ message: 'Career deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete career.",
+      error: error.message,
+    });
   }
 };
 
@@ -101,6 +125,10 @@ export const toggleCareerStatus = async (req, res) => {
     await career.save();
     res.json(career);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to toggle career status.",
+      error: error.message,
+    });
   }
 };

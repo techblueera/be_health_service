@@ -11,7 +11,11 @@ export const createContact = async (req, res) => {
     await contact.save();
     res.status(201).json(contact);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create contact.",
+      error: error.message,
+    });
   }
 };
 
@@ -24,7 +28,11 @@ export const getContact = async (req, res) => {
     }
     res.json(contact);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to get contact by ID.",
+      error: error.message,
+    });
   }
 };
 
@@ -38,7 +46,11 @@ export const updateContact = async (req, res) => {
     );
     res.json(contact);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update contact.",
+      error: error.message,
+    });
   }
 };
 
@@ -51,6 +63,10 @@ export const deleteContact = async (req, res) => {
     }
     res.json({ message: 'Contact deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete contact.",
+      error: error.message,
+    });
   }
 };

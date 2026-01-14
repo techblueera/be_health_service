@@ -1,17 +1,25 @@
 // controllers/hospitalControllers/bedController.js
-import Bed from '../../models/hospitalModels/bed.model.js';
+import Bed from "../../models/hospitalModels/bed.model.js";
 
 // Create Bed
 export const createBed = async (req, res) => {
   try {
     const bed = new Bed({
       businessId: req.user._id,
-      ...req.body
+      ...req.body,
     });
     await bed.save();
-    res.status(201).json(bed);
+    res.status(201).json({
+      success: true,
+      message: 'Successfully created bed.',
+      data: bed
+    })
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch about us.",
+      error: error.message,
+    });
   }
 };
 
@@ -19,9 +27,17 @@ export const createBed = async (req, res) => {
 export const getAllBeds = async (req, res) => {
   try {
     const beds = await Bed.find({ businessId: req.user._id });
-    res.json(beds);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully fetched beds.',
+      data: beds
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch all beds.",
+      error: error.message,
+    });
   }
 };
 
@@ -30,11 +46,19 @@ export const getBedsByWard = async (req, res) => {
   try {
     const beds = await Bed.find({
       businessId: req.user._id,
-      wardId: req.params.wardId
+      wardId: req.params.wardId,
     });
-    res.json(beds);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully fetched bed by ward.',
+      data: beds
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bed by ward.",
+      error: error.message,
+    });
   }
 };
 
@@ -43,14 +67,22 @@ export const getBedById = async (req, res) => {
   try {
     const bed = await Bed.findOne({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!bed) {
-      return res.status(404).json({ message: 'Bed not found' });
+      return res.status(404).json({ message: "Bed not found" });
     }
-    res.json(bed);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully fetched bed by ID.',
+      data: bed
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bed by ID.",
+      error: error.message,
+    });
   }
 };
 
@@ -63,11 +95,19 @@ export const updateBed = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!bed) {
-      return res.status(404).json({ message: 'Bed not found' });
+      return res.status(404).json({ message: "Bed not found" });
     }
-    res.json(bed);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully updated bed.',
+      data: bed
+    })
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update bed.",
+      error: error.message,
+    });
   }
 };
 
@@ -76,14 +116,18 @@ export const deleteBed = async (req, res) => {
   try {
     const bed = await Bed.findOneAndDelete({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!bed) {
-      return res.status(404).json({ message: 'Bed not found' });
+      return res.status(404).json({ message: "Bed not found" });
     }
-    res.json({ message: 'Bed deleted successfully' });
+    res.json({ message: "Bed deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete bed.",
+      error: error.message,
+    });
   }
 };
 
@@ -92,15 +136,23 @@ export const toggleBedOccupancy = async (req, res) => {
   try {
     const bed = await Bed.findOne({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!bed) {
-      return res.status(404).json({ message: 'Bed not found' });
+      return res.status(404).json({ message: "Bed not found" });
     }
     bed.isOccupied = !bed.isOccupied;
     await bed.save();
-    res.json(bed);
+    res.status(200).json({
+      success: true,
+      message: 'Successfully toggled bed occupancy.',
+      data: bed
+    })
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to toggle bed occupancy.",
+      error: error.message,
+    });
   }
 };
