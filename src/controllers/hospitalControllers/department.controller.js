@@ -119,14 +119,18 @@ export const deleteDepartment = async (req, res) => {
 // Get Main Departments (for Update Tab)
 export const getMainDepartments = async (req, res) => {
   try {
-    const departments = await Department.find({
+    let departments = await Department.find({
       businessId: req.user._id,
-      parentId: null, // Only main departments
+      parentId: null,
     }).sort({ order: 1 });
 
-    // If no departments exist, seed default ones
+    // If no departments exist, seed default ones and fetch again
     if (!departments.length) {
       await seedDefaultDepartments(req.user._id);
+      departments = await Department.find({
+        businessId: req.user._id,
+        parentId: null,
+      }).sort({ order: 1 });
     }
 
     res.status(200).json({
@@ -136,7 +140,7 @@ export const getMainDepartments = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: true,
+      success: false,
       message: "Failed to fetch main departments.",
       error: error.message,
     });
@@ -146,14 +150,18 @@ export const getMainDepartments = async (req, res) => {
 // Get Sub Departments by Parent
 export const getSubDepartments = async (req, res) => {
   try {
+    const anyDepts = await Department.findOne({
+      businessId: req.user._id,
+    });
+
+    if (!anyDepts) {
+      await seedDefaultDepartments(req.user._id);
+    }
+
     const subDepartments = await Department.find({
       businessId: req.user._id,
       parentId: req.params.parentId,
     }).sort({ order: 1 });
-    // If no departments exist, seed default ones
-    if (!subDepartments.length) {
-      await seedDefaultDepartments(req.user._id);
-    }
 
     res.status(200).json({
       success: true,
@@ -182,17 +190,18 @@ export const getDepartmentWithChildren = async (req, res) => {
       await seedDefaultDepartments(req.user._id);
     }
 
-    // Get main department
     const mainDept = await Department.findOne({
       _id: req.params.id,
       businessId: req.user._id,
     });
 
     if (!mainDept) {
-      return res.status(404).json({ message: "Department not found" });
+      return res.status(404).json({ 
+        success: false,
+        message: "Department not found" 
+      });
     }
 
-    // Get sub departments
     const subDepartments = await Department.find({
       businessId: req.user._id,
       parentId: req.params.id,
