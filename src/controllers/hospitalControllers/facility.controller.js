@@ -9,19 +9,39 @@ export const createFacility = async (req, res) => {
       ...req.body
     });
     await facility.save();
-    res.status(201).json(facility);
+
+    res.status(201).json({
+      success: true,
+      message: 'Facility created successfully',
+      data: facility
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
 // Get All Facilities
 export const getAllFacilities = async (req, res) => {
   try {
-    const facilities = await Facility.find({ businessId: req.user._id });
-    res.json(facilities);
+    const facilities = await Facility.find({
+      businessId: req.user._id
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Facilities fetched successfully',
+      data: facilities
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -32,9 +52,18 @@ export const getFacilitiesByType = async (req, res) => {
       businessId: req.user._id,
       type: req.params.type
     });
-    res.json(facilities);
+
+    res.status(200).json({
+      success: true,
+      message: 'Facilities fetched by type successfully',
+      data: facilities
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -45,12 +74,26 @@ export const getFacilityById = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!facility) {
-      return res.status(404).json({ message: 'Facility not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Facility not found',
+        data: null
+      });
     }
-    res.json(facility);
+
+    res.status(200).json({
+      success: true,
+      message: 'Facility fetched successfully',
+      data: facility
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -62,12 +105,26 @@ export const updateFacility = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!facility) {
-      return res.status(404).json({ message: 'Facility not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Facility not found',
+        data: null
+      });
     }
-    res.json(facility);
+
+    res.status(200).json({
+      success: true,
+      message: 'Facility updated successfully',
+      data: facility
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -78,11 +135,25 @@ export const deleteFacility = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!facility) {
-      return res.status(404).json({ message: 'Facility not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Facility not found',
+        data: null
+      });
     }
-    res.json({ message: 'Facility deleted successfully' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Facility deleted successfully',
+      data: null
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };

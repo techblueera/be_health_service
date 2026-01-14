@@ -9,19 +9,39 @@ export const createEmergencyService = async (req, res) => {
       ...req.body
     });
     await emergencyService.save();
-    res.status(201).json(emergencyService);
+
+    res.status(201).json({
+      success: true,
+      message: 'Emergency service created successfully',
+      data: emergencyService
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
 // Get All Emergency Services
 export const getAllEmergencyServices = async (req, res) => {
   try {
-    const emergencyServices = await EmergencyService.find({ businessId: req.user._id });
-    res.json(emergencyServices);
+    const emergencyServices = await EmergencyService.find({
+      businessId: req.user._id
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency services fetched successfully',
+      data: emergencyServices
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -32,9 +52,18 @@ export const getEmergencyServicesByDepartment = async (req, res) => {
       businessId: req.user._id,
       departmentId: req.params.departmentId
     });
-    res.json(emergencyServices);
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency services fetched by department successfully',
+      data: emergencyServices
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -45,12 +74,26 @@ export const getEmergencyServiceById = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!emergencyService) {
-      return res.status(404).json({ message: 'Emergency Service not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Emergency service not found',
+        data: null
+      });
     }
-    res.json(emergencyService);
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency service fetched successfully',
+      data: emergencyService
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -62,12 +105,26 @@ export const updateEmergencyService = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!emergencyService) {
-      return res.status(404).json({ message: 'Emergency Service not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Emergency service not found',
+        data: null
+      });
     }
-    res.json(emergencyService);
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency service updated successfully',
+      data: emergencyService
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -78,11 +135,25 @@ export const deleteEmergencyService = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!emergencyService) {
-      return res.status(404).json({ message: 'Emergency Service not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Emergency service not found',
+        data: null
+      });
     }
-    res.json({ message: 'Emergency Service deleted successfully' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency service deleted successfully',
+      data: null
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };

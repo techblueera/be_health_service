@@ -9,9 +9,18 @@ export const createDoctor = async (req, res) => {
       ...req.body
     });
     await doctor.save();
-    res.status(201).json(doctor);
+
+    res.status(201).json({
+      success: true,
+      message: 'Doctor created successfully',
+      data: doctor
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -19,9 +28,18 @@ export const createDoctor = async (req, res) => {
 export const getAllDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find({ businessId: req.user._id });
-    res.json(doctors);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctors fetched successfully',
+      data: doctors
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -32,9 +50,18 @@ export const getDoctorsByDepartment = async (req, res) => {
       businessId: req.user._id,
       departmentId: req.params.departmentId
     });
-    res.json(doctors);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctors fetched by department successfully',
+      data: doctors
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -45,12 +72,26 @@ export const getDoctorById = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found',
+        data: null
+      });
     }
-    res.json(doctor);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor fetched successfully',
+      data: doctor
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -62,12 +103,26 @@ export const updateDoctor = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found',
+        data: null
+      });
     }
-    res.json(doctor);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor updated successfully',
+      data: doctor
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -78,12 +133,26 @@ export const deleteDoctor = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found',
+        data: null
+      });
     }
-    res.json({ message: 'Doctor deleted successfully' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor deleted successfully',
+      data: null
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -91,6 +160,7 @@ export const deleteDoctor = async (req, res) => {
 export const setDoctorLeave = async (req, res) => {
   try {
     const { leaveFrom, leaveTo } = req.body;
+
     const doctor = await Doctor.findOneAndUpdate(
       { _id: req.params.id, businessId: req.user._id },
       {
@@ -100,12 +170,26 @@ export const setDoctorLeave = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
+
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found',
+        data: null
+      });
     }
-    res.json(doctor);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor leave set successfully',
+      data: doctor
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -122,10 +206,23 @@ export const removeDoctorLeave = async (req, res) => {
       { new: true }
     );
     if (!doctor) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found',
+        data: null
+      });
     }
-    res.json(doctor);
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor leave removed successfully',
+      data: doctor
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };

@@ -9,9 +9,18 @@ export const createWard = async (req, res) => {
       ...req.body
     });
     await ward.save();
-    res.status(201).json(ward);
+
+    res.status(201).json({
+      success: true,
+      message: 'Ward created successfully',
+      data: ward
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -19,9 +28,18 @@ export const createWard = async (req, res) => {
 export const getAllWards = async (req, res) => {
   try {
     const wards = await Ward.find({ businessId: req.user._id });
-    res.json(wards);
+
+    res.status(200).json({
+      success: true,
+      message: 'Wards fetched successfully',
+      data: wards
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -32,9 +50,18 @@ export const getWardsByDepartment = async (req, res) => {
       businessId: req.user._id,
       departmentId: req.params.departmentId
     });
-    res.json(wards);
+
+    res.status(200).json({
+      success: true,
+      message: 'Wards fetched by department successfully',
+      data: wards
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -45,12 +72,26 @@ export const getWardById = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!ward) {
-      return res.status(404).json({ message: 'Ward not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Ward not found',
+        data: null
+      });
     }
-    res.json(ward);
+
+    res.status(200).json({
+      success: true,
+      message: 'Ward fetched successfully',
+      data: ward
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -62,12 +103,26 @@ export const updateWard = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!ward) {
-      return res.status(404).json({ message: 'Ward not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Ward not found',
+        data: null
+      });
     }
-    res.json(ward);
+
+    res.status(200).json({
+      success: true,
+      message: 'Ward updated successfully',
+      data: ward
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -78,12 +133,26 @@ export const deleteWard = async (req, res) => {
       _id: req.params.id,
       businessId: req.user._id
     });
+
     if (!ward) {
-      return res.status(404).json({ message: 'Ward not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Ward not found',
+        data: null
+      });
     }
-    res.json({ message: 'Ward deleted successfully' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Ward deleted successfully',
+      data: null
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
 
@@ -91,16 +160,31 @@ export const deleteWard = async (req, res) => {
 export const updateAvailableBeds = async (req, res) => {
   try {
     const { availableBeds } = req.body;
+
     const ward = await Ward.findOneAndUpdate(
       { _id: req.params.id, businessId: req.user._id },
       { availableBeds },
       { new: true, runValidators: true }
     );
+
     if (!ward) {
-      return res.status(404).json({ message: 'Ward not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Ward not found',
+        data: null
+      });
     }
-    res.json(ward);
+
+    res.status(200).json({
+      success: true,
+      message: 'Available beds updated successfully',
+      data: ward
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: null
+    });
   }
 };
