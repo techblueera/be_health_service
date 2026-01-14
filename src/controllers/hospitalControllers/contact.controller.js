@@ -9,7 +9,11 @@ export const createContact = async (req, res) => {
       ...req.body
     });
     await contact.save();
-    res.status(201).json(contact);
+    res.status(201).json({
+      success: true,
+      message: "Contact created succesfully.",
+      data: contact,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -26,7 +30,11 @@ export const getContact = async (req, res) => {
     if (!contact) {
       return res.status(404).json({ message: 'Contact not found' });
     }
-    res.json(contact);
+    res.status(200).json({
+      success: true,
+      message: "Contact fetched succesfully.",
+      data: contact,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -44,7 +52,11 @@ export const updateContact = async (req, res) => {
       req.body,
       { new: true, upsert: true, runValidators: true }
     );
-    res.json(contact);
+    res.status(200).json({
+      success: true,
+      message: 'Contact updated successfully.',
+      data: contact
+    })
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -61,7 +73,7 @@ export const deleteContact = async (req, res) => {
     if (!contact) {
       return res.status(404).json({ message: 'Contact not found' });
     }
-    res.json({ message: 'Contact deleted successfully' });
+    res.json({ success: true, message: 'Contact deleted successfully' });
   } catch (error) {
     res.status(500).json({
       success: false,

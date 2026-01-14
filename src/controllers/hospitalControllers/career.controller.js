@@ -1,15 +1,19 @@
 // controllers/hospitalControllers/careerController.js
-import Career from '../../models/hospitalModels/career.model.js';
+import Career from "../../models/hospitalModels/career.model.js";
 
 // Create Career
 export const createCareer = async (req, res) => {
   try {
     const career = new Career({
       businessId: req.user._id,
-      ...req.body
+      ...req.body,
     });
     await career.save();
-    res.status(201).json(career);
+    res.status(201).json({
+      success: true,
+      message: "Career created successfully.",
+      data: career,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -23,7 +27,11 @@ export const createCareer = async (req, res) => {
 export const getAllCareers = async (req, res) => {
   try {
     const careers = await Career.find({ businessId: req.user._id });
-    res.json(careers);
+    res.status(200).json({
+      success: true,
+      message: "Career fetched successfully.",
+      data: careers,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -38,9 +46,14 @@ export const getActiveCareers = async (req, res) => {
   try {
     const careers = await Career.find({
       businessId: req.user._id,
-      isActive: true
+      isActive: true,
     });
     res.json(careers);
+    res.status(200).json({
+      success: true,
+      message: "Active career fetched successfully.",
+      data: careers,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -55,12 +68,16 @@ export const getCareerById = async (req, res) => {
   try {
     const career = await Career.findOne({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!career) {
-      return res.status(404).json({ message: 'Career not found' });
+      return res.status(404).json({ message: "Career not found" });
     }
-    res.json(career);
+    res.status(200).json({
+      success: true,
+      message: "Career by ID fetched successfully.",
+      data: career,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -79,9 +96,13 @@ export const updateCareer = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!career) {
-      return res.status(404).json({ message: 'Career not found' });
+      return res.status(404).json({ message: "Career not found" });
     }
-    res.json(career);
+    res.status(200).json({
+      success: true,
+      message: "Career updated successfully.",
+      data: career,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -96,12 +117,12 @@ export const deleteCareer = async (req, res) => {
   try {
     const career = await Career.findOneAndDelete({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!career) {
-      return res.status(404).json({ message: 'Career not found' });
+      return res.status(404).json({ message: "Career not found" });
     }
-    res.json({ message: 'Career deleted successfully' });
+    res.json({ message: "Career deleted successfully" });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -116,14 +137,19 @@ export const toggleCareerStatus = async (req, res) => {
   try {
     const career = await Career.findOne({
       _id: req.params.id,
-      businessId: req.user._id
+      businessId: req.user._id,
     });
     if (!career) {
-      return res.status(404).json({ message: 'Career not found' });
+      return res.status(404).json({ message: "Career not found" });
     }
     career.isActive = !career.isActive;
     await career.save();
-    res.json(career);
+
+    res.status(200).json({
+      success: true,
+      message: "Career status toggled succesfully.",
+      data: career,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
