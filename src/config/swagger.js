@@ -17,11 +17,12 @@ const options = {
       }
     },
     servers: [
-      { url: "http://localhost:3000", description: "Development server" },
       {
         url: "https://be.blueera.ai/api/health-service/",
         description: "Production server",
       },
+      { url: "http://localhost:3000", description: "Development server" },
+   
     ],
     security: [
       {
