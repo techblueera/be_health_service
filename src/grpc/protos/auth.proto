@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package auth_service;
+
+service AuthService {
+  rpc ValidateSession(ValidateSessionRequest) returns (ValidateSessionResponse);
+}
+
+message ValidateSessionRequest {
+  string session_id = 1;
+}
+
+message User {
+    string id = 1;
+    string account_type = 2;
+    string contact_no = 3;
+    string business_id = 4;
+    string name = 5;
+    string profile_image = 6;
+}
+
+message ValidateSessionResponse {
+  bool is_valid = 1;
+  string user_id = 2;
+  User user = 3;
+}
