@@ -19,7 +19,7 @@ const router = express.Router();
  *   name: Beds
  *   description: Hospital bed management
  */
-
+ 
 /**
  * @swagger
  * components:
