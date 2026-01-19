@@ -5,6 +5,7 @@ const bedSchema = new Schema({
   businessId: { type: String, required: true },
   wardId: { type: String, required: true },
   bedNumber: { type: String, required: true },
+  name: String,
   image: String,
   description: String,
   fees: Number,

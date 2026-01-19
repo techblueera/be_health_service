@@ -12,6 +12,7 @@ import {
 import { protect } from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
+
 /**
  * @swagger
  * tags:
@@ -29,12 +30,18 @@ const router = express.Router();
  *         _id:
  *           type: string
  *           example: 64f1d2c1a1b23c0012345678
+ *         businessId:
+ *           type: string
+ *           example: 64f1a1b2c3d4e5f6g7h8i9j0
  *         wardId:
  *           type: string
  *           example: 64f1c9c2a1b23c0099999999
  *         bedNumber:
  *           type: string
  *           example: B-12
+ *         name:
+ *           type: string
+ *           example: General Bed Male
  *         image:
  *           type: string
  *           example: https://cdn.example.com/bed.jpg
@@ -81,23 +88,54 @@ const router = express.Router();
  *             properties:
  *               wardId:
  *                 type: string
+ *                 example: 64f1c9c2a1b23c0099999999
  *               bedNumber:
  *                 type: string
+ *                 example: B-12
+ *               name:
+ *                 type: string
+ *                 example: General Bed Male
  *               image:
  *                 type: string
+ *                 example: https://cdn.example.com/bed.jpg
  *               description:
  *                 type: string
+ *                 example: Standard hospital bed with adjustable height
  *               fees:
  *                 type: number
+ *                 example: 2500
  *     responses:
  *       201:
  *         description: Bed created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully created bed.
+ *                 data:
+ *                   $ref: '#/components/schemas/Bed'
  *       400:
  *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Failed to create bed.
+ *                 error:
+ *                   type: string
+ *                   example: Validation failed
  */
 router.post('/', protect, createBed);
 
@@ -115,11 +153,33 @@ router.post('/', protect, createBed);
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully fetched beds.
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Bed'
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Failed to fetch all beds.
+ *                 error:
+ *                   type: string
  */
 router.get('/', protect, getAllBeds);
 
@@ -137,19 +197,29 @@ router.get('/', protect, getAllBeds);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Ward ID to filter beds
+ *         example: 64f1c9c2a1b23c0099999999
  *     responses:
  *       200:
  *         description: Beds under the ward
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully fetched bed by ward.
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Bed'
  *       500:
  *         description: Server error
  */
-
 router.get('/ward/:wardId', protect, getBedsByWard);
 
 /**
@@ -166,15 +236,34 @@ router.get('/ward/:wardId', protect, getBedsByWard);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Bed ID
+ *         example: 64f1d2c1a1b23c0012345678
  *     responses:
  *       200:
  *         description: Bed details
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully fetched bed by ID.
+ *                 data:
+ *                   $ref: '#/components/schemas/Bed'
  *       404:
  *         description: Bed not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Bed not found
  *       500:
  *         description: Server error
  */
@@ -194,6 +283,8 @@ router.get('/:id', protect, getBedById);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Bed ID
+ *         example: 64f1d2c1a1b23c0012345678
  *     requestBody:
  *       required: true
  *       content:
@@ -203,23 +294,41 @@ router.get('/:id', protect, getBedById);
  *             properties:
  *               wardId:
  *                 type: string
+ *                 example: 64f1c9c2a1b23c0099999999
  *               bedNumber:
  *                 type: string
+ *                 example: B-15
+ *               name:
+ *                 type: string
+ *                 example: ICU Bed Premium
  *               image:
  *                 type: string
+ *                 example: https://cdn.example.com/bed-updated.jpg
  *               description:
  *                 type: string
+ *                 example: Premium ICU bed with advanced features
  *               fees:
  *                 type: number
+ *                 example: 3500
  *               isOccupied:
  *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
  *         description: Bed updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully updated bed.
+ *                 data:
+ *                   $ref: '#/components/schemas/Bed'
  *       404:
  *         description: Bed not found
  *       400:
@@ -241,6 +350,8 @@ router.put('/:id', protect, updateBed);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Bed ID
+ *         example: 64f1d2c1a1b23c0012345678
  *     responses:
  *       200:
  *         description: Bed deleted successfully
@@ -249,11 +360,25 @@ router.put('/:id', protect, updateBed);
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *                   example: Bed deleted successfully
  *       404:
  *         description: Bed not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Bed not found
  *       500:
  *         description: Server error
  */
@@ -273,15 +398,34 @@ router.delete('/:id', protect, deleteBed);
  *         required: true
  *         schema:
  *           type: string
+ *         description: Bed ID
+ *         example: 64f1d2c1a1b23c0012345678
  *     responses:
  *       200:
  *         description: Bed occupancy toggled
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Bed'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully toggled bed occupancy.
+ *                 data:
+ *                   $ref: '#/components/schemas/Bed'
  *       404:
  *         description: Bed not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Bed not found
  *       400:
  *         description: Error toggling occupancy
  */
