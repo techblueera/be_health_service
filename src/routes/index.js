@@ -12,6 +12,7 @@ import wardRoutes from "./hospitalRoutes/ward.routes.js";
 import aiRoutes from "./hospitalRoutes/ai.routes.js";
 import authRouter from "./hospitalRoutes/auth.route.js";
 import uploadRoutes from "./upload.routes.js"
+import testimonialRoutes from './hospitalRoutes/testimonial.routes.js'
 
 const router = express.Router();
 
@@ -28,4 +29,6 @@ router.use("/contact", contactRoutes);
 router.use("/hospital-data", aiRoutes);
 router.use("/auth", authRouter);
 router.use("/upload", uploadRoutes)
+router.use('/testimonials', testimonialRoutes)
+
 export default router;
