@@ -7,6 +7,7 @@ import Bed from "../../models/hospitalModels/bed.model.js";
 import EmergencyService from "../../models/hospitalModels/emergencyService.model.js";
 import Contact from "../../models/hospitalModels/contact.model.js";
 import Facility from '../../models/hospitalModels/facility.model.js';
+import Testimonial from '../../models/hospitalModels/testimonial.model.js';
 
 // Create About Us
 export const createAboutUs = async (req, res) => {
@@ -100,37 +101,23 @@ export const getHomePageDetails = async (req, res) => {
   try {
     const businessId = req.user._id;
 
-    // 1. HOSPITAL INFO (Top section with cover page)
+    // 1. HOSPITAL INFO (Top section - Cover Image & Logo)
     const contact = await Contact.findOne({ businessId }).lean();
     const aboutUs = await AboutUs.findOne({ businessId }).lean();
 
     const hospitalInfo = {
       name: contact?.hospitalName || 'The Mission Hospital',
       tagline: 'Quality Healthcare for All',
-      coverImage: aboutUs?.coverPage || '', // Cover page from AboutUs
-      logo: aboutUs?.image || '' // Hospital logo from AboutUs
+      coverImage: aboutUs?.coverPage || '',
+      logo: aboutUs?.logoImage || ''
     };
 
-    // 2. STATISTICS (Number cards - OPD, IPD, Emergency)
-    const opdCount = await Department.countDocuments({ 
-      businessId, 
-      type: 'OPD', 
-      parentId: { $ne: null }, // Only sub-departments
-      isActive: true 
-    });
-    
-    const ipdCount = await Ward.countDocuments({ businessId, isActive: true });
-    
-    const emergencyCount = await EmergencyService.countDocuments({ 
-      businessId, 
-      isActive: true 
-    });
-
-    // 3. DOCTORS (Show active doctors with departments)
+    // 3. DOCTORS SECTION
+    // Get active doctors (not on leave)
     const activeDoctors = await Doctor.find({ 
       businessId,
-      isOnLeave: false // Not on leave
-    }).limit(4).lean();
+      isOnLeave: false
+    }).lean();
 
     const doctorDeptIds = [...new Set(activeDoctors.map(d => d.departmentId))];
     const doctorDepartments = await Department.find({ 
@@ -147,16 +134,17 @@ export const getHomePageDetails = async (req, res) => {
       name: doctor.name,
       photo: doctor.photo,
       specialization: doctor.specialization,
+      qualification: doctor.qualification,
       departmentName: deptMap[doctor.departmentId] || 'General',
       availability: doctor.availability,
       fees: doctor.fees
     }));
 
-    // 4. IPD (Active wards with bed availability)
+    // 4. IPD SECTION (Wards with bed details)
     const activeWards = await Ward.find({ 
       businessId, 
       isActive: true 
-    }).limit(4).lean();
+    }).lean();
 
     const ipd = await Promise.all(
       activeWards.map(async (ward) => {
@@ -181,24 +169,24 @@ export const getHomePageDetails = async (req, res) => {
       })
     );
 
-    // 5. EMERGENCY & CRITICAL CARE (Active services only)
+    // 5. EMERGENCY & CRITICAL CARE
     const emergencyServices = await EmergencyService.find({ 
       businessId, 
       isActive: true 
-    }).limit(6).lean();
+    }).lean();
 
     const emergency = emergencyServices.map(service => ({
       _id: service._id,
       name: service.name,
       type: service.type,
-      icon: service.type.toLowerCase() // For UI icons
+      description: service.description || ''
     }));
 
-    // 6. OTHER SERVICES (Active facilities)
+    // 6. OTHER SERVICES (Ambulance, Insurance, etc.)
     const otherFacilities = await Facility.find({ 
       businessId, 
       isActive: true 
-    }).limit(4).lean();
+    }).lean();
 
     const otherServices = otherFacilities.map(facility => ({
       _id: facility._id,
@@ -207,25 +195,35 @@ export const getHomePageDetails = async (req, res) => {
       description: facility.description
     }));
 
-    // 7. ABOUT US (History, Vision, Management with image)
+    // 7. ABOUT US SECTION
     const aboutUsData = {
       visionMission: aboutUs?.visionMission || '',
       history: aboutUs?.history || '',
       management: aboutUs?.management ? JSON.parse(aboutUs.management) : [],
-      image: aboutUs?.image || '', // Hospital image/logo
-      coverPage: aboutUs?.coverPage || '' // Cover page image
+      hospitalImage: aboutUs?.hospitalImage || '' // Main hospital building image
     };
 
-    // 8. GALLERY
-    // For now using coverPage and image from AboutUs
-    // You can later add a separate images array field to AboutUs model
+    // 8. GALLERY (From AboutUs gallery array + other images)
     const gallery = [
+      ...(aboutUs?.gallery || []), // Gallery images array
       aboutUs?.coverPage,
-      aboutUs?.image
+      aboutUs?.hospitalImage
     ].filter(Boolean); // Remove null/undefined values
 
-    // 9. TESTIMONIALS (You need to create a Testimonial model)
-    const testimonials = []; // Empty for now
+    // 9. TESTIMONIALS (Active testimonials only)
+    const activeTestimonials = await Testimonial.find({ 
+      businessId, 
+      isActive: true 
+    }).lean();
+
+    const testimonials = activeTestimonials.map(testimonial => ({
+      _id: testimonial._id,
+      name: testimonial.name,
+      image: testimonial.image,
+      rating: testimonial.rating,
+      message: testimonial.message,
+      designation: testimonial.designation
+    }));
 
     // 10. CONTACT US
     const contactUs = contact ? {
