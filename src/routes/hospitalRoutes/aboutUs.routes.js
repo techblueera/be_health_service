@@ -5,6 +5,14 @@ import {
   getAboutUs,
   updateAboutUs,
   deleteAboutUs,
+  getHomePageDetails,
+  getAllImages,
+  removeGalleryImage,
+  addMultipleGalleryImages,
+  addGalleryImage,
+  uploadCoverPage,
+  uploadHospitalImage,
+  uploadLogoImage,
 } from "../../controllers/hospitalControllers/aboutUs.controller.js";
 import { protect } from "../../middlewares/auth.middleware.js";
 
@@ -166,5 +174,363 @@ router.put("/", protect, updateAboutUs);
  *         description: Server error
  */
 router.delete("/", protect, deleteAboutUs);
+
+/**
+ * @swagger
+ * /api/about-us/home:
+ *   get:
+ *     summary: Get home page details
+ *     description: Fetches aggregated data required for the home page including doctors, departments, IPD, emergency services, about us, management, gallery, testimonials, and contact details.
+ *     tags: [Home]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Home page details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Home page details fetched successfully.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     doctors:
+ *                       type: object
+ *                       properties:
+ *                         departments:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               _id:
+ *                                 type: string
+ *                               name:
+ *                                 type: string
+ *                         list:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               _id:
+ *                                 type: string
+ *                               name:
+ *                                 type: string
+ *                               department:
+ *                                 type: object
+ *                                 properties:
+ *                                   _id:
+ *                                     type: string
+ *                                   name:
+ *                                     type: string
+ *                     ipd:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           beds:
+ *                             type: number
+ *                     emergencyAndCriticalCare:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           serviceName:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                     otherServices:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           serviceName:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                     aboutUs:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           title:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                     management:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           designation:
+ *                             type: string
+ *                     gallery:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     testimonials:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                       example: []
+ *                     contactUs:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         address:
+ *                           type: string
+ *       500:
+ *         description: Failed to fetch home page details
+ */
+router.get("/home", protect, getHomePageDetails);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Images
+ *   description: Hospital image management APIs
+ */
+
+/**
+ * @swagger
+ * /api/about-us/images/logo:
+ *   post:
+ *     summary: Upload logo image
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - logoImage
+ *             properties:
+ *               logoImage:
+ *                 type: string
+ *                 example: https://cdn.app/logo.png
+ *     responses:
+ *       200:
+ *         description: Logo image uploaded successfully
+ *       400:
+ *         description: Validation error
+ */
+
+router.post("/images/logo", protect, uploadLogoImage);
+
+/**
+ * @swagger
+ * /api/about-us/images/hospital:
+ *   post:
+ *     summary: Upload hospital image
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - hospitalImage
+ *             properties:
+ *               hospitalImage:
+ *                 type: string
+ *                 example: https://cdn.app/hospital.png
+ *     responses:
+ *       200:
+ *         description: Hospital image uploaded successfully
+ *       400:
+ *         description: Validation error
+ */
+
+router.post("/images/hospital", protect, uploadHospitalImage);
+
+/**
+ * @swagger
+ * /api/about-us/images/cover:
+ *   post:
+ *     summary: Upload cover page image
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - coverPage
+ *             properties:
+ *               coverPage:
+ *                 type: string
+ *                 example: https://cdn.app/cover.jpg
+ *     responses:
+ *       200:
+ *         description: Cover page uploaded successfully
+ *       400:
+ *         description: Validation error
+ */
+
+router.post("/images/cover", protect, uploadCoverPage);
+
+/**
+ * @swagger
+ * /api/about-us/images/gallery:
+ *   post:
+ *     summary: Add a single gallery image
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - imageUrl
+ *             properties:
+ *               imageUrl:
+ *                 type: string
+ *                 example: https://cdn.app/gallery1.jpg
+ *     responses:
+ *       200:
+ *         description: Gallery image added successfully
+ *       400:
+ *         description: Validation error
+ */
+
+router.post("/images/gallery", protect, addGalleryImage);
+
+/**
+ * @swagger
+ * /api/about-us/images/gallery/bulk:
+ *   post:
+ *     summary: Add multiple gallery images
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - images
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example:
+ *                   - https://cdn.app/gallery1.jpg
+ *                   - https://cdn.app/gallery2.jpg
+ *     responses:
+ *       200:
+ *         description: Gallery images added successfully
+ *       400:
+ *         description: Validation error
+ */
+
+router.post("/images/gallery/bulk", protect, addMultipleGalleryImages);
+
+/**
+ * @swagger
+ * /api/about-us/images/gallery:
+ *   delete:
+ *     summary: Remove a gallery image
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - imageUrl
+ *             properties:
+ *               imageUrl:
+ *                 type: string
+ *                 example: https://cdn.app/gallery1.jpg
+ *     responses:
+ *       200:
+ *         description: Gallery image removed successfully
+ *       404:
+ *         description: About Us not found
+ *       400:
+ *         description: Validation error
+ */
+
+router.delete("/images/gallery", protect, removeGalleryImage);
+
+/**
+ * @swagger
+ * /api/about-us/images:
+ *   get:
+ *     summary: Get all uploaded images
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Images fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 logoImage:
+ *                   type: string
+ *                 hospitalImage:
+ *                   type: string
+ *                 coverPage:
+ *                   type: string
+ *                 gallery:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       404:
+ *         description: About Us not found
+ *       500:
+ *         description: Server error
+ */
+
+router.get("/images", protect, getAllImages);
 
 export default router;
