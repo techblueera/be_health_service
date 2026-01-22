@@ -84,7 +84,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/departments:
+ * /api/hp/departments:
  *   post:
  *     summary: Create a new department
  *     tags: [Departments]
@@ -130,7 +130,7 @@ router.post('/', protect, createDepartment);
 
 /**
  * @swagger
- * /api/departments:
+ * /api/hp/departments:
  *   get:
  *     summary: Get all departments for logged-in business
  *     tags: [Departments]
@@ -154,7 +154,7 @@ router.get('/', protect, getAllDepartments);
 
 /**
  * @swagger
- * /api/departments/main:
+ * /api/hp/departments/main:
  *   get:
  *     summary: Get main (top-level) departments
  *     description: >
@@ -180,7 +180,7 @@ router.get('/main', protect, getMainDepartments); // For Update Tab
 
 /**
  * @swagger
- * /api/departments/{id}/with-children:
+ * /api/hp/departments/{id}/with-children:
  *   get:
  *     summary: Get department along with its sub-departments
  *     description: >
@@ -213,7 +213,7 @@ router.get('/:id/with-children', protect, getDepartmentWithChildren); // Complet
 
 /**
  * @swagger
- * /api/departments/{parentId}/sub:
+ * /api/hp/departments/{parentId}/sub:
  *   get:
  *     summary: Get sub-departments by parent department
  *     description: >
@@ -245,7 +245,7 @@ router.get('/:parentId/sub', protect, getSubDepartments);
 
 /**
  * @swagger
- * /api/departments/{id}:
+ * /api/hp/departments/{id}:
  *   get:
  *     summary: Get department by ID
  *     tags: [Departments]
@@ -274,7 +274,7 @@ router.get('/:id', protect, getDepartmentById);
 
 /**
  * @swagger
- * /api/departments/{id}:
+ * /api/hp/departments/{id}:
  *   put:
  *     summary: Update department details
  *     tags: [Departments]
@@ -324,7 +324,7 @@ router.put('/:id', protect, updateDepartment);
 
 /**
  * @swagger
- * /api/departments/{id}:
+ * /api/hp/departments/{id}:
  *   delete:
  *     summary: Delete a department
  *     tags: [Departments]

@@ -70,7 +70,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/beds:
+ * /api/hp/beds:
  *   post:
  *     summary: Create a new bed
  *     tags: [Beds]
@@ -141,7 +141,7 @@ router.post('/', protect, createBed);
 
 /**
  * @swagger
- * /api/beds:
+ * /api/hp/beds:
  *   get:
  *     summary: Get all beds for logged-in business
  *     tags: [Beds]
@@ -185,7 +185,7 @@ router.get('/', protect, getAllBeds);
 
 /**
  * @swagger
- * /api/beds/ward/{wardId}:
+ * /api/hp/beds/ward/{wardId}:
  *   get:
  *     summary: Get beds by ward ID
  *     tags: [Beds]
@@ -224,7 +224,7 @@ router.get('/ward/:wardId', protect, getBedsByWard);
 
 /**
  * @swagger
- * /api/beds/{id}:
+ * /api/hp/beds/{id}:
  *   get:
  *     summary: Get a bed by ID
  *     tags: [Beds]
@@ -271,7 +271,7 @@ router.get('/:id', protect, getBedById);
 
 /**
  * @swagger
- * /api/beds/{id}:
+ * /api/hp/beds/{id}:
  *   put:
  *     summary: Update bed details
  *     tags: [Beds]
@@ -338,7 +338,7 @@ router.put('/:id', protect, updateBed);
 
 /**
  * @swagger
- * /api/beds/{id}:
+ * /api/hp/beds/{id}:
  *   delete:
  *     summary: Delete a bed
  *     tags: [Beds]
@@ -386,7 +386,7 @@ router.delete('/:id', protect, deleteBed);
 
 /**
  * @swagger
- * /api/beds/{id}/occupancy:
+ * /api/hp/beds/{id}/occupancy:
  *   patch:
  *     summary: Toggle bed occupancy status
  *     tags: [Beds]

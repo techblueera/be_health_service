@@ -6,7 +6,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/hospital-data/save:
+ * /api/hp/hospital-data/save:
  *   post:
  *     summary: Save complete hospital master data
  *     description: >

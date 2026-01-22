@@ -14,21 +14,33 @@ import authRouter from "./hospitalRoutes/auth.route.js";
 import uploadRoutes from "./upload.routes.js"
 import testimonialRoutes from './hospitalRoutes/testimonial.routes.js'
 
+import categoryRoutes from './pharmacyRoutes/category.routes.js'
+import orderRoutes from './pharmacyRoutes/order.routes.js'
+import productRoutes from './pharmacyRoutes/product.routes.js'
+import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
+
 const router = express.Router();
 
-router.use("/about-us", aboutUsRoutes);
-router.use("/beds", bedRoutes);
-router.use("/branches", branchRoutes);
-router.use("/careers", careerRoutes);
-router.use("/departments", departmentRoutes);
-router.use("/doctors", doctorRoutes);
-router.use("/wards", wardRoutes);
-router.use("/emergency-services", emergencyServiceRoutes);
-router.use("/facilities", facilityRoutes);
-router.use("/contact", contactRoutes);
-router.use("/hospital-data", aiRoutes);
 router.use("/auth", authRouter);
-router.use("/upload", uploadRoutes)
-router.use('/testimonials', testimonialRoutes)
 
+router.use("/hp/about-us", aboutUsRoutes);
+router.use("/hp/beds", bedRoutes);
+router.use("/hp/branches", branchRoutes);
+router.use("/hp/careers", careerRoutes);
+router.use("/hp/departments", departmentRoutes);
+router.use("/hp/doctors", doctorRoutes);
+router.use("/hp/wards", wardRoutes);
+router.use("/hp/emergency-services", emergencyServiceRoutes);
+router.use("/hp/facilities", facilityRoutes);
+router.use("/hp/contact", contactRoutes);
+router.use("/hp/hospital-data", aiRoutes);
+router.use('/hp/testimonials', testimonialRoutes)
+
+router.use('/ms/categories', categoryRoutes);
+router.use('/ms/orders', orderRoutes);
+router.use('/ms/products', productRoutes);
+router.use('/ms/product-variants', productVariantRoutes)
+
+
+router.use("/upload", uploadRoutes)
 export default router;

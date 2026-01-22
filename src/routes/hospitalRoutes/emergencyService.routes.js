@@ -64,7 +64,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/emergency-services:
+ * /api/hp/emergency-services:
  *   post:
  *     summary: Create a new emergency service
  *     tags: [EmergencyServices]
@@ -110,7 +110,7 @@ router.post('/', protect, createEmergencyService);
 
 /**
  * @swagger
- * /api/emergency-services:
+ * /api/hp/emergency-services:
  *   get:
  *     summary: Get all emergency services for logged-in business
  *     tags: [EmergencyServices]
@@ -133,7 +133,7 @@ router.get('/', protect, getAllEmergencyServices);
 
 /**
  * @swagger
- * /api/emergency-services/department/{departmentId}:
+ * /api/hp/emergency-services/department/{departmentId}:
  *   get:
  *     summary: Get emergency services by department ID
  *     tags: [EmergencyServices]
@@ -162,7 +162,7 @@ router.get('/department/:departmentId', protect, getEmergencyServicesByDepartmen
 
 /**
  * @swagger
- * /api/emergency-services/{id}:
+ * /api/hp/emergency-services/{id}:
  *   get:
  *     summary: Get emergency service by ID
  *     tags: [EmergencyServices]
@@ -191,7 +191,7 @@ router.get('/:id', protect, getEmergencyServiceById);
 
 /**
  * @swagger
- * /api/emergency-services/{id}:
+ * /api/hp/emergency-services/{id}:
  *   put:
  *     summary: Update emergency service details
  *     tags: [EmergencyServices]
@@ -241,7 +241,7 @@ router.get('/:id', protect, getEmergencyServiceById);
 router.put('/:id', protect, updateEmergencyService);
 /**
  * @swagger
- * /api/emergency-services/{id}:
+ * /api/hp/emergency-services/{id}:
  *   delete:
  *     summary: Delete an emergency service
  *     tags: [EmergencyServices]

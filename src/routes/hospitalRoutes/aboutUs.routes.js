@@ -63,7 +63,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/about-us:
+ * /api/hp/about-us:
  *   post:
  *     summary: Create About Us details
  *     tags: [AboutUs]
@@ -96,7 +96,7 @@ router.post("/", protect, createAboutUs);
 
 /**
  * @swagger
- * /api/about-us:
+ * /api/hp/about-us:
  *   get:
  *     summary: Get About Us details for logged-in business
  *     tags: [AboutUs]
@@ -118,7 +118,7 @@ router.get("/", protect, getAboutUs);
 
 /**
  * @swagger
- * /api/about-us:
+ * /api/hp/about-us:
  *   put:
  *     summary: Update About Us details (upsert supported)
  *     tags: [AboutUs]
@@ -151,7 +151,7 @@ router.put("/", protect, updateAboutUs);
 
 /**
  * @swagger
- * /api/about-us:
+ * /api/hp/about-us:
  *   delete:
  *     summary: Delete About Us details
  *     tags: [AboutUs]
@@ -177,7 +177,7 @@ router.delete("/", protect, deleteAboutUs);
 
 /**
  * @swagger
- * /api/about-us/home:
+ * /api/hp/about-us/home:
  *   get:
  *     summary: Get home page details
  *     description: Fetches aggregated data required for the home page including doctors, departments, IPD, emergency services, about us, management, gallery, testimonials, and contact details.
@@ -321,7 +321,7 @@ router.get("/home", protect, getHomePageDetails);
 
 /**
  * @swagger
- * /api/about-us/images/logo:
+ * /api/hp/about-us/images/logo:
  *   post:
  *     summary: Upload logo image
  *     tags: [Images]
@@ -350,7 +350,7 @@ router.post("/images/logo", protect, uploadLogoImage);
 
 /**
  * @swagger
- * /api/about-us/images/hospital:
+ * /api/hp/about-us/images/hospital:
  *   post:
  *     summary: Upload hospital image
  *     tags: [Images]
@@ -379,7 +379,7 @@ router.post("/images/hospital", protect, uploadHospitalImage);
 
 /**
  * @swagger
- * /api/about-us/images/cover:
+ * /api/hp/about-us/images/cover:
  *   post:
  *     summary: Upload cover page image
  *     tags: [Images]
@@ -408,7 +408,7 @@ router.post("/images/cover", protect, uploadCoverPage);
 
 /**
  * @swagger
- * /api/about-us/images/gallery:
+ * /api/hp/about-us/images/gallery:
  *   post:
  *     summary: Add a single gallery image
  *     tags: [Images]
@@ -437,7 +437,7 @@ router.post("/images/gallery", protect, addGalleryImage);
 
 /**
  * @swagger
- * /api/about-us/images/gallery/bulk:
+ * /api/hp/about-us/images/gallery/bulk:
  *   post:
  *     summary: Add multiple gallery images
  *     tags: [Images]
@@ -470,7 +470,7 @@ router.post("/images/gallery/bulk", protect, addMultipleGalleryImages);
 
 /**
  * @swagger
- * /api/about-us/images/gallery:
+ * /api/hp/about-us/images/gallery:
  *   delete:
  *     summary: Remove a gallery image
  *     tags: [Images]
@@ -501,7 +501,7 @@ router.delete("/images/gallery", protect, removeGalleryImage);
 
 /**
  * @swagger
- * /api/about-us/images:
+ * /api/hp/about-us/images:
  *   get:
  *     summary: Get all uploaded images
  *     tags: [Images]

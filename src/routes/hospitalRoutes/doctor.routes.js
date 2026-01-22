@@ -78,7 +78,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/doctors:
+ * /api/hp/doctors:
  *   post:
  *     summary: Create a new doctor
  *     tags: [Doctors]
@@ -123,7 +123,7 @@ router.post('/', protect, createDoctor);
 
 /**
  * @swagger
- * /api/doctors:
+ * /api/hp/doctors:
  *   get:
  *     summary: Get all doctors for logged-in business
  *     tags: [Doctors]
@@ -145,7 +145,7 @@ router.get('/', protect, getAllDoctors);
 
 /**
  * @swagger
- * /api/doctors/department/{departmentId}:
+ * /api/hp/doctors/department/{departmentId}:
  *   get:
  *     summary: Get doctors by department ID
  *     tags: [Doctors]
@@ -173,7 +173,7 @@ router.get('/department/:departmentId', protect, getDoctorsByDepartment);
 
 /**
  * @swagger
- * /api/doctors/{id}:
+ * /api/hp/doctors/{id}:
  *   get:
  *     summary: Get doctor by ID
  *     tags: [Doctors]
@@ -201,7 +201,7 @@ router.get('/:id', protect, getDoctorById);
 
 /**
  * @swagger
- * /api/doctors/{id}:
+ * /api/hp/doctors/{id}:
  *   put:
  *     summary: Update doctor details
  *     tags: [Doctors]
@@ -250,7 +250,7 @@ router.put('/:id', protect, updateDoctor);
 
 /**
  * @swagger
- * /api/doctors/{id}:
+ * /api/hp/doctors/{id}:
  *   delete:
  *     summary: Delete a doctor
  *     tags: [Doctors]
@@ -283,7 +283,7 @@ router.delete('/:id', protect, deleteDoctor);
 
 /**
  * @swagger
- * /api/doctors/{id}/leave:
+ * /api/hp/doctors/{id}/leave:
  *   put:
  *     summary: Set doctor leave period
  *     tags: [Doctors]
@@ -328,7 +328,7 @@ router.put('/:id/leave', protect, setDoctorLeave);
 
 /**
  * @swagger
- * /api/doctors/{id}/leave:
+ * /api/hp/doctors/{id}/leave:
  *   delete:
  *     summary: Remove doctor leave
  *     tags: [Doctors]

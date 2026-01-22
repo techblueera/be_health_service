@@ -63,7 +63,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/facilities:
+ * /api/hp/facilities:
  *   post:
  *     summary: Create a new facility
  *     tags: [Facilities]
@@ -106,7 +106,7 @@ router.post('/', protect, createFacility);
 
 /**
  * @swagger
- * /api/facilities:
+ * /api/hp/facilities:
  *   get:
  *     summary: Get all facilities for logged-in business
  *     tags: [Facilities]
@@ -128,7 +128,7 @@ router.get('/', protect, getAllFacilities);
 
 /**
  * @swagger
- * /api/facilities/type/{type}:
+ * /api/hp/facilities/type/{type}:
  *   get:
  *     summary: Get facilities by type
  *     tags: [Facilities]
@@ -162,7 +162,7 @@ router.get('/type/:type', protect, getFacilitiesByType);
 
 /**
  * @swagger
- * /api/facilities/{id}:
+ * /api/hp/facilities/{id}:
  *   get:
  *     summary: Get facility by ID
  *     tags: [Facilities]
@@ -191,7 +191,7 @@ router.get('/:id', protect, getFacilityById);
 
 /**
  * @swagger
- * /api/facilities/{id}:
+ * /api/hp/facilities/{id}:
  *   put:
  *     summary: Update facility details
  *     tags: [Facilities]
@@ -241,7 +241,7 @@ router.put('/:id', protect, updateFacility);
 
 /**
  * @swagger
- * /api/facilities/{id}:
+ * /api/hp/facilities/{id}:
  *   delete:
  *     summary: Delete a facility
  *     tags: [Facilities]

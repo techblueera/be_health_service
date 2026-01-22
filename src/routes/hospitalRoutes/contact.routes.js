@@ -61,7 +61,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/contact:
+ * /api/hp/contact:
  *   post:
  *     summary: Create contact details
  *     tags: [Contact]
@@ -100,7 +100,7 @@ router.post('/', protect, createContact);
 
 /**
  * @swagger
- * /api/contact:
+ * /api/hp/contact:
  *   get:
  *     summary: Get contact details for logged-in business
  *     tags: [Contact]
@@ -122,7 +122,7 @@ router.get('/', protect, getContact);
 
 /**
  * @swagger
- * /api/contact:
+ * /api/hp/contact:
  *   put:
  *     summary: Update contact details (upsert supported)
  *     tags: [Contact]
@@ -161,7 +161,7 @@ router.put('/', protect, updateContact);
 
 /**
  * @swagger
- * /api/contact:
+ * /api/hp/contact:
  *   delete:
  *     summary: Delete contact details
  *     tags: [Contact]

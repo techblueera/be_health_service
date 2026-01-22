@@ -57,7 +57,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/branches:
+ * /api/hp/branches:
  *   post:
  *     summary: Create a new branch
  *     tags: [Branches]
@@ -95,7 +95,7 @@ router.post('/', protect, createBranch);
 
 /**
  * @swagger
- * /api/branches:
+ * /api/hp/branches:
  *   get:
  *     summary: Get all branches for logged-in business
  *     tags: [Branches]
@@ -117,7 +117,7 @@ router.get('/', protect, getAllBranches);
 
 /**
  * @swagger
- * /api/branches/{id}:
+ * /api/hp/branches/{id}:
  *   get:
  *     summary: Get branch by ID
  *     tags: [Branches]
@@ -145,7 +145,7 @@ router.get('/:id', protect, getBranchById);
 
 /**
  * @swagger
- * /api/branches/{id}:
+ * /api/hp/branches/{id}:
  *   put:
  *     summary: Update branch details
  *     tags: [Branches]
@@ -188,7 +188,7 @@ router.put('/:id', protect, updateBranch);
 
 /**
  * @swagger
- * /api/branches/{id}:
+ * /api/hp/branches/{id}:
  *   delete:
  *     summary: Delete a branch
  *     tags: [Branches]

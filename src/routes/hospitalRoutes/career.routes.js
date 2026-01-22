@@ -58,7 +58,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/careers:
+ * /api/hp/careers:
  *   post:
  *     summary: Create a new career opening
  *     tags: [Careers]
@@ -94,7 +94,7 @@ router.post('/', protect, createCareer);
 
 /**
  * @swagger
- * /api/careers:
+ * /api/hp/careers:
  *   get:
  *     summary: Get all careers for logged-in business
  *     tags: [Careers]
@@ -117,7 +117,7 @@ router.get('/', protect, getAllCareers);
 
 /**
  * @swagger
- * /api/careers/active:
+ * /api/hp/careers/active:
  *   get:
  *     summary: Get all active career openings
  *     tags: [Careers]
@@ -139,7 +139,7 @@ router.get('/active', protect, getActiveCareers);
 
 /**
  * @swagger
- * /api/careers/{id}:
+ * /api/hp/careers/{id}:
  *   get:
  *     summary: Get career by ID
  *     tags: [Careers]
@@ -167,7 +167,7 @@ router.get('/:id', protect, getCareerById);
 
 /**
  * @swagger
- * /api/careers/{id}:
+ * /api/hp/careers/{id}:
  *   put:
  *     summary: Update career details
  *     tags: [Careers]
@@ -211,7 +211,7 @@ router.put('/:id', protect, updateCareer);
 
 /**
  * @swagger
- * /api/careers/{id}:
+ * /api/hp/careers/{id}:
  *   delete:
  *     summary: Delete a career
  *     tags: [Careers]
@@ -243,7 +243,7 @@ router.delete('/:id', protect, deleteCareer);
 
 /**
  * @swagger
- * /api/careers/{id}/status:
+ * /api/hp/careers/{id}/status:
  *   patch:
  *     summary: Toggle career active status
  *     tags: [Careers]

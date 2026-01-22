@@ -74,7 +74,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/wards:
+ * /api/hp/wards:
  *   post:
  *     summary: Create a new ward
  *     tags: [Wards]
@@ -125,7 +125,7 @@ router.post('/', protect, createWard);
 
 /**
  * @swagger
- * /api/wards:
+ * /api/hp/wards:
  *   get:
  *     summary: Get all wards for logged-in business
  *     tags: [Wards]
@@ -147,7 +147,7 @@ router.get('/', protect, getAllWards);
 
 /**
  * @swagger
- * /api/wards/department/{departmentId}:
+ * /api/hp/wards/department/{departmentId}:
  *   get:
  *     summary: Get wards by department ID
  *     tags: [Wards]
@@ -175,7 +175,7 @@ router.get('/department/:departmentId', protect, getWardsByDepartment);
 
 /**
  * @swagger
- * /api/wards/{id}:
+ * /api/hp/wards/{id}:
  *   get:
  *     summary: Get ward by ID
  *     tags: [Wards]
@@ -204,7 +204,7 @@ router.get('/:id', protect, getWardById);
 
 /**
  * @swagger
- * /api/wards/{id}:
+ * /api/hp/wards/{id}:
  *   put:
  *     summary: Update ward details
  *     tags: [Wards]
@@ -260,7 +260,7 @@ router.put('/:id', protect, updateWard);
 
 /**
  * @swagger
- * /api/wards/{id}:
+ * /api/hp/wards/{id}:
  *   delete:
  *     summary: Delete a ward
  *     tags: [Wards]
@@ -292,7 +292,7 @@ router.delete('/:id', protect, deleteWard);
 
 /**
  * @swagger
- * /api/wards/{id}/beds:
+ * /api/hp/wards/{id}/beds:
  *   patch:
  *     summary: Update available beds for a ward
  *     tags: [Wards]

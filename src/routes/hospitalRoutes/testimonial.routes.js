@@ -64,7 +64,7 @@ router.use(protect);
 
 /**
  * @swagger
- * /api/testimonials:
+ * /api/hp/testimonials:
  *   post:
  *     summary: Create a testimonial
  *     tags: [Testimonials]
@@ -92,7 +92,7 @@ router.post('/', createTestimonial);
 
 /**
  * @swagger
- * /api/testimonials:
+ * /api/hp/testimonials:
  *   get:
  *     summary: Get all testimonials
  *     tags: [Testimonials]
@@ -114,7 +114,7 @@ router.get('/', getAllTestimonials);
 
 /**
  * @swagger
- * /api/testimonials/active:
+ * /api/hp/testimonials/active:
  *   get:
  *     summary: Get active testimonials only
  *     tags: [Testimonials]
@@ -136,7 +136,7 @@ router.get('/active', getActiveTestimonials);
 
 /**
  * @swagger
- * /api/testimonials/{id}:
+ * /api/hp/testimonials/{id}:
  *   get:
  *     summary: Get testimonial by ID
  *     tags: [Testimonials]
@@ -166,7 +166,7 @@ router.get('/:id', getTestimonialById);
 
 /**
  * @swagger
- * /api/testimonials/{id}:
+ * /api/hp/testimonials/{id}:
  *   put:
  *     summary: Update a testimonial
  *     tags: [Testimonials]
@@ -215,7 +215,7 @@ router.put('/:id', updateTestimonial);
 
 /**
  * @swagger
- * /api/testimonials/{id}/toggle-status:
+ * /api/hp/testimonials/{id}/toggle-status:
  *   patch:
  *     summary: Toggle testimonial active status
  *     tags: [Testimonials]
@@ -245,7 +245,7 @@ router.patch('/:id/toggle-status', toggleTestimonialStatus);
 
 /**
  * @swagger
- * /api/testimonials/{id}:
+ * /api/hp/testimonials/{id}:
  *   delete:
  *     summary: Delete a testimonial
  *     tags: [Testimonials]
