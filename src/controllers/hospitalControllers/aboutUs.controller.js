@@ -200,8 +200,11 @@ export const getHomePageDetails = async (req, res) => {
     if (aboutUs?.management) {
       try {
         parsedManagement = JSON.parse(aboutUs.management);
+        if (!Array.isArray(parsedManagement)) {
+          parsedManagement = [parsedManagement];
+        }
       } catch (e) {
-        parsedManagement = [];
+        parsedManagement = [aboutUs.management];
       }
     }
     const aboutUsData = {
@@ -252,7 +255,7 @@ export const getHomePageDetails = async (req, res) => {
         ipd,
         emergency,
         otherServices,
-        aboutUs: 1,
+        aboutUs: aboutUsData,
         gallery,
         testimonials,
         contactUs,
