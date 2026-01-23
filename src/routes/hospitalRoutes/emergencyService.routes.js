@@ -45,6 +45,9 @@ const router = express.Router();
  *             - NICU
  *             - PICU
  *           example: Emergency
+ *         description:
+ *           type: string
+ *           example: Provides 24x7 emergency and trauma care.
  *         isActive:
  *           type: boolean
  *           example: true
@@ -93,6 +96,8 @@ const router = express.Router();
  *                   - CCU
  *                   - NICU
  *                   - PICU
+ *               description:
+ *                 type: string
  *               isActive:
  *                 type: boolean
  *     responses:
@@ -223,6 +228,8 @@ router.get('/:id', protect, getEmergencyServiceById);
  *                   - CCU
  *                   - NICU
  *                   - PICU
+ *               description:
+ *                 type: string
  *               isActive:
  *                 type: boolean
  *     responses:

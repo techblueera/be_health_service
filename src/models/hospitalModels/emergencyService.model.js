@@ -9,7 +9,8 @@ const emergencyServiceSchema = new Schema({
     type: String, 
     enum: ['Emergency', 'Trauma', 'ICU', 'CCU', 'NICU', 'PICU'] 
   },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  description: { type: String }
 }, { timestamps: true });
 
 export default model('EmergencyService', emergencyServiceSchema);
