@@ -196,10 +196,18 @@ export const getHomePageDetails = async (req, res) => {
     }));
 
     // 7. ABOUT US SECTION
+    let parsedManagement = [];
+    if (aboutUs?.management) {
+      try {
+        parsedManagement = JSON.parse(aboutUs.management);
+      } catch (e) {
+        parsedManagement = [];
+      }
+    }
     const aboutUsData = {
       visionMission: aboutUs?.visionMission || '',
       history: aboutUs?.history || '',
-      management: aboutUs?.management ? JSON.parse(aboutUs.management) : [],
+      management: parsedManagement,
       hospitalImage: aboutUs?.hospitalImage || '' // Main hospital building image
     };
 
@@ -244,7 +252,7 @@ export const getHomePageDetails = async (req, res) => {
         ipd,
         emergency,
         otherServices,
-        aboutUs: aboutUsData,
+        aboutUs: 1,
         gallery,
         testimonials,
         contactUs,
