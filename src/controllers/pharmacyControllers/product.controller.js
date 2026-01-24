@@ -1,4 +1,6 @@
 import { Product } from "../../models/pharmacyModels/product.model.js";
+import { ProductVariant } from "../../models/pharmacyModels/productVariant.model.js";
+
 
 // ==================== GET ALL PRODUCTS ====================
 // Screen: "Business Chats" - Display product grid
@@ -6,18 +8,57 @@ export const getProducts = async (req, res) => {
   try {
     const businessId = req.user._id;
     const { categoryId } = req.query;
-
+    
+    if (!businessId) {
+      return res.status(401).json({
+        success: false,
+        message: "Business ID not found",
+      });
+    }
+    
     const filter = { businessId };
     if (categoryId) {
       filter.categoryId = categoryId;
     }
-
-    const products = await Product.find(filter).populate("categoryId");
-
+    
+    const products = await Product.find(filter).populate('categoryId');
+    
+    // Fetch variants for each product
+    const productsWithVariants = await Promise.all(
+      products.map(async (product) => {
+        const variants = await ProductVariant.find({ 
+          productId: product._id,
+          businessId 
+        });
+        
+        // Get price range from variants
+        let priceInfo = {};
+        if (variants.length > 0) {
+          const prices = variants.map(v => v.sellingPrice);
+          const mrps = variants.map(v => v.mrp);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+          const minMrp = Math.min(...mrps);
+          
+          priceInfo = {
+            displayPrice: minPrice,
+            priceRange: minPrice !== maxPrice ? `₹${minPrice} - ₹${maxPrice}` : `₹${minPrice}`,
+            mrp: minMrp,
+            variantCount: variants.length
+          };
+        }
+        
+        return {
+          ...product.toObject(),
+          ...priceInfo
+        };
+      })
+    );
+    
     res.status(200).json({
       success: true,
       message: "Products fetched successfully.",
-      data: products,
+      data: productsWithVariants
     });
   } catch (error) {
     res.status(500).json({
@@ -64,31 +105,56 @@ export const getProduct = async (req, res) => {
 export const createProduct = async (req, res) => {
   try {
     const businessId = req.user._id;
-    const {
-      categoryId,
-      name,
-      description,
+    const { 
+      categoryId, 
+      name, 
+      description, 
       image,
-      basePrice,
-      sellingPrice,
-      discountPercent,
+      variant
     } = req.body;
-
+    
+    if (!businessId) {
+      return res.status(401).json({
+        success: false,
+        message: "Business ID not found",
+      });
+    }
+    
+    if (!name || !categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product name and category are required",
+      });
+    }
+    
+    if (!variant || !variant.weight || !variant.mrp || !variant.sellingPrice) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one variant is required with weight, MRP, and selling price",
+      });
+    }
+    
     const product = await Product.create({
       businessId,
       categoryId,
       name,
       description,
-      image,
-      basePrice,
-      sellingPrice,
-      discountPercent,
+      image
     });
-
+    
+    await ProductVariant.create({
+      businessId,
+      productId: product._id,
+      weight: variant.weight,
+      quantity: variant.quantity,
+      mrp: variant.mrp,
+      sellingPrice: variant.sellingPrice
+    });
+    
     res.status(201).json({
       success: true,
-      message: "Product created successfully.",
-      data: product,
+      message: "Product created successfully with variant.",
+      data: product
     });
   } catch (error) {
     res.status(500).json({

@@ -102,7 +102,7 @@ router.get("/:productId", protect, getProduct);
  * @swagger
  * /api/ms/products:
  *   post:
- *     summary: Create new product
+ *     summary: Create new product with mandatory variant
  *     tags: [Product]
  *     security:
  *       - bearerAuth: []
@@ -115,32 +115,69 @@ router.get("/:productId", protect, getProduct);
  *             required:
  *               - categoryId
  *               - name
- *               - sellingPrice
+ *               - variant
  *             properties:
  *               categoryId:
  *                 type: string
- *                 example: 60d5f484f8d2e24b8c8e4f1a
  *               name:
  *                 type: string
- *                 example: Pharma Franchise For OTC Product
  *               description:
  *                 type: string
- *                 example: A popular and healthy South Indian breakfast
  *               image:
  *                 type: string
- *                 example: https://cdn.app/product.png
- *               basePrice:
- *                 type: number
- *                 example: 98000
- *               sellingPrice:
- *                 type: number
- *                 example: 61499
- *               discountPercent:
- *                 type: number
- *                 example: 50
+ *               variant:
+ *                 type: object
+ *                 required:
+ *                   - weight
+ *                   - mrp
+ *                   - sellingPrice
+ *                 properties:
+ *                   weight:
+ *                     type: string
+ *                     example: 600 gm
+ *                   quantity:
+ *                     type: string
+ *                     example: 100GM
+ *                   mrp:
+ *                     type: number
+ *                     example: 1999
+ *                   sellingPrice:
+ *                     type: number
+ *                     example: 1500
  *     responses:
  *       201:
  *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Product created successfully with variant.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         businessId:
+ *                           type: string
+ *                         categoryId:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         description:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *       400:
+ *         description: Bad request, validation error
  *       500:
  *         description: Server error
  */
