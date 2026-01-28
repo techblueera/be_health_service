@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package products;
+
+import "google/protobuf/timestamp.proto";
+
+// Product type enum
+enum ProductType {
+  PRODUCT = 0;
+  SERVICE = 1;
+}
+
+// Currency symbol enum
+enum CurrencySymbol {
+  RS = 0;
+  USD = 1;
+  EUR = 2;
+}
+
+// Product option
+message ProductOption {
+  string attribute = 1;
+  repeated string value = 2;
+}
+
+// Expiry time
+message ExpiryTime {
+  int32 date = 1;
+  int32 month = 2;
+  int32 year = 3;
+}
+
+// Additional details
+message AdditionalDetail {
+  string title = 1;
+  string details = 2;
+}
+
+// Product feature
+message ProductFeature {
+  string title = 1;
+}
+
+// Link or referral
+message LinkOrReferral {
+  string title = 1;
+}
+
+// Product message
+message Product {
+  string id = 1;
+  string name = 2;
+  ProductType type = 3;
+  CurrencySymbol symbol = 4;
+  string description = 5;
+  string brand = 6;
+  repeated ProductOption options = 7;
+  repeated string media = 8;
+  repeated string video_url = 9;
+  string category_id = 10;
+  string product_warranty = 11;
+  bool is_returnable = 12;
+  int32 returning_day = 13;
+  bool is_published = 14;
+  double mrp_per_unit = 15;
+  string sku = 16;
+  string hsn = 17;
+  ExpiryTime expiry_time = 18;
+  repeated string tags = 19;
+  repeated AdditionalDetail add_more_details = 20;
+  repeated ProductFeature add_product_features = 21;
+  LinkOrReferral link_or_referral_website = 22;
+  string created_by_business = 23;
+  string updated_by_business = 24;
+  google.protobuf.Timestamp created_at = 25;
+  google.protobuf.Timestamp updated_at = 26;
+  google.protobuf.Timestamp deleted_at = 27;
+}
+
+// Request to get products
+message GetProductsRequest {
+  repeated string product_ids = 1;
+  string cursor = 2; // Timestamp cursor for pagination
+  int32 limit = 3;
+  string created_by_business = 4;
+  ProductType type = 5;
+  bool is_published = 6;
+}
+
+// Response containing products
+message GetProductsResponse {
+  repeated Product products = 1;
+  int32 total = 2;
+  string next_cursor = 3;
+  bool has_more = 4;
+}
+
+// Request to get recent products
+message GetRecentProductsRequest {
+  string cursor = 1;
+  int32 limit = 2;
+  repeated ProductType types = 3;
+  bool is_published = 4;
+}
+
+// Products service
+service ProductsService {
+  rpc GetProducts(GetProductsRequest) returns (GetProductsResponse);
+  rpc GetRecentProducts(GetRecentProductsRequest) returns (GetProductsResponse);
+}

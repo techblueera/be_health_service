@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package channel;
+
+service ChannelService {
+  rpc GetChannel (GetChannelRequest) returns (GetChannelResponse);
+}
+
+message GetChannelRequest {
+  string id = 1;      // channel id, username or userId
+  string userId = 2;  // OPTIONAL – the authenticated caller’s user id
+}
+
+message Channel {
+  string id = 1;
+  string name = 2;
+  string username = 3;
+  string bio = 4;
+  string logoUrl = 5;
+  string coverImageUrl = 6;
+  repeated string websites = 7;
+  string category = 8;
+  string gstCode = 9;
+  bool isVerified = 10;
+  string claimedBy = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+  bool isFollowing = 14;  // NEW
+}
+
+message GetChannelResponse {
+  Channel channel = 1;
+}

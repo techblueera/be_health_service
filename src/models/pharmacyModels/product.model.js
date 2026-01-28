@@ -6,7 +6,6 @@ const productSchema = new Schema({
   name: String,
   description: String,
   image: String,
-  createdAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
-export const Product = model("Product", productSchema);
+export default model("Product", productSchema);

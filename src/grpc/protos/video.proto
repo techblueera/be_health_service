@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package video;
+
+import "google/protobuf/timestamp.proto";
+
+message Location {
+    string name = 1;
+    double lat = 2;
+    double lng = 3;
+}
+
+message Song {
+    string id = 1;
+    string name = 2;
+    string artist = 3;
+    string cover_url = 4;
+}
+
+message Report {
+    string user_id = 1;
+    string reason = 2;
+    google.protobuf.Timestamp created_at = 3;
+}
+
+message Stats {
+    int64 views = 1;
+    int64 likes = 2;
+    int64 shares = 3;
+    int64 comments = 4;
+}
+
+message Video {
+    string id = 1;
+    string user_id = 2;
+    string channel_id = 3;
+    string type = 4;
+    string status = 5;
+    string title = 6;
+    string description = 7;
+    string caption = 8;
+    string cover_url = 9;
+    string video_url = 10;
+    int32 duration = 11;
+    map<string, string> transcoded_urls = 12;
+    map<string, string> thumbnails = 13;
+    string visibility = 14;
+    repeated string tags = 15;
+    repeated string keywords = 16;
+    repeated string categories = 17;
+    Location location = 18;
+    Song song = 19;
+    bool is_collaboration = 20;
+    bool allow_comments = 21;
+    repeated string tagged_users = 22;
+    repeated string tagged_channel_products = 23;
+    bool is_mature_content = 24;
+    string related_video_link = 25;
+    bool is_brand_promotion = 26;
+    string brand_promotion_link = 27;
+    bool accept_bookings_or_enquiries = 28;
+    map<string, string> bank_details = 30;
+    bool is_flagged = 31;
+    repeated Report reports = 32;
+    Stats stats = 33;
+    google.protobuf.Timestamp created_at = 34;
+    google.protobuf.Timestamp updated_at = 35;
+}
+
+// Defines the structure for a category
+message Category {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message GetVideoRequest {
+    repeated string video_ids = 1;
+}
+
+message GetVideoResponse {
+    repeated Video videos = 1;
+    int32 total = 2;
+}
+
+// Request message for fetching categories by their IDs
+message GetCategoriesRequest {
+    repeated string category_ids = 1;
+}
+
+// Response message containing the fetched categories
+message GetCategoriesResponse {
+    repeated Category categories = 1;
+}
+
+message GetLikeStatusRequest {
+    string user_id = 1;
+    repeated string video_ids = 2;
+}
+
+message GetLikeStatusResponse {
+    map<string, bool> like_status = 1;
+}
+
+message GetHotVideosRequest {
+    string type = 1;
+    int32 limit = 2;
+    int32 page = 3;
+}
+
+message SearchVideosRequest {
+    string query = 1;
+    string category = 2;
+    int32 limit = 3;
+    int32 page = 4;
+}
+
+service VideoService {
+    rpc GetVideos(GetVideoRequest) returns (GetVideoResponse);
+    // New RPC for fetching categories
+    rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse);
+    rpc GetLikeStatus(GetLikeStatusRequest) returns (GetLikeStatusResponse);
+    rpc GetHotVideos(GetHotVideosRequest) returns (GetVideoResponse);
+    rpc SearchVideos(SearchVideosRequest) returns (GetVideoResponse);
+}

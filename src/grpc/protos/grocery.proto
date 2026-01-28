@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package grocery_service;
+
+// Custom message types to replace google.protobuf.Struct
+message Image {
+  string url = 1;
+  string altText = 2;
+}
+
+message Pricing {
+  string pincode = 1;
+  string cityName = 2;
+  double mrp = 3;
+  double sellingPrice = 4;
+  string currency = 5;
+}
+
+message Dimensions {
+  double length = 1;
+  double width = 2;
+  double height = 3;
+}
+
+message Batch {
+  string batchNumber = 1;
+  int32 quantity = 2;
+  string mfgDate = 3;
+  string expiryDate = 4;
+  double mrp = 5;
+  double sellingPrice = 6;
+}
+
+message SupplierInfo {
+  string name = 1;
+  string contact = 2;
+}
+
+message Location {
+  string aisle = 1;
+  string shelf = 2;
+}
+
+message OrderItem {
+  string inventory = 1;
+  string productVariant = 2;
+  int32 quantity = 3;
+  double mrp = 4;
+  double sellingPrice = 5;
+}
+
+service GroceryService {
+  // Order related RPCs
+  rpc UpdateOrderStatus (UpdateOrderStatusRequest) returns (OrderResponse);
+
+  // Inventory and Product RPCs
+  rpc GetInventoryDetails(GetInventoryDetailsRequest) returns (GetInventoryDetailsResponse);
+  rpc GetProductDetailsByVariantId(GetProductDetailsByVariantIdRequest) returns (GetProductDetailsByVariantIdResponse);
+}
+
+message UpdateOrderStatusRequest {
+  string orderId = 1;
+  string status = 2;
+}
+
+message OrderResponse {
+  string id = 1;
+  string userId = 2;
+  repeated OrderItem items = 3;
+  int32 totalItems = 4;
+  double totalMRP = 5;
+  double discount = 6;
+  double grandTotal = 7;
+  string deliveryType = 8;
+  string rider = 9;
+  string orderStatus = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+}
+
+// GetInventoryDetails Messages
+message GetInventoryDetailsRequest {
+  repeated string inventoryIds = 1;
+}
+
+message InventoryDetails {
+  string id = 1;
+  string businessId = 2;
+  ProductVariantDetails productVariant = 3;
+  string pincode = 4;
+  string cityName = 5;
+  repeated Batch batches = 6;
+  SupplierInfo supplierInfo = 7;
+  Location location = 8;
+  int32 reorderPoint = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+  int32 totalStock = 12;
+}
+
+message GetInventoryDetailsResponse {
+  repeated InventoryDetails inventories = 1;
+}
+
+// GetProductDetailsByVariantId Messages
+message GetProductDetailsByVariantIdRequest {
+  repeated string variantIds = 1;
+}
+
+message ProductDetails {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string brand = 4;
+  string category = 5;
+  repeated string tags = 6;
+  repeated Image images = 7;
+  bool isActive = 8;
+  bool isVegetarian = 9;
+  string countryOfOrigin = 10;
+  map<string, string> nutritionalInfo = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+}
+
+message ProductVariantDetails {
+  string id = 1;
+  ProductDetails product = 2;
+  string variantName = 3;
+  string unit = 4;
+  string sku = 5;
+  string barcode = 6;
+  repeated Pricing pricing = 7;
+  repeated Image images = 8;
+  Dimensions dimensions = 9;
+  double weight = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+}
+
+message GetProductDetailsByVariantIdResponse {
+  repeated ProductVariantDetails variants = 1;
+}
+

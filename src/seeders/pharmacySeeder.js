@@ -1,4 +1,4 @@
-import { Category } from "../models/pharmacyModels/category.model.js";
+import Category from "../models/pharmacyModels/category.model.js";
 
 const categories = [
   {
@@ -35,24 +35,18 @@ const categories = [
   },
 ];
 
-export const seedCategories = async (businessId) => {
+export const seedCategories = async () => {
   try {
-    // Check if categories already exist for this business
-    const existingCategories = await Category.find({ businessId });
+    // Check if categories already exist
+    const existingCategories = await Category.find();
 
     if (existingCategories.length > 0) {
-      console.log("Categories already exist for this business");
+      console.log("Categories already exist");
       return;
     }
 
-    // Add businessId to each category
-    const categoriesWithBusinessId = categories.map((category) => ({
-      ...category,
-      businessId,
-    }));
-
     // Insert categories
-    await Category.insertMany(categoriesWithBusinessId);
+    await Category.insertMany(categories);
     console.log("Categories seeded successfully");
   } catch (error) {
     console.error("Error seeding categories:", error);

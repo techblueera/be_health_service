@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package rider_service;
+
+import "google/protobuf/struct.proto";
+
+service RiderService {
+  rpc GetRiderById (RiderIdRequest) returns (RiderResponse);
+  rpc GetRidersByIds (RiderIdsRequest) returns (RiderListResponse);
+  rpc GetRiderByUserId (UserIdRequest) returns (RiderResponse);
+  rpc GetRiderByUserIds (UserIdsRequest) returns (RiderListResponse);
+  rpc GetRideOrderWithGroceryData (GetRideOrderWithGroceryDataRequest) returns (RideOrderWithGroceryDataResponse);
+  rpc GetRideOrderWithPharmacyData (GetRideOrderWithPharmacyDataRequest) returns (RideOrderWithPharmacyDataResponse);
+}
+
+// --- Requests ---
+
+message RiderIdRequest {
+  string id = 1;
+}
+
+message RiderIdsRequest {
+  repeated string ids = 1;
+}
+
+message UserIdRequest {
+  string userId = 1;
+}
+
+message UserIdsRequest {
+  repeated string userIds = 1;
+}
+
+message GetRideOrderWithGroceryDataRequest {
+  string orderId = 1;
+}
+
+message GetRideOrderWithPharmacyDataRequest {
+  string orderId = 1;
+}
+
+// --- Responses ---
+
+message RiderListResponse {
+  repeated RiderResponse riders = 1;
+  int32 totalCount = 2;
+}
+
+message RiderResponse {
+  string id = 1;
+  string userId = 2;
+  string status = 3; // 'available', 'on-trip', 'offline'
+  
+  // Nested Objects mapped to Structs for flexibility
+  google.protobuf.Struct currentLocation = 4;
+  google.protobuf.Struct ratings = 5;
+  double earnings = 6;
+  
+  google.protobuf.Struct personalInformation = 7;
+  google.protobuf.Struct address = 8;
+  google.protobuf.Struct personalIdentification = 9;
+  google.protobuf.Struct drivingVerification = 10;
+  google.protobuf.Struct vehicleImages = 11;
+  google.protobuf.Struct vehicleInformation = 12;
+
+  int32 onboardingStep = 13;
+  bool isOnboardingComplete = 14;
+
+  string createdAt = 15;
+  string updatedAt = 16;
+}
+
+message RideOrderWithGroceryDataResponse {
+  google.protobuf.Struct rideOrder = 1;
+  google.protobuf.Struct groceryOrder = 2;
+}
+
+message RideOrderWithPharmacyDataResponse {
+  google.protobuf.Struct rideOrder = 1;
+  google.protobuf.Struct pharmacyOrder = 2;
+}

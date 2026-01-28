@@ -15,7 +15,7 @@ import uploadRoutes from "./upload.routes.js"
 import testimonialRoutes from './hospitalRoutes/testimonial.routes.js'
 
 import categoryRoutes from './pharmacyRoutes/category.routes.js'
-import orderRoutes from './pharmacyRoutes/order.routes.js'
+import orderRoutes from './pharmacyRoutes/order.route.js'
 import productRoutes from './pharmacyRoutes/product.routes.js'
 import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
 
@@ -40,7 +40,6 @@ router.use('/ms/categories', categoryRoutes);
 router.use('/ms/orders', orderRoutes);
 router.use('/ms/products', productRoutes);
 router.use('/ms/product-variants', productVariantRoutes)
-
 
 router.use("/upload", uploadRoutes)
 export default router;

@@ -41,8 +41,6 @@ const router = express.Router();
  *                         properties:
  *                           _id:
  *                             type: string
- *                           businessId:
- *                             type: string
  *                           name:
  *                             type: string
  *                             example: OTC Items

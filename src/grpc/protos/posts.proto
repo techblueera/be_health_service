@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package posts;
+
+import "google/protobuf/timestamp.proto";
+
+// Post types enum
+enum PostType {
+  MESSAGE_POST = 0;
+  POLL_POST = 1;
+  PHOTO_POST = 2;
+}
+
+// Media aspect ratio enum
+enum MediaAspectRatio {
+  SQUARE = 0;
+  PORTRAIT = 1;
+}
+
+// Post via enum
+enum PostVia {
+  PROFILE = 0;
+  CHANNEL = 1;
+}
+
+// Song message
+message Song {
+  string id = 1;
+  string name = 2;
+  string artist = 3;
+  string cover_url = 4;
+  string external_url = 5;
+  int32 duration = 6;
+}
+
+// Location metadata
+message LocationMetadata {
+  double lat = 1;
+  double long = 2;
+  string state = 3;
+  string distance = 4;
+  string name = 5;
+}
+
+// Poll option
+message PollOption {
+  string text = 1;
+  repeated string votes = 2; // User IDs who voted
+  bool is_correct = 3;
+}
+
+// Poll message
+message Poll {
+  string question = 1;
+  repeated PollOption options = 2;
+}
+
+// Post message
+message Post {
+  string id = 1;
+  PostType type = 2;
+  int32 visibility_duration = 3;
+  Song song = 4;
+  string message = 5;
+  string title = 6;
+  string sub_title = 7;
+  string nature_of_post = 8;
+  string location = 9;
+  double latitude = 10;
+  double longitude = 11;
+  LocationMetadata location_metadata = 12;
+  repeated string tagged_users = 13;
+  repeated string media = 14;
+  repeated string media_types = 31; // New field for media content types
+  MediaAspectRatio media_aspect_ratio = 15;
+  PostVia post_via = 16;
+  string reference_link = 17;
+  string author_id = 18;
+  string created_by = 19;
+  string updated_by = 20;
+  Poll poll = 21;
+  int32 comments_count = 22;
+  int32 likes_count = 23;
+  int32 repost_count = 24;
+  int32 views_count = 25;
+  int32 shares_count = 26;
+  google.protobuf.Timestamp created_at = 27;
+  google.protobuf.Timestamp updated_at = 28;
+  bool is_reposted = 29;
+  Post children_post = 30;
+  string thumbnail = 32;
+  int32 duration = 33;
+}
+
+// Request to get posts
+message GetPostsRequest {
+  repeated string post_ids = 1;
+  string cursor = 2; // Timestamp cursor for pagination
+  int32 limit = 3;
+  string author_id = 4;
+  PostType type = 5;
+}
+
+// Response containing posts
+message GetPostsResponse {
+  repeated Post posts = 1;
+  int32 total = 2;
+  string next_cursor = 3;
+  bool has_more = 4;
+}
+
+// Request to get recent posts
+message GetRecentPostsRequest {
+  string cursor = 1;
+  int32 limit = 2;
+  repeated PostType types = 3;
+}
+
+// Request to get posts count by user id
+message GetPostsCountByUserIdRequest {
+  string user_id = 1;
+}
+
+// Response containing posts count
+message GetPostsCountByUserIdResponse {
+  int32 count = 1;
+}
+
+// Request to check which posts are liked by a user
+message CheckPostLikesRequest {
+  string user_id = 1;
+  repeated string post_ids = 2;
+}
+
+// Response for post likes check
+message CheckPostLikesResponse {
+  map<string, bool> liked_posts = 1;
+}
+
+// Request to get video posts
+message GetVideoPostsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+// Response containing video posts
+message GetVideoPostsResponse {
+  repeated Post posts = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  int32 total_pages = 5;
+}
+
+// Posts service
+service PostsService {
+  rpc GetPosts(GetPostsRequest) returns (GetPostsResponse);
+  rpc GetRecentPosts(GetRecentPostsRequest) returns (GetPostsResponse);
+  rpc GetPostsCountByUserId(GetPostsCountByUserIdRequest) returns (GetPostsCountByUserIdResponse);
+  rpc CheckPostLikes(CheckPostLikesRequest) returns (CheckPostLikesResponse);
+  rpc GetVideoPosts(GetVideoPostsRequest) returns (GetVideoPostsResponse);
+}

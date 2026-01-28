@@ -1,0 +1,146 @@
+// business.proto
+// This file defines the gRPC messages and services for the Business microservice.
+
+syntax = "proto3";
+
+package business;
+
+service BusinessService {
+  rpc GetAllBusinesses (GetAllBusinessesRequest) returns (GetAllBusinessesResponse);
+  rpc GetBusinessById (GetBusinessByIdRequest) returns (GetBusinessByIdResponse);
+  rpc GetBusinessByUserId (GetBusinessByUserIdRequest) returns (GetBusinessByUserIdResponse);
+  rpc GetBusinessesByLocation (GetBusinessesByLocationRequest) returns (GetAllBusinessesResponse);
+}
+
+// --- Messages ---
+
+message Date {
+  int32 date = 1;
+  int32 month = 2;
+  int32 year = 3;
+}
+
+message PhoneNumber {
+  int32 pre = 1;
+  string number = 2;
+}
+
+message OwnerDetails {
+  string name = 1;
+  string role_in_business = 2;
+  string email = 3;
+}
+
+message GstDetails {
+  bool have = 1;
+  string number = 2;
+  bool gst_verification = 3;
+}
+
+message Location {
+  double lat = 1;
+  double lon = 2;
+}
+
+// Message for Category object
+message Category {
+    string id = 1;
+    string name = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string deleted_at = 5;
+    string created_by = 6;
+    string updated_by = 7;
+    bool active = 8;
+    string image_url = 9;
+}
+
+// Message for SubCategory object
+message SubCategory {
+    string id = 1;
+    string name = 2;
+    string created_at = 3;
+    string updated_at = 4;
+    string deleted_at = 5;
+    string created_by = 6;
+    string updated_by = 7;
+    string category_id = 8;
+    bool active = 9;
+}
+
+// Message for a single Rating
+message Rating {
+    string id = 1;
+    string user_id = 2;
+    string user_name = 3;
+    string user_profile_image = 4;
+    int32 rating = 5;
+    string comment = 6;
+    string created_at = 7;
+    string formatted_created_at = 8;
+}
+
+// The core Business message, now including a list of ratings
+message Business {
+  string id = 1;
+  string user_id = 2;
+  string business_name = 3;
+  Date date_of_incorporation = 4;
+  string type_of_business = 5;
+  string logo = 6;
+  Category category_of_business = 7;
+  SubCategory sub_category_of_business = 8;
+  string business_description = 9;
+  BusinessNumber business_number = 10;
+  string Nature_of_Business = 11;
+  string city_state_pincode = 12;
+  string address = 13;
+  repeated OwnerDetails owner_details = 14;
+  GstDetails gst = 15;
+  bool isActive = 16;
+  bool business_isVerified = 17;
+  Location business_location = 18;
+  repeated string live_photos = 19;
+  string website_url = 20;
+  string created_at = 21;
+  string updated_at = 22;
+  double avg_rating = 23;
+  int64 total_ratings = 24;
+  repeated Rating ratings = 25; // New field for detailed ratings
+}
+
+// --- Request & Response Messages ---
+
+message BusinessNumber {
+  PhoneNumber office_mob_no = 1;
+  PhoneNumber office_landline_no = 2;
+}
+
+message GetAllBusinessesRequest {}
+
+message GetAllBusinessesResponse {
+  repeated Business businesses = 1;
+}
+
+message GetBusinessByIdRequest {
+  string business_id = 1;
+}
+
+message GetBusinessByIdResponse {
+  Business business = 1;
+}
+
+message GetBusinessByUserIdRequest {
+  string user_id = 1;
+}
+
+message GetBusinessByUserIdResponse {
+  Business business = 1;
+}
+
+message GetBusinessesByLocationRequest {
+  double lat = 1;
+  double long = 2;
+  int32 noOfEntries = 3;
+  double radius = 4;
+}

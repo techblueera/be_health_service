@@ -1,6 +1,4 @@
-import { Product } from "../../models/pharmacyModels/product.model.js";
-import { ProductVariant } from "../../models/pharmacyModels/productVariant.model.js";
-
+import { Product, ProductVariant } from "../../models/pharmacyModels/index.js";
 
 // ==================== GET ALL PRODUCTS ====================
 // Screen: "Business Chats" - Display product grid
@@ -28,24 +26,39 @@ export const getProducts = async (req, res) => {
       products.map(async (product) => {
         const variants = await ProductVariant.find({ 
           productId: product._id,
-          businessId 
+          businessId
         });
         
         // Get price range from variants
         let priceInfo = {};
         if (variants.length > 0) {
-          const prices = variants.map(v => v.sellingPrice);
-          const mrps = variants.map(v => v.mrp);
-          const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-          const minMrp = Math.min(...mrps);
-          
-          priceInfo = {
-            displayPrice: minPrice,
-            priceRange: minPrice !== maxPrice ? `₹${minPrice} - ₹${maxPrice}` : `₹${minPrice}`,
-            mrp: minMrp,
-            variantCount: variants.length
-          };
+          const allPrices = [];
+          const allMrps = [];
+          variants.forEach(variant => {
+            if (variant.inventories) {
+              variant.inventories.forEach(inventory => {
+                if (inventory.batches) {
+                  inventory.batches.forEach(batch => {
+                    allPrices.push(batch.sellingPrice);
+                    allMrps.push(batch.mrp);
+                  });
+                }
+              });
+            }
+          });
+
+          if (allPrices.length > 0) {
+            const minPrice = Math.min(...allPrices);
+            const maxPrice = Math.max(...allPrices);
+            const minMrp = Math.min(...allMrps);
+            
+            priceInfo = {
+              displayPrice: minPrice,
+              priceRange: minPrice !== maxPrice ? `₹${minPrice} - ₹${maxPrice}` : `₹${minPrice}`,
+              mrp: minMrp,
+              variantCount: variants.length
+            };
+          }
         }
         
         return {
@@ -105,10 +118,10 @@ export const getProduct = async (req, res) => {
 export const createProduct = async (req, res) => {
   try {
     const businessId = req.user._id;
-    const { 
-      categoryId, 
-      name, 
-      description, 
+    const {
+      categoryId,
+      name,
+      description,
       image,
       variant
     } = req.body;
@@ -127,10 +140,28 @@ export const createProduct = async (req, res) => {
       });
     }
     
-    if (!variant || !variant.weight || !variant.mrp || !variant.sellingPrice) {
+    // Validate the incoming variant structure
+    // Expecting variant to have weight, and an inventories array with at least one item
+    if (!variant || !variant.weight || !Array.isArray(variant.inventories) || variant.inventories.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "At least one variant is required with weight, MRP, and selling price",
+        message: "At least one product variant is required with weight and an inventories array.",
+      });
+    }
+
+    // Further validation for the first inventory item for simplicity, similar to original logic
+    const firstInventory = variant.inventories[0];
+    if (!firstInventory || !firstInventory.pincode || !firstInventory.cityName || !Array.isArray(firstInventory.batches) || firstInventory.batches.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Variant's inventory must have pincode, cityName, and at least one batch.",
+      });
+    }
+    const firstBatch = firstInventory.batches[0];
+    if (!firstBatch || typeof firstBatch.mrp === 'undefined' || typeof firstBatch.sellingPrice === 'undefined') {
+      return res.status(400).json({
+        success: false,
+        message: "Variant's inventory batch must have MRP and selling price.",
       });
     }
     
@@ -146,9 +177,8 @@ export const createProduct = async (req, res) => {
       businessId,
       productId: product._id,
       weight: variant.weight,
-      quantity: variant.quantity,
-      mrp: variant.mrp,
-      sellingPrice: variant.sellingPrice
+      images: variant.images || [],
+      inventories: variant.inventories
     });
     
     res.status(201).json({
@@ -156,13 +186,14 @@ export const createProduct = async (req, res) => {
       message: "Product created successfully with variant.",
       data: product
     });
-  } catch (error) {
+  }
+  catch(error) {
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
-};
+}
 
 // ==================== UPDATE PRODUCT ====================
 // Screen: "Business Chats" - Edit product

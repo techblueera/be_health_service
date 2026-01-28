@@ -22,7 +22,7 @@ export const validate = (schema) => (req, res, next) => {
     .catch((err) => {
       res.status(400).json({
         message: "Validation error",
-        details: err.details?.map(d => d.message) || err.message,
+        details: err.details?.map((d) => d.message) || err.message,
       });
     });
 };

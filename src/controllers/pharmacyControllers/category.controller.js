@@ -1,15 +1,13 @@
-import { Category } from "../../models/pharmacyModels/category.model.js";
+import { Category } from "../../models/pharmacyModels/index.js";
 import { seedCategories } from "../../seeders/pharmacySeeder.js";
 
 // ==================== GET ALL CATEGORIES ====================
 // Screen: "My Store" - Display categories in sidebar
 export const getCategories = async (req, res) => {
   try {
-    const businessId = req.user._id;
+    await seedCategories();
 
-    await seedCategories(businessId);
-
-    const categories = await Category.find({ businessId });
+    const categories = await Category.find({});
 
     res.status(200).json({
       success: true,
@@ -28,11 +26,9 @@ export const getCategories = async (req, res) => {
 // Screen: "Add Details" - Create new category
 export const createCategory = async (req, res) => {
   try {
-    const businessId = req.user._id;
     const { name, icon } = req.body;
 
     const category = await Category.create({
-      businessId,
       name,
       icon,
     });
@@ -54,12 +50,11 @@ export const createCategory = async (req, res) => {
 // Screen: "Add Details" - Edit category
 export const updateCategory = async (req, res) => {
   try {
-    const businessId = req.user._id;
     const { categoryId } = req.params;
     const { name, icon } = req.body;
 
     const category = await Category.findOneAndUpdate(
-      { _id: categoryId, businessId },
+      { _id: categoryId },
       { name, icon },
       { new: true }
     );
@@ -88,12 +83,10 @@ export const updateCategory = async (req, res) => {
 // Screen: "Add Details" - Delete category
 export const deleteCategory = async (req, res) => {
   try {
-    const businessId = req.user._id;
     const { categoryId } = req.params;
 
     const category = await Category.findOneAndDelete({
       _id: categoryId,
-      businessId,
     });
 
     if (!category) {

@@ -1,4 +1,5 @@
-import { ProductVariant } from "../../models/pharmacyModels/productVariant.model.js";
+import { ProductVariant } from "../../models/pharmacyModels/index.js";
+import mongoose from "mongoose";
 
 // ==================== GET ALL VARIANTS ====================
 // Screen: "All Variant" modal - Display all variants of a product
@@ -8,8 +9,8 @@ export const getProductVariants = async (req, res) => {
     const { productId } = req.params;
 
     const variants = await ProductVariant.find({
-      businessId,
-      productId,
+      businessId: businessId,
+      productId: new mongoose.Types.ObjectId(productId),
     });
 
     res.status(200).json({
@@ -62,15 +63,14 @@ export const getProductVariant = async (req, res) => {
 export const createProductVariant = async (req, res) => {
   try {
     const businessId = req.user._id;
-    const { productId, weight, quantity, mrp, sellingPrice } = req.body;
+    const { productId, weight, images, inventories } = req.body;
 
     const variant = await ProductVariant.create({
       businessId,
       productId,
       weight,
-      quantity,
-      mrp,
-      sellingPrice,
+      images,
+      inventories,
     });
 
     res.status(201).json({
@@ -92,11 +92,11 @@ export const updateProductVariant = async (req, res) => {
   try {
     const businessId = req.user._id;
     const { variantId } = req.params;
-    const { weight, quantity, mrp, sellingPrice } = req.body;
+    const { weight, images } = req.body;
 
     const variant = await ProductVariant.findOneAndUpdate(
       { _id: variantId, businessId },
-      { weight, quantity, mrp, sellingPrice },
+      { weight, images },
       { new: true }
     );
 

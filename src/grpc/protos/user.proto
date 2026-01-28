@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+package user;
+
+// Service definition for user-related operations.
+service UserService {
+  // Retrieves a user by their unique ID.
+  rpc GetUserById(GetUserByIdRequest) returns (User);
+
+  // Retrieves a list of users by their unique IDs.
+  rpc GetUsersByIds(GetUsersByIdsRequest) returns (GetUsersResponse);
+
+  // Retrieves a list of all unique professions from the user database.
+  rpc GetAllProfessions(GetAllProfessionsRequest) returns (GetAllProfessionsResponse);
+
+  // Retrieves a list of all unique professions for a specific location.
+  rpc GetProfessionsByLocation(GetProfessionsByLocationRequest) returns (GetProfessionsByLocationResponse);
+
+  // Retrieves a list of users matching a specific profession.
+  rpc GetUsersByProfession(GetUsersByProfessionRequest) returns (GetUsersResponse);
+
+  // Retrieves a list of users matching a profession, filtered by location.
+  rpc GetUsersByProfessionAndLocation(GetUsersByProfessionAndLocationRequest) returns (GetUsersResponse);
+
+  // --- NEW METHOD ---
+  rpc GetUsersByContacts(GetUsersByContactsRequest) returns (GetUsersByContactsResponse);
+
+  // --- NEW METHOD ---
+  rpc HandleListOfUserId(HandleListOfUserIdRequest) returns (HandleListOfUserIdResponse);
+
+  // Retrieves user information by ID list (matches RabbitMQ RPC GET_USER_INFORMATION_BY_ID_LIST)
+  rpc GetUserInfoByIdList(GetUserInfoByIdListRequest) returns (GetUserInfoByIdListResponse);
+
+  rpc CheckFollowingStatus(CheckFollowingStatusRequest) returns (CheckFollowingStatusResponse);
+}
+
+// The core User message, now including all fields from the Mongoose schema.
+message User {
+  string id = 1; // Corresponds to MongoDB's _id
+  string name = 2;
+  string gender = 3;
+  string pre = 4; // Prefix like Mr., Ms., Dr.
+  string contact_no = 5;
+  string profession = 6;
+  string designation = 7;
+  string profile_image = 8;
+  bool is_ended = 9;
+  string username = 10;
+  Date date_of_birth = 11;
+  string deleted_at = 12; // ISO 8601 timestamp string
+  string account_type = 13; // "INDIVIDUAL", "BUSINESS", "BLUEFLY", "GUEST"
+  string language = 14;
+  int32 referral_points = 15;
+  string referral_code = 16;
+  string referred_by = 17; // The string representation of the User's ObjectId
+  string device_token = 18;
+  string last_seen = 19; // ISO 8601 timestamp string
+  string location = 20;
+  string email = 21;
+  string highest_education = 22;
+  string role = 23;
+  string password = 24; // Note: Sending passwords should be handled with care.
+  string current_organisation = 25;
+  string bio = 26;
+  string address = 27;
+  string introVideo = 28;
+  SocialLinks social_links = 29;
+  string created_at = 30; // ISO 8601 timestamp string
+  string updated_at = 31; // ISO 8601 timestamp string
+  string specialization = 32;
+  string department = 33;
+  string sub_division = 34;
+  Art art = 35;
+  string school_or_college_name = 36;
+  string sector = 37;
+  string qr_url = 38;
+  UserLocation user_location = 39;
+  repeated string skills = 40;
+  bool email_verified = 41;
+  string objective = 42;
+  repeated Project projects = 43;
+  repeated Experience experiences = 44;
+}
+
+// ================== CATEGORY AND SUB-CATEGORY ==================
+
+// Represents a business category with its ID and name.
+message CategoryInfo {
+  string id = 1;
+  string name = 2;
+}
+
+// Represents a business sub-category with its ID and name.
+message SubCategoryInfo {
+  string id = 1;
+  string name = 2;
+}
+
+
+// ================== BUSINESS ==================
+message Business {
+  string id = 1;
+  string user_id = 2;
+  string business_name = 3;
+  Date date_of_incorporation = 4;
+  string type_of_business = 5;
+  string logo = 6;
+  CategoryInfo category_of_business = 7;      // UPDATED: Changed from string category_id
+  string category_other = 8;
+  SubCategoryInfo sub_category_of_business = 9; // UPDATED: Changed from string sub_category_id
+  string sub_category_other = 10;
+  string size_of_business = 11;
+  string specification = 12;
+  string number_of_employees = 13;
+  string business_description = 14;
+  BusinessNumbers business_number = 15;
+  string nature_of_business = 16;
+  string city_state_pincode = 17;
+  int32 pincode = 18;
+  string address = 19;
+  repeated OwnerDetails owner_details = 20;
+  Gst gst = 21;
+  bool is_active = 22;
+  bool business_isVerified = 23;
+  UserLocation business_location = 24;
+  repeated string live_photos = 25;
+  string website_url = 26;
+  string created_at = 27;
+  string updated_at = 28;
+}
+
+message BusinessNumbers {
+  OfficeMobile office_mob_no = 1;
+  OfficeLandline office_landline_no = 2;
+}
+
+message OfficeMobile {
+  int32 pre = 1;
+  int64 number = 2;
+}
+
+message OfficeLandline {
+  int32 pre = 1;
+  int64 number = 2;
+}
+
+message OwnerDetails {
+  string name = 1;
+  string role_in_business = 2;
+  string email = 3;
+}
+
+message Gst {
+  bool have = 1;
+  string number = 2;
+  bool gst_verification = 3;
+}
+
+// Message for representing a date without time.
+message Date {
+  int32 date = 1;
+  int32 month = 2;
+  int32 year = 3;
+}
+
+// Message for social media links.
+message SocialLinks {
+  string youtube = 1;
+  string twitter = 2;
+  string linkedin = 3;
+  string instagram = 4;
+  string website = 5;
+}
+
+// Message for art details.
+message Art {
+    string art_name = 1;
+    string art_type = 2;
+}
+
+// Message for geographic location.
+message UserLocation {
+    double lat = 1;
+    double lon = 2;
+}
+
+// Message for user projects.
+message Project {
+    string title = 1;
+    string description = 2;
+}
+
+// Message for user work experience.
+message Experience {
+    string company_name = 1;
+    string roles_and_responsibility = 2;
+}
+
+
+// == Service Request and Response Messages ==
+
+// Request for GetUserById.
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+// Request for GetUsersByIds.
+message GetUsersByIdsRequest {
+  repeated string ids = 1;
+}
+
+// Request for GetAllProfessions - can be empty.
+message GetAllProfessionsRequest {}
+
+// Response for GetAllProfessions.
+message GetAllProfessionsResponse {
+  repeated string professions = 1;
+}
+
+// Request for GetProfessionsByLocation.
+message GetProfessionsByLocationRequest {
+  string location = 1;
+}
+
+// Response for GetProfessionsByLocation.
+message GetProfessionsByLocationResponse {
+  repeated string professions = 1;
+}
+
+// Request for GetUsersByProfession.
+message GetUsersByProfessionRequest {
+  string profession = 1;
+}
+
+// Request for GetUsersByProfessionAndLocation.
+message GetUsersByProfessionAndLocationRequest {
+  string profession = 1;
+  string location = 2;
+}
+
+// A generic response that returns a list of users.
+message GetUsersResponse {
+  repeated User users = 1;
+}
+
+// Responses
+message GetUserResponse {
+  User user = 1;
+  Business business = 2; // optional (null if not BUSINESS type)
+}
+
+message GetUsersWithBusinessResponse  {
+  repeated UserWithBusiness users = 1;
+}
+
+message UserWithBusiness {
+  User user = 1;
+  Business business = 2; // optional
+}
+message GetUsersByContactsRequest {
+  repeated string contact_no = 1;
+}
+
+
+// Response for GetUsersByContacts
+message GetUsersByContactsResponse {
+  repeated UserWithBusiness users = 1;
+}
+
+
+
+message ListOfUserBusinessResponse {
+  repeated UserBusinessResult results = 1;
+}
+
+
+
+
+// Request for list of user IDs
+message HandleListOfUserIdRequest {
+  repeated string list = 1; // list of user IDs
+}
+
+// Wrapper for user + business
+message UserBusinessResult {
+  User user = 1;
+  Business business = 2;
+}
+
+// Response containing list of results
+message HandleListOfUserIdResponse {
+  repeated UserBusinessResult results = 1;
+}
+
+// Request for GetUserInfoByIdList.
+message GetUserInfoByIdListRequest {
+  repeated string ids = 1;
+}
+
+// Response for GetUserInfoByIdList - matches RabbitMQ RPC format.
+message GetUserInfoByIdListResponse {
+  repeated UserInfoWithBusiness users = 1;
+}
+
+// Message for user information with business data - matches RabbitMQ RPC format.
+message UserInfoWithBusiness {
+  User user = 1;
+  Business business = 2;
+}
+
+message CheckFollowingStatusRequest {
+  string user_id = 1;
+  repeated string author_ids = 2;
+}
+
+message CheckFollowingStatusResponse {
+  map<string, bool> statuses = 1;
+}

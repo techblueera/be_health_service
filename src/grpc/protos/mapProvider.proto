@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package provider;
+
+service LiveLocation {
+  rpc GetLiveUserLocation(GetLiveUserLocationRequest) returns (stream LocationUpdate);
+  rpc GetUsersInRange(GetUsersInRangeRequest) returns (GetUsersInRangeResponse);
+  rpc GetUserLocation(GetLiveUserLocationRequest) returns (UserLocation);
+}
+
+message Location {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message GetLiveUserLocationRequest {
+  string user_id = 1;
+}
+
+message LocationUpdate {
+  string user_id = 1;
+  Location location = 2;
+  string timestamp = 3;
+}
+
+message GetUsersInRangeRequest {
+  Location center = 1;
+  double range_in_km = 2;
+  int32 limit = 3;
+}
+
+message UserLocation {
+  string user_id = 1;
+  Location location = 2;
+  string last_seen = 3;
+}
+
+message GetUsersInRangeResponse {
+  repeated UserLocation users = 1;
+}
