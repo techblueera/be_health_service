@@ -61,11 +61,11 @@ export const getProducts = async (req, res) => {
           }
         }
         
-        return {
-          ...product.toObject(),
-          ...priceInfo
-        };
-      })
+                  return {
+                    ...product.toObject(),
+                    ...priceInfo,
+                    variants: variants
+                  };      })
     );
     
     res.status(200).json({
