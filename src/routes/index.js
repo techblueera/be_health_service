@@ -13,11 +13,13 @@ import aiRoutes from "./hospitalRoutes/ai.routes.js";
 import authRouter from "./hospitalRoutes/auth.route.js";
 import uploadRoutes from "./upload.routes.js"
 import testimonialRoutes from './hospitalRoutes/testimonial.routes.js'
+import searchRoutes from './hospitalRoutes/search.routes.js'
 
 import categoryRoutes from './pharmacyRoutes/category.routes.js'
 import orderRoutes from './pharmacyRoutes/order.route.js'
 import productRoutes from './pharmacyRoutes/product.routes.js'
 import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
+import pharmacySearchRoutes from './pharmacyRoutes/search.routes.js'
 
 const router = express.Router();
 
@@ -35,11 +37,13 @@ router.use("/hp/facilities", facilityRoutes);
 router.use("/hp/contact", contactRoutes);
 router.use("/hp/hospital-data", aiRoutes);
 router.use('/hp/testimonials', testimonialRoutes)
+router.use("/hp/search", searchRoutes);
 
 router.use('/ms/categories', categoryRoutes);
 router.use('/ms/orders', orderRoutes);
 router.use('/ms/products', productRoutes);
 router.use('/ms/product-variants', productVariantRoutes)
+router.use('/ms/search', pharmacySearchRoutes);
 
 router.use("/upload", uploadRoutes)
 export default router;
