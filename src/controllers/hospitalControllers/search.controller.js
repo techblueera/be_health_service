@@ -1,4 +1,5 @@
-// controllers/searchController.js
+import https from 'https';
+import { getBusinessesByLocation } from '../../grpc/clients/businessClient.js';
 import Department from '../../models/hospitalModels/department.model.js';
 import Doctor from '../../models/hospitalModels/doctor.model.js';
 import Ward from '../../models/hospitalModels/ward.model.js';
@@ -168,7 +169,7 @@ export const searchAcrossModels = async (req, res) => {
       }
     }
 
-    // 8. Enrich results with hospital information
+    // 8. Enrich results with business details via gRPC
     if (totalResults > 0) {
       const allBusinessIds = new Set();
       
@@ -181,26 +182,45 @@ export const searchAcrossModels = async (req, res) => {
         });
       });
 
-      // Fetch hospital info for all businesses
-      const hospitalInfo = await Contact.find({
-        businessId: { $in: Array.from(allBusinessIds) }
+      const uniqueBusinessIds = Array.from(allBusinessIds);
+
+      // Fetch hospital contact info from MongoDB
+      const hospitalContacts = await Contact.find({
+        businessId: { $in: uniqueBusinessIds }
       }).lean();
 
-      const hospitalMap = hospitalInfo.reduce((acc, hospital) => {
+      const contactMap = hospitalContacts.reduce((acc, hospital) => {
         acc[hospital.businessId] = {
           hospitalName: hospital.hospitalName,
           address: hospital.address,
           phone: hospital.phone,
-          email: hospital.email
+          email: hospital.email,
+          website: hospital.website
         };
         return acc;
       }, {});
 
-      // Add hospital info to results
+      // Fetch business details via gRPC (raw response)
+      let businessDetailsMap = {};
+      try {
+        const businessDetails = await getBusinessByUserIds(uniqueBusinessIds);
+        // Store raw business details without mapping
+        businessDetailsMap = businessDetails.reduce((acc, business) => {
+          acc[business.id] = business; // Store entire business object as-is
+          return acc;
+        }, {});
+        console.log(`Fetched business details for ${Object.keys(businessDetailsMap).length} businesses via gRPC`);
+      } catch (grpcError) {
+        console.error('gRPC error fetching business details:', grpcError.message);
+        // Continue without gRPC data if it fails
+      }
+
+      // Add combined hospital info + raw business details to results
       Object.keys(results).forEach(modelName => {
         results[modelName].data = results[modelName].data.map(item => ({
           ...item,
-          hospitalInfo: hospitalMap[item.businessId] || null
+          hospitalInfo: contactMap[item.businessId] || null,
+          businessDetails: businessDetailsMap[item.businessId] || null // Raw gRPC response
         }));
       });
     }
