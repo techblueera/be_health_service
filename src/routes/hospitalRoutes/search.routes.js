@@ -1,7 +1,6 @@
-// routes/searchRoutes.js
+// routes/publicSearchRoutes.js
 import express from 'express';
 import { searchAcrossModels } from '../../controllers/hospitalControllers/search.controller.js';
-import { protect } from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -9,58 +8,63 @@ const router = express.Router();
  * @swagger
  * /api/hp/search:
  *   get:
- *     summary: Smart search across all hospital data
- *     description: Automatically searches across all relevant models based on the provided parameters
- *     tags: [Search]
- *     security:
- *       - bearerAuth: []
+ *     summary: Public search across all hospitals
+ *     description: Search doctors, departments, facilities across hospitals by location, fees, etc.
+ *     tags: [Public Search]
  *     parameters:
  *       - in: query
  *         name: keyword
  *         schema:
  *           type: string
- *         description: Search keyword (searches across all text fields in all models)
- *         example: ramesh
+ *         description: Search keyword
+ *         example: cardiologist
  *       - in: query
- *         name: name
+ *         name: pincode
  *         schema:
  *           type: string
- *         description: Search by name field
- *         example: Dr. Ramesh
+ *         description: Search by pincode
+ *         example: 110001
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         description: Search by city
+ *         example: Delhi
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         description: Search by state
+ *         example: Delhi
+ *       - in: query
+ *         name: businessId
+ *         schema:
+ *           type: string
+ *         description: Search within specific hospital
+ *       - in: query
+ *         name: price
+ *         schema:
+ *           type: string
+ *         description: Fee range (e.g., 500-2000)
+ *         example: 500-2000
+ *       - in: query
+ *         name: specialization
+ *         schema:
+ *           type: string
+ *         description: Doctor specialization
+ *         example: Cardiology
  *       - in: query
  *         name: type
  *         schema:
  *           type: string
- *         description: Search by type field (departments, wards, etc.)
+ *         description: Department type (OPD, IPD, Emergency)
  *         example: OPD
  *       - in: query
  *         name: isActive
  *         schema:
  *           type: boolean
- *         description: Filter by active status
+ *         description: Filter active items only
  *         example: true
- *       - in: query
- *         name: isOnLeave
- *         schema:
- *           type: boolean
- *         description: Filter doctors by leave status
- *         example: false
- *       - in: query
- *         name: isOccupied
- *         schema:
- *           type: boolean
- *         description: Filter beds by occupancy
- *         example: false
- *       - in: query
- *         name: departmentId
- *         schema:
- *           type: string
- *         description: Filter by department ID
- *       - in: query
- *         name: wardId
- *         schema:
- *           type: string
- *         description: Filter by ward ID
  *       - in: query
  *         name: page
  *         schema:
@@ -71,44 +75,10 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *           default: 10
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           default: createdAt
- *       - in: query
- *         name: sortOrder
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *           default: desc
  *     responses:
  *       200:
- *         description: Search results from all matching models
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   description: Results grouped by model name
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *                     totalResults:
- *                       type: integer
+ *         description: Search results with hospital information
  */
-router.get('/', protect, searchAcrossModels);
+router.get('/', searchAcrossModels); // NO protect middleware
 
 export default router;
