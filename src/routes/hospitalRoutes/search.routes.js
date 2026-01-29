@@ -8,63 +8,47 @@ const router = express.Router();
  * @swagger
  * /api/hp/search:
  *   get:
- *     summary: Public search across all hospitals
- *     description: Search doctors, departments, facilities across hospitals by location, fees, etc.
- *     tags: [Public Search]
+ *     summary: Universal public search for hospitals by location
+ *     description: Publicly search for doctors, departments, and other hospital data based on a pincode and an optional radius.
+ *     tags: [Hospital Search]
  *     parameters:
+ *       - in: query
+ *         name: pincode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Indian pincode to search around.
+ *         example: 110001
+ *       - in: query
+ *         name: radius
+ *         schema:
+ *           type: number
+ *           default: 10
+ *         description: The search radius in kilometers.
+ *         example: 5
  *       - in: query
  *         name: keyword
  *         schema:
  *           type: string
- *         description: Search keyword
+ *         description: A general keyword to search within the results (e.g., 'fever', 'cardiologist').
  *         example: cardiologist
- *       - in: query
- *         name: pincode
- *         schema:
- *           type: string
- *         description: Search by pincode
- *         example: 110001
- *       - in: query
- *         name: city
- *         schema:
- *           type: string
- *         description: Search by city
- *         example: Delhi
- *       - in: query
- *         name: state
- *         schema:
- *           type: string
- *         description: Search by state
- *         example: Delhi
  *       - in: query
  *         name: businessId
  *         schema:
  *           type: string
- *         description: Search within specific hospital
+ *         description: Search within a specific hospital by its ID (overrides pincode search).
  *       - in: query
  *         name: price
  *         schema:
  *           type: string
- *         description: Fee range (e.g., 500-2000)
+ *         description: Fee range for services or consultations (e.g., '500-2000').
  *         example: 500-2000
  *       - in: query
  *         name: specialization
  *         schema:
  *           type: string
- *         description: Doctor specialization
+ *         description: Filter doctors by specialization.
  *         example: Cardiology
- *       - in: query
- *         name: type
- *         schema:
- *           type: string
- *         description: Department type (OPD, IPD, Emergency)
- *         example: OPD
- *       - in: query
- *         name: isActive
- *         schema:
- *           type: boolean
- *         description: Filter active items only
- *         example: true
  *       - in: query
  *         name: page
  *         schema:
@@ -77,7 +61,11 @@ const router = express.Router();
  *           default: 10
  *     responses:
  *       200:
- *         description: Search results with hospital information
+ *         description: Search results from nearby hospitals, enriched with hospital information.
+ *       400:
+ *         description: Bad request, a pincode or businessId is required.
+ *       404:
+ *         description: No data found for the provided pincode or location.
  */
 router.get('/', searchAcrossModels); // NO protect middleware
 

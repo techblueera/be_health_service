@@ -1,4 +1,5 @@
-// controllers/searchController.js
+import https from 'https';
+import { getBusinessesByLocation } from '../../grpc/clients/businessClient.js';
 import Department from '../../models/hospitalModels/department.model.js';
 import Doctor from '../../models/hospitalModels/doctor.model.js';
 import Ward from '../../models/hospitalModels/ward.model.js';
@@ -25,9 +26,40 @@ const hospitalModels = {
   // Testimonial
 };
 
+// Helper function to get lat/long from pincode using an external API
+const getLatLongFromPincode = (pincode) => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.postalpincode.in',
+      path: `/pincode/${pincode}`,
+      method: 'GET'
+    };
+
+    const req = https.request(options, res => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsedData = JSON.parse(data);
+          if (parsedData && parsedData.length > 0 && parsedData[0].Status === 'Success' && parsedData[0].PostOffice && parsedData[0].PostOffice.length > 0) {
+            const office = parsedData[0].PostOffice[0];
+            resolve({ lat: parseFloat(office.Latitude), long: parseFloat(office.Longitude) });
+          } else {
+            reject(new Error('Invalid pincode or no data found.'));
+          }
+        } catch (e) {
+          reject(new Error('Failed to parse pincode API response.'));
+        }
+      });
+    });
+    req.on('error', error => { reject(new Error(`Pincode API request failed: ${error.message}`)); });
+    req.end();
+  });
+};
+
+
 export const searchAcrossModels = async (req, res) => {
   try {
-    // 1. Extract pagination and control parameters
     const {
       page = 1,
       limit = 10,
@@ -35,8 +67,7 @@ export const searchAcrossModels = async (req, res) => {
       sortOrder = 'desc',
       keyword = '',
       pincode = '',
-      city = '',
-      state = '',
+      radius = 10, // Default radius
       businessId = '', // Optional: search specific hospital
       ...otherFilters
     } = req.query;
@@ -45,88 +76,60 @@ export const searchAcrossModels = async (req, res) => {
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    // 2. First, find matching hospitals by location (pincode, city, state)
     let businessIds = [];
     
-    if (pincode || city || state || businessId) {
-      const locationQuery = {};
-      
-      if (businessId) {
-        // Search specific hospital
+    if (businessId) {
         businessIds = [businessId];
-      } else {
-        // Search by location
-        if (pincode) locationQuery['address'] = { $regex: pincode, $options: 'i' };
-        if (city) locationQuery['address'] = { $regex: city, $options: 'i' };
-        if (state) locationQuery['address'] = { $regex: state, $options: 'i' };
-        
-        if (Object.keys(locationQuery).length > 0) {
-          const matchingContacts = await Contact.find(locationQuery).lean();
-          businessIds = matchingContacts.map(c => c.businessId);
+    } else if (pincode) {
+        try {
+            const { lat, long } = await getLatLongFromPincode(pincode);
+            const noOfEntries = 1000; // High limit for gRPC call
+            const businessResponse = await getBusinessesByLocation(lat, long, noOfEntries, parseFloat(radius));
+            if (businessResponse && businessResponse.businesses) {
+                businessIds = businessResponse.businesses.map(b => b.id);
+            }
+        } catch (e) {
+            return res.status(404).json({ success: false, message: e.message || 'Could not fetch location data.' });
         }
-      }
+    } else {
+        return res.status(400).json({ success: false, message: "A pincode or businessId is required for the search." });
+    }
+
+    if (businessIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No hospitals found for the specified location.',
+        data: {},
+        pagination: { page: pageNum, limit: limitNum, totalPages: 0, totalResults: 0 }
+      });
     }
 
     const results = {};
     let totalResults = 0;
 
-    // 3. Search through ALL models
     for (const modelName of Object.keys(hospitalModels)) {
       const model = hospitalModels[modelName];
-      
       if (!model || !model.schema) continue;
 
-      // Build query
-      const query = {};
-      let hasSearchCriteria = false;
-
-      // 4. Filter by location if provided
-      if (businessIds.length > 0) {
-        query.businessId = { $in: businessIds };
-        hasSearchCriteria = true;
-      }
-
-      // 5. Handle keyword search (searches across multiple text fields)
+      const query = { businessId: { $in: businessIds } };
+      
       if (keyword) {
-        const modelSchemaPaths = Object.keys(model.schema.paths);
-        const textFields = modelSchemaPaths.filter(path => {
-          const schemaType = model.schema.paths[path].instance;
-          return schemaType === 'String' && path !== 'businessId';
-        });
-
+        const textFields = Object.keys(model.schema.paths).filter(path => 
+            model.schema.paths[path].instance === 'String' && path !== 'businessId');
         if (textFields.length > 0) {
-          const keywordConditions = textFields.map(field => ({
-            [field]: { $regex: keyword, $options: 'i' }
-          }));
-          
-          // Combine with existing $or or create new
-          if (query.$or) {
-            query.$and = [{ $or: query.$or }, { $or: keywordConditions }];
-            delete query.$or;
-          } else {
-            query.$or = keywordConditions;
-          }
-          hasSearchCriteria = true;
+          query.$or = textFields.map(field => ({ [field]: { $regex: keyword, $options: 'i' } }));
         }
       }
-
-      // 6. Handle specific field filters
+      
       const modelSchemaPaths = Object.keys(model.schema.paths);
       for (let [key, value] of Object.entries(otherFilters)) {
-        // Map price to fees
-        if (key === 'price') {
-          key = 'fees';
-        }
+        if (key === 'price') key = 'fees';
         
         if (modelSchemaPaths.includes(key)) {
-          hasSearchCriteria = true;
-          
           const schemaType = model.schema.paths[key].instance;
-          
           if (schemaType === 'String') {
             query[key] = { $regex: value, $options: 'i' };
           } else if (schemaType === 'Number') {
-            // Support range queries (e.g., fees=100-500)
             if (typeof value === 'string' && value.includes('-')) {
               const [min, max] = value.split('-').map(Number);
               query[key] = { $gte: min, $lte: max };
@@ -135,73 +138,37 @@ export const searchAcrossModels = async (req, res) => {
             }
           } else if (schemaType === 'Boolean') {
             query[key] = value === 'true' || value === true;
-          } else if (schemaType === 'Date') {
-            query[key] = new Date(value);
           } else {
             query[key] = value;
           }
         }
       }
 
-      // 7. Only search if we have meaningful criteria
-      if (hasSearchCriteria) {
-        try {
-          const data = await model
-            .find(query)
-            .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-            .skip(skip)
-            .limit(limitNum)
-            .lean();
-
-          const count = await model.countDocuments(query);
-
-          if (data.length > 0) {
-            results[modelName] = {
-              data,
-              count
-            };
-            totalResults += count;
-          }
-        } catch (err) {
-          console.error(`Error searching ${modelName}:`, err.message);
+      try {
+        const data = await model.find(query)
+          .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+          .skip(skip)
+          .limit(limitNum)
+          .lean();
+        const count = await model.countDocuments(query);
+        if (data.length > 0) {
+          results[modelName] = { data, count };
+          totalResults += count;
         }
+      } catch (err) {
+        console.error(`Error searching ${modelName}:`, err.message);
       }
     }
 
-    // 8. Enrich results with hospital information
     if (totalResults > 0) {
-      const allBusinessIds = new Set();
-      
-      // Collect all businessIds from results
-      Object.values(results).forEach(result => {
-        result.data.forEach(item => {
-          if (item.businessId) {
-            allBusinessIds.add(item.businessId);
-          }
-        });
-      });
-
-      // Fetch hospital info for all businesses
-      const hospitalInfo = await Contact.find({
-        businessId: { $in: Array.from(allBusinessIds) }
-      }).lean();
-
-      const hospitalMap = hospitalInfo.reduce((acc, hospital) => {
-        acc[hospital.businessId] = {
-          hospitalName: hospital.hospitalName,
-          address: hospital.address,
-          phone: hospital.phone,
-          email: hospital.email
-        };
+      const allBusinessIds = Array.from(new Set(Object.values(results).flatMap(r => r.data.map(i => i.businessId))));
+      const hospitalInfo = await Contact.find({ businessId: { $in: allBusinessIds } }).lean();
+      const hospitalMap = hospitalInfo.reduce((acc, h) => {
+        acc[h.businessId] = { hospitalName: h.hospitalName, address: h.address, phone: h.phone, email: h.email };
         return acc;
       }, {});
-
-      // Add hospital info to results
-      Object.keys(results).forEach(modelName => {
-        results[modelName].data = results[modelName].data.map(item => ({
-          ...item,
-          hospitalInfo: hospitalMap[item.businessId] || null
-        }));
+      Object.values(results).forEach(r => {
+        r.data.forEach(item => { item.hospitalInfo = hospitalMap[item.businessId] || null; });
       });
     }
 
