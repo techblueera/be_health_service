@@ -1,5 +1,5 @@
 import https from 'https';
-import { getBusinessesByLocation } from '../../grpc/clients/businessClient.js';
+import { getBusinessesByLocation,getBusinessByUserId } from '../../grpc/clients/businessClient.js';
 import Department from '../../models/hospitalModels/department.model.js';
 import Doctor from '../../models/hospitalModels/doctor.model.js';
 import Ward from '../../models/hospitalModels/ward.model.js';
@@ -203,7 +203,7 @@ export const searchAcrossModels = async (req, res) => {
       // Fetch business details via gRPC (raw response)
       let businessDetailsMap = {};
       try {
-        const businessDetails = await getBusinessByUserIds(uniqueBusinessIds);
+        const businessDetails = await getBusinessByUserId(uniqueBusinessIds);
         // Store raw business details without mapping
         businessDetailsMap = businessDetails.reduce((acc, business) => {
           acc[business.id] = business; // Store entire business object as-is
