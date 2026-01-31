@@ -22,6 +22,11 @@ import orderRoutes from './pharmacyRoutes/order.route.js'
 import productRoutes from './pharmacyRoutes/product.routes.js'
 import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
 import pharmacySearchRoutes from './pharmacyRoutes/search.routes.js'
+import pharmacyContactRoutes from './pharmacyRoutes/pharmacyContact.routes.js';
+import findNearestPharmacyRoutes from './pharmacyRoutes/findNearest.routes.js';
+import pharmacyTestimonialRoutes from './pharmacyRoutes/pharmacyTestimonial.routes.js';
+import pharmacyAboutUsRoutes from './pharmacyRoutes/pharmacyAboutUs.routes.js';
+
 
 const router = express.Router();
 
@@ -48,6 +53,10 @@ router.use('/ms/orders', orderRoutes);
 router.use('/ms/products', productRoutes);
 router.use('/ms/product-variants', productVariantRoutes)
 router.use('/ms/search', pharmacySearchRoutes);
+router.use('/ms/contact', pharmacyContactRoutes);
+router.use('/ms/nearest', findNearestPharmacyRoutes);
+router.use('/ms/testimonials', pharmacyTestimonialRoutes);
+router.use('/ms/about-us', pharmacyAboutUsRoutes);
 
 router.use("/upload", uploadRoutes)
 export default router;
