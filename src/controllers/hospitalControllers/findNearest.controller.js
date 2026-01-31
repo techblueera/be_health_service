@@ -47,9 +47,18 @@ export const findNearestHospitals = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: 'aboutus',
+          localField: 'businessId',
+          foreignField: 'businessId',
+          as: 'about'
+        }
+      },
+      {
         $addFields: {
           averageRating: { $avg: "$testimonials.rating" },
-          numberOfReviews: { $size: "$testimonials" }
+          numberOfReviews: { $size: "$testimonials" },
+          logoImage: { $arrayElemAt: ["$about.logoImage", 0] }
         }
       },
       {
@@ -67,7 +76,8 @@ export const findNearestHospitals = async (req, res) => {
             }
           },
           averageRating: 1,
-          numberOfReviews: 1
+          numberOfReviews: 1,
+          logoImage: 1
         }
       }
     ]);

@@ -47,6 +47,20 @@ const router = express.Router();
  *         management:
  *           type: string
  *           example: Managed by a team of senior doctors
+ *         logoImage:
+ *           type: string
+ *           example: https://cdn.app/logo.png
+ *         gallery:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["https://cdn.app/gallery1.jpg", "https://cdn.app/gallery2.jpg"]
+ *         hospitalImage:
+ *           type: string
+ *           example: https://cdn.app/hospital.png
+ *         coverPage:
+ *           type: string
+ *           example: https://cdn.app/cover.jpg
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -81,6 +95,16 @@ const router = express.Router();
  *               history:
  *                 type: string
  *               management:
+ *                 type: string
+ *               logoImage:
+ *                 type: string
+ *               gallery:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               hospitalImage:
+ *                 type: string
+ *               coverPage:
  *                 type: string
  *     responses:
  *       201:
@@ -136,6 +160,16 @@ router.get("/", protect, getAboutUs);
  *               history:
  *                 type: string
  *               management:
+ *                 type: string
+ *               logoImage:
+ *                 type: string
+ *               gallery:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               hospitalImage:
+ *                 type: string
+ *               coverPage:
  *                 type: string
  *     responses:
  *       200:
