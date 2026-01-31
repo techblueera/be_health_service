@@ -53,10 +53,8 @@ export const searchAcrossModels = async (req, res) => {
       const locationQuery = {};
       
       if (businessId) {
-        // Search specific hospital
         businessIds = [businessId];
       } else {
-        // Search by location
         if (pincode) locationQuery['address'] = { $regex: pincode, $options: 'i' };
         if (city) locationQuery['address'] = { $regex: city, $options: 'i' };
         if (state) locationQuery['address'] = { $regex: state, $options: 'i' };
@@ -74,10 +72,8 @@ export const searchAcrossModels = async (req, res) => {
     // 3. Search through ALL models
     for (const modelName of Object.keys(hospitalModels)) {
       const model = hospitalModels[modelName];
-      
       if (!model || !model.schema) continue;
 
-      // Build query
       const query = {};
       let hasSearchCriteria = false;
 
@@ -87,7 +83,7 @@ export const searchAcrossModels = async (req, res) => {
         hasSearchCriteria = true;
       }
 
-      // 5. Handle keyword search (searches across multiple text fields)
+      // 5. Handle keyword search
       if (keyword) {
         const modelSchemaPaths = Object.keys(model.schema.paths);
         const textFields = modelSchemaPaths.filter(path => {
@@ -100,7 +96,6 @@ export const searchAcrossModels = async (req, res) => {
             [field]: { $regex: keyword, $options: 'i' }
           }));
           
-          // Combine with existing $or or create new
           if (query.$or) {
             query.$and = [{ $or: query.$or }, { $or: keywordConditions }];
             delete query.$or;
@@ -114,20 +109,15 @@ export const searchAcrossModels = async (req, res) => {
       // 6. Handle specific field filters
       const modelSchemaPaths = Object.keys(model.schema.paths);
       for (let [key, value] of Object.entries(otherFilters)) {
-        // Map price to fees
-        if (key === 'price') {
-          key = 'fees';
-        }
+        if (key === 'price') key = 'fees';
         
         if (modelSchemaPaths.includes(key)) {
           hasSearchCriteria = true;
-          
           const schemaType = model.schema.paths[key].instance;
           
           if (schemaType === 'String') {
             query[key] = { $regex: value, $options: 'i' };
           } else if (schemaType === 'Number') {
-            // Support range queries (e.g., fees=100-500)
             if (typeof value === 'string' && value.includes('-')) {
               const [min, max] = value.split('-').map(Number);
               query[key] = { $gte: min, $lte: max };
@@ -144,7 +134,7 @@ export const searchAcrossModels = async (req, res) => {
         }
       }
 
-      // 7. Only search if we have meaningful criteria
+      // 7. Search Execution
       if (hasSearchCriteria) {
         try {
           const data = await model
@@ -157,10 +147,7 @@ export const searchAcrossModels = async (req, res) => {
           const count = await model.countDocuments(query);
 
           if (data.length > 0) {
-            results[modelName] = {
-              data,
-              count
-            };
+            results[modelName] = { data, count };
             totalResults += count;
           }
         } catch (err) {
@@ -172,13 +159,9 @@ export const searchAcrossModels = async (req, res) => {
     // 8. Enrich results with business details via gRPC
     if (totalResults > 0) {
       const allBusinessIds = new Set();
-      
-      // Collect all businessIds from results
       Object.values(results).forEach(result => {
         result.data.forEach(item => {
-          if (item.businessId) {
-            allBusinessIds.add(item.businessId);
-          }
+          if (item.businessId) allBusinessIds.add(item.businessId);
         });
       });
 
@@ -200,27 +183,35 @@ export const searchAcrossModels = async (req, res) => {
         return acc;
       }, {});
 
-      // Fetch business details via gRPC (raw response)
+      // --- FIXED: Fetch business details via parallel gRPC calls ---
       let businessDetailsMap = {};
       try {
-        const businessDetails = await getBusinessByUserId(uniqueBusinessIds);
-        // Store raw business details without mapping
-        businessDetailsMap = businessDetails.reduce((acc, business) => {
-          acc[business.id] = business; // Store entire business object as-is
+        const businessPromises = uniqueBusinessIds.map(id => getBusinessByUserId(id));
+        
+        // Use Settled to ensure one failure doesn't break the whole search
+        const settledResults = await Promise.allSettled(businessPromises);
+        
+        businessDetailsMap = settledResults.reduce((acc, result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            const business = result.value;
+            // Map by the business ID (ensure field name matches your proto: id or business_id)
+            const bId = business.id || business.business_id;
+            if (bId) acc[bId] = business;
+          }
           return acc;
         }, {});
-        console.log(`Fetched business details for ${Object.keys(businessDetailsMap).length} businesses via gRPC`);
+
+        console.log(`Fetched business details for ${Object.keys(businessDetailsMap).length} businesses`);
       } catch (grpcError) {
         console.error('gRPC error fetching business details:', grpcError.message);
-        // Continue without gRPC data if it fails
       }
 
-      // Add combined hospital info + raw business details to results
+      // Merge combined hospital info + raw business details into results
       Object.keys(results).forEach(modelName => {
         results[modelName].data = results[modelName].data.map(item => ({
           ...item,
           hospitalInfo: contactMap[item.businessId] || null,
-          businessDetails: businessDetailsMap[item.businessId] || null // Raw gRPC response
+          businessDetails: businessDetailsMap[item.businessId] || null
         }));
       });
     }
