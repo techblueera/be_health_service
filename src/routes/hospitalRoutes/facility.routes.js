@@ -44,6 +44,9 @@ const router = express.Router();
  *         description:
  *           type: string
  *           example: Fully equipped emergency ambulances available round the clock
+ *         image:
+ *           type: string
+ *           example: https://example.com/facility-image.png
  *         isActive:
  *           type: boolean
  *           example: true
@@ -89,6 +92,8 @@ const router = express.Router();
  *                   - BloodBank
  *                   - Other
  *               description:
+ *                 type: string
+ *               image:
  *                 type: string
  *               isActive:
  *                 type: boolean
@@ -221,6 +226,8 @@ router.get('/:id', protect, getFacilityById);
  *                   - BloodBank
  *                   - Other
  *               description:
+ *                 type: string
+ *               image:
  *                 type: string
  *               isActive:
  *                 type: boolean

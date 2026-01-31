@@ -31,6 +31,7 @@
     "moment-timezone": "^0.6.0",
     "mongoose": "^8.19.3",
     "multer": "^2.0.2",
+    "node-geocoder": "^4.4.1",
     "opossum": "^9.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

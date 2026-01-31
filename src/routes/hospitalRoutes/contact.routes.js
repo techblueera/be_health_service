@@ -36,6 +36,19 @@ const router = express.Router();
  *         address:
  *           type: string
  *           example: 45 Ring Road, New Delhi
+ *         pincode:
+ *           type: string
+ *           example: "110021"
+ *         location:
+ *           type: object
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [Point]
+ *             coordinates:
+ *               type: array
+ *               items:
+ *                 type: number
  *         admissionPhone:
  *           type: string
  *           example: +91-9876543210
@@ -79,6 +92,8 @@ const router = express.Router();
  *               website:
  *                 type: string
  *               address:
+ *                 type: string
+ *               pincode:
  *                 type: string
  *               admissionPhone:
  *                 type: string
@@ -140,6 +155,8 @@ router.get('/', protect, getContact);
  *               website:
  *                 type: string
  *               address:
+ *                 type: string
+ *               pincode:
  *                 type: string
  *               admissionPhone:
  *                 type: string

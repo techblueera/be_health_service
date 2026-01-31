@@ -14,6 +14,8 @@ import authRouter from "./hospitalRoutes/auth.route.js";
 import uploadRoutes from "./upload.routes.js"
 import testimonialRoutes from './hospitalRoutes/testimonial.routes.js'
 import searchRoutes from './hospitalRoutes/search.routes.js'
+import emergencyNumberRoutes from './hospitalRoutes/emergencyNumber.routes.js';
+import findNearestRoutes from './hospitalRoutes/findNearest.routes.js';
 
 import categoryRoutes from './pharmacyRoutes/category.routes.js'
 import orderRoutes from './pharmacyRoutes/order.route.js'
@@ -38,6 +40,8 @@ router.use("/hp/contact", contactRoutes);
 router.use("/hp/hospital-data", aiRoutes);
 router.use('/hp/testimonials', testimonialRoutes)
 router.use("/hp/search", searchRoutes);
+router.use("/hp/emergency-number", emergencyNumberRoutes);
+router.use("/hp/hospitals/nearest", findNearestRoutes);
 
 router.use('/ms/categories', categoryRoutes);
 router.use('/ms/orders', orderRoutes);

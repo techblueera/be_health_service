@@ -1,12 +1,25 @@
 // controllers/hospitalControllers/contactController.js
 import Contact from '../../models/hospitalModels/contact.model.js';
+import geocoder from '../../utils/geocoder.js';
 
 // Create Contact
 export const createContact = async (req, res) => {
   try {
+    const { pincode } = req.body;
+    let location;
+
+    if (pincode) {
+      const loc = await geocoder.geocode(pincode);
+      location = {
+        type: 'Point',
+        coordinates: [loc[0].longitude, loc[0].latitude],
+      };
+    }
+
     const contact = new Contact({
       businessId: req.user._id,
-      ...req.body
+      ...req.body,
+      location,
     });
     await contact.save();
     res.status(201).json({
@@ -47,6 +60,16 @@ export const getContact = async (req, res) => {
 // Update Contact
 export const updateContact = async (req, res) => {
   try {
+    const { pincode } = req.body;
+    
+    if (pincode) {
+      const loc = await geocoder.geocode(pincode);
+      req.body.location = {
+        type: 'Point',
+        coordinates: [loc[0].longitude, loc[0].latitude],
+      };
+    }
+
     const contact = await Contact.findOneAndUpdate(
       { businessId: req.user._id },
       req.body,

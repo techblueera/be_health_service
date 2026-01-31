@@ -8,6 +8,7 @@ const facilitySchema = new Schema({
     type: String, 
     enum: ['Insurance', 'Ambulance', 'GovernmentScheme', 'BloodBank', 'Other'] 
   },
+  image: String,
   description: String,
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
