@@ -30,6 +30,12 @@ const startServer = async () => {
   // --- API Documentation ---
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+  //For Centralised Swagger
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
   // --- API Routes ---
   app.use("/api", apiRoutes);
 
