@@ -59,7 +59,7 @@ app.get("/swagger.json", (req, res) => {
   // --- Connect DB and Start Server ---
   try {
     await connectDB();
-    await seedCategories();
+    // await seedCategories();
     app.listen(PORT, () => {
       appLogger.info(`Server listening on http://localhost:${PORT}`, 'SERVER');
       appLogger.info(`API documentation available at http://localhost:${PORT}/api-docs`, 'SERVER');
