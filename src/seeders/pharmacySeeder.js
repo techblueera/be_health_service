@@ -436,21 +436,36 @@ const categories = [
 
 // Seeder function
 export async function seedCategories() {
-  const createdCategories = new Map(); // Store key -> _id mapping
+  try {
+    const createdCategories = new Map();
+    const sortedCategories = categories.sort((a, b) => a.level - b.level);
 
-  // Sort by level to ensure parents are created first
-  const sortedCategories = categories.sort((a, b) => a.level - b.level);
+    for (const cat of sortedCategories) {
+      const { parentKey, ...categoryData } = cat;
 
-  for (const cat of sortedCategories) {
-    const { parentKey, ...categoryData } = cat;
+      // If has parent, find parent's _id
+      if (parentKey && createdCategories.has(parentKey)) {
+        categoryData.parentId = createdCategories.get(parentKey);
+      }
 
-    // If has parent, find parent's _id
-    if (parentKey && createdCategories.has(parentKey)) {
-      categoryData.parentId = createdCategories.get(parentKey);
+      // Update if exists, create if not
+      const category = await Category.findOneAndUpdate(
+        { key: categoryData.key },
+        categoryData,
+        { 
+          upsert: true, 
+          new: true,
+          setDefaultsOnInsert: true 
+        }
+      );
+
+      createdCategories.set(category.key, category._id);
+      console.log(`✓ Upserted: ${category.name} (Level ${category.level})`);
     }
 
-    const category = await Category.create(categoryData);
-    createdCategories.set(category.key, category._id);
-    console.log(`Created: ${category.name} (Level ${category.level})`);
+    console.log(`\n✓ Successfully processed ${sortedCategories.length} categories`);
+  } catch (error) {
+    console.error('✗ Error seeding categories:', error.message);
+    throw error;
   }
 }
