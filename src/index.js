@@ -9,6 +9,7 @@ import { connectDB } from "./config/database.js";
 import appLogger from "./utils/appLogger.js";
 import { asciiLogger } from "./utils/asciiLogger.js";
 import apiRoutes from "./routes/index.js";
+import { seedCategories } from "./seeders/pharmacySeeder.js";
 
 const startServer = async () => {
   // Load environment variables from .env file
@@ -58,6 +59,7 @@ app.get("/swagger.json", (req, res) => {
   // --- Connect DB and Start Server ---
   try {
     await connectDB();
+    await seedCategories();
     app.listen(PORT, () => {
       appLogger.info(`Server listening on http://localhost:${PORT}`, 'SERVER');
       appLogger.info(`API documentation available at http://localhost:${PORT}/api-docs`, 'SERVER');

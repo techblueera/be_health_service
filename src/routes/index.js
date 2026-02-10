@@ -17,15 +17,20 @@ import searchRoutes from './hospitalRoutes/search.routes.js'
 import emergencyNumberRoutes from './hospitalRoutes/emergencyNumber.routes.js';
 import findNearestRoutes from './hospitalRoutes/findNearest.routes.js';
 
-import categoryRoutes from './pharmacyRoutes/category.routes.js'
-import orderRoutes from './pharmacyRoutes/order.route.js'
-import productRoutes from './pharmacyRoutes/product.routes.js'
-import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
-import pharmacySearchRoutes from './pharmacyRoutes/search.routes.js'
-import pharmacyContactRoutes from './pharmacyRoutes/pharmacyContact.routes.js';
-import findNearestPharmacyRoutes from './pharmacyRoutes/findNearest.routes.js';
-import pharmacyTestimonialRoutes from './pharmacyRoutes/pharmacyTestimonial.routes.js';
-import pharmacyAboutUsRoutes from './pharmacyRoutes/pharmacyAboutUs.routes.js';
+// import categoryRoutes from './pharmacyRoutes/category.routes.js'
+// import orderRoutes from './pharmacyRoutes/order.route.js'
+// import productRoutes from './pharmacyRoutes/product.routes.js'
+// import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
+// import pharmacySearchRoutes from './pharmacyRoutes/search.routes.js'
+// import pharmacyContactRoutes from './pharmacyRoutes/pharmacyContact.routes.js';
+// import findNearestPharmacyRoutes from './pharmacyRoutes/findNearest.routes.js';
+// import pharmacyTestimonialRoutes from './pharmacyRoutes/pharmacyTestimonial.routes.js';
+// import pharmacyAboutUsRoutes from './pharmacyRoutes/pharmacyAboutUs.routes.js';
+
+import categoryRouter from "../routes/medicalRoutes/category.route.js";
+import productRouter from "../routes/medicalRoutes/product.route.js";
+import inventoryRouter from "../routes/medicalRoutes/inventory.route.js";
+import orderRouter from "../routes/medicalRoutes/order.route.js";
 
 
 const router = express.Router();
@@ -48,15 +53,21 @@ router.use("/hp/search", searchRoutes);
 router.use("/hp/emergency-number", emergencyNumberRoutes);
 router.use("/hp/hospitals/nearest", findNearestRoutes);
 
-router.use('/ms/categories', categoryRoutes);
-router.use('/ms/orders', orderRoutes);
-router.use('/ms/products', productRoutes);
-router.use('/ms/product-variants', productVariantRoutes)
-router.use('/ms/search', pharmacySearchRoutes);
-router.use('/ms/contact', pharmacyContactRoutes);
-router.use('/ms/nearest', findNearestPharmacyRoutes);
-router.use('/ms/testimonials', pharmacyTestimonialRoutes);
-router.use('/ms/about-us', pharmacyAboutUsRoutes);
+// router.use('/ms/categories', categoryRoutes);
+// router.use('/ms/orders', orderRoutes);
+// router.use('/ms/products', productRoutes);
+// router.use('/ms/product-variants', productVariantRoutes)
+// router.use('/ms/search', pharmacySearchRoutes);
+// router.use('/ms/contact', pharmacyContactRoutes);
+// router.use('/ms/nearest', findNearestPharmacyRoutes);
+// router.use('/ms/testimonials', pharmacyTestimonialRoutes);
+// router.use('/ms/about-us', pharmacyAboutUsRoutes);
+
+
+router.use("/ms/categories", categoryRouter);
+router.use("/ms/products", productRouter);
+router.use("/ms/inventory", inventoryRouter);
+router.use("/ms/orders", orderRouter);
 
 router.use("/upload", uploadRoutes)
 export default router;

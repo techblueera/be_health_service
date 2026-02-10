@@ -1,8 +1,8 @@
-import { Schema, model } from "mongoose";
+// import { Schema, model } from "mongoose";
 
-const categorySchema = new Schema({
-  name: String, // "OTC Items", "Herbal/Ayurved"
-  icon: String
-});
+// const categorySchema = new Schema({
+//   name: String, // "OTC Items", "Herbal/Ayurved"
+//   icon: String
+// });
 
-export default model("Category", categorySchema);
+// export default model("Category", categorySchema);
