@@ -10,7 +10,9 @@ import {
     getChildrenByCategoryId,
     getChildrenByCategoryKey,
     searchCategories,
-    getBusinessCategoriesWithInventory
+    getBusinessCategoriesWithInventory,
+    getCategoriesWithImageOptions,
+    deleteImageOption
 } from '../../controllers/medicalStore/category.controller.js';
 import { protect } from '../../middlewares/auth.middleware.js';
 
@@ -55,6 +57,13 @@ const upload = multer({ storage: storage });
  *               image:
  *                 type: string
  *                 format: binary
+*                 description: Main category image.
+ *               imageOptions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Array of optional images for the category.
  *     responses:
  *       201:
  *         description: Category created successfully
@@ -65,7 +74,7 @@ const upload = multer({ storage: storage });
  *       500:
  *         description: Server error
  */
-router.post('/', upload.single('image'), createCategory);
+router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), createCategory);
 
 /**
  * @swagger
@@ -208,6 +217,39 @@ router.get('/:id', getCategoryById);
 
 /**
  * @swagger
+ * /api/categories/with-image-options:
+ *   get:
+ *     summary: Retrieve category data with image options for one or more categories.
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: query
+ *         name: categoryIds
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of category IDs.
+ *       - in: query
+ *         name: categoryKeys
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of category keys.
+ *     responses:
+ *       200:
+ *         description: A list of categories with their image options.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: No categories found for the provided IDs or keys.
+ *       500:
+ *         description: Server error
+ */
+router.get('/with-image-options', getCategoriesWithImageOptions);
+
+/**
+ * @swagger
  * /api/ms/categories/{id}/children:
  *   get:
  *     summary: Retrieve all direct child categories for a given category ID
@@ -299,6 +341,13 @@ router.get('/key/:key/children', getChildrenByCategoryKey);
  *               image:
  *                 type: string
  *                 format: binary
+ *                 description: Main category image.
+ *               imageOptions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Array of optional images for the category.
  *     responses:
  *       200:
  *         description: Category updated successfully
@@ -311,7 +360,7 @@ router.get('/key/:key/children', getChildrenByCategoryKey);
  *       500:
  *         description: Server error
  */
-router.put('/:id', upload.single('image'), updateCategory);
+router.put('/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), updateCategory);
 
 /**
  * @swagger
@@ -337,5 +386,46 @@ router.put('/:id', upload.single('image'), updateCategory);
  *         description: Server error
  */
 router.delete('/:id', deleteCategory);
+
+/**
+ * @swagger
+ * /api/categories/{id}/image-options:
+ *   delete:
+ *     summary: Delete a specific image URL from a category's optional images.
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The category ID.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               imageUrl:
+ *                 type: string
+ *                 description: The URL of the image to be deleted from imageOptions.
+ *             required:
+ *               - imageUrl
+ *     responses:
+ *       200:
+ *         description: Image option deleted successfully.
+ *       400:
+ *         description: Bad request (e.g., imageUrl missing).
+ *       401:
+ *         description: Not authorized.
+ *       404:
+ *         description: Category or image URL not found.
+ *       500:
+ *         description: Server error.
+ */
+router.delete('/:id/image-options', protect, deleteImageOption);
 
 export default router;

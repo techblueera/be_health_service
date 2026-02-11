@@ -8,8 +8,17 @@ const createCategory = async (req, res) => {
 
     try {
         let imageUrl;
-        if (req.file) {
-            imageUrl = uploadedUrl;
+        let imageOptionsUrls = [];
+
+        if (req.files && req.files.image && req.files.image.length > 0) {
+            imageUrl = await uploadToS3(req.files.image[0]);
+        }
+
+        if (req.files && req.files.imageOptions && req.files.imageOptions.length > 0) {
+            for (const file of req.files.imageOptions) {
+                const url = await uploadToS3(file);
+                imageOptionsUrls.push(url);
+            }
         }
 
         let level = 0;
@@ -29,6 +38,7 @@ const createCategory = async (req, res) => {
             level,
             isActive,
             image: imageUrl,
+            imageOptions: imageOptionsUrls,
         });
 
         await newCategory.save();
@@ -44,7 +54,7 @@ const createCategory = async (req, res) => {
 
 const getCategories = async (req, res) => {
     try {
-        const categories = await Category.find().sort({ level: 1 });
+        const categories = await Category.find().select('-imageOptions').sort({ level: 1 });
         res.status(200).json(categories);
     } catch (error) {
         logger.error('Error fetching categories', 'getCategories', error);
@@ -54,7 +64,7 @@ const getCategories = async (req, res) => {
 
 const getCategoryById = async (req, res) => {
     try {
-        const category = await Category.findById(req.params.id);
+        const category = await Category.findById(req.params.id).select('-imageOptions');
         if (!category) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -67,7 +77,7 @@ const getCategoryById = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     const { id } = req.params;
-    const { name, key, description, parentId, level, isActive } = req.body;
+    const { name, key, description, parentId, level, isActive } = req.body; // req.body.image and req.body.imageOptions might also be here
 
     try {
         const category = await Category.findById(id);
@@ -75,23 +85,111 @@ const updateCategory = async (req, res) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        let imageUrl = category.image;
-        if (req.file) {
-            const uploadedUrl = await uploadToS3(req.file);
-            // If moderation is successful and there was an old image, delete it
-            if (category.image) {
-                await deleteFromS3(category.image);
-            }
-            imageUrl = uploadedUrl;
-        }
+        let newMainImage = category.image;
+        // Make a mutable copy of imageOptionsUrls. This array will be modified.
+        let newImageOptions = category.imageOptions ? [...category.imageOptions] : [];
 
+        // Track images to delete from S3
+        let s3Deletions = [];
+
+        // --- Handle Main Image Update ---
+        if (req.files && req.files.image && req.files.image.length > 0) {
+            // Priority 1: New file uploaded for main image
+            if (newMainImage) {
+                newImageOptions.push(newMainImage); // Move old main image to options
+                logger.info(`Moved old main image (${newMainImage}) to imageOptions for category ${id}.`, 'updateCategory');
+            }
+            newMainImage = await uploadToS3(req.files.image[0]);
+            logger.info(`Updated main image for category ${id} via file upload.`, 'updateCategory');
+        } else if (req.body.image !== undefined) {
+            // Priority 2: URL provided in req.body.image (no new file uploaded for main image)
+            const requestedMainImage = req.body.image;
+
+            if (requestedMainImage === null || requestedMainImage === '') {
+                // Case 1: Clear main image
+                if (newMainImage) {
+                    s3Deletions.push(newMainImage);
+                }
+                newMainImage = null;
+                logger.info(`Cleared main image for category ${id}.`, 'updateCategory');
+            } else if (requestedMainImage !== newMainImage) {
+                // Case 2: Requested main image is different from current. Could be a swap or new external URL.
+                const optionIndex = newImageOptions.indexOf(requestedMainImage);
+
+                if (optionIndex !== -1) {
+                    // It's a swap: requestedMainImage is one of the existing options
+                    newImageOptions.splice(optionIndex, 1); // Remove from options
+                    if (newMainImage) {
+                        newImageOptions.push(newMainImage); // Add old main to options
+                        logger.info(`Moved old main image to options for category ${id}.`, 'updateCategory');
+                    }
+                    newMainImage = requestedMainImage; // Set new main
+                    logger.info(`Swapped main image with an option for category ${id}.`, 'updateCategory');
+                } else {
+                    // It's a new external URL or a URL that was previously deleted.
+                    // If the old main image was managed by us, mark it for deletion.
+                    if (newMainImage) {
+                        s3Deletions.push(newMainImage);
+                    }
+                    newMainImage = requestedMainImage;
+                    logger.info(`Set external main image for category ${id}. Old main image marked for deletion.`, 'updateCategory');
+                }
+            }
+            // If requestedMainImage is same as newMainImage, no action needed for newMainImage.
+        }
+        // If req.body.image is not provided, newMainImage retains its original value.
+
+
+        // --- Handle Optional Images Update ---
+        if (req.files && req.files.imageOptions && req.files.imageOptions.length > 0) {
+            // Priority 3: New files uploaded for optional images
+            // Mark ALL current optional images for deletion
+            for (const oldOptionUrl of newImageOptions) {
+                s3Deletions.push(oldOptionUrl);
+            }
+            newImageOptions = []; // Clear current options
+            for (const file of req.files.imageOptions) {
+                const url = await uploadToS3(file);
+                newImageOptions.push(url);
+            }
+            logger.info(`Updated all optional images for category ${id} via file upload.`, 'updateCategory');
+        } else if (req.body.imageOptions !== undefined) {
+            // Priority 4: Array of URLs provided in req.body.imageOptions (no new files uploaded)
+            const requestedImageOptions = req.body.imageOptions;
+
+            if (!Array.isArray(requestedImageOptions)) {
+                return res.status(400).json({ message: 'imageOptions must be an array of URLs.' });
+            }
+
+            // Identify options to delete from S3 (those in newImageOptions but not in requestedImageOptions)
+            for (const oldOptionUrl of newImageOptions) {
+                if (!requestedImageOptions.includes(oldOptionUrl) && oldOptionUrl !== newMainImage) {
+                    s3Deletions.push(oldOptionUrl);
+                }
+            }
+
+            // Set newImageOptions to the requested list, ensuring the newMainImage is not duplicated if it was an option.
+            newImageOptions = requestedImageOptions.filter(url => url !== newMainImage);
+            logger.info(`Updated optional images for category ${id} via URL array.`, 'updateCategory');
+        }
+        // If req.body.imageOptions is not provided and no files uploaded, newImageOptions retains its current value.
+
+        // Perform S3 deletions for all marked URLs
+        await Promise.all(s3Deletions.map(url => deleteFromS3(url).catch(err => {
+            logger.warn(`Failed to delete old S3 image: ${url}. Error: ${err.message}`, 'updateCategory');
+            // Continue even if one deletion fails
+        })));
+
+
+        // Update category document properties
         category.name = name ?? category.name;
         category.key = key ?? category.key;
         category.description = description ?? category.description;
         category.parentId = parentId ?? category.parentId;
         category.level = level ?? category.level;
         category.isActive = isActive ?? category.isActive;
-        category.image = imageUrl;
+        category.image = newMainImage;
+        category.imageOptions = newImageOptions;
 
         const updatedCategory = await category.save();
         res.status(200).json(updatedCategory);
@@ -134,7 +232,7 @@ const getNestedCategories = async (req, res) => {
     try {
         const { categoryId, categoryKey } = req.query;
 
-        const categories = await Category.find().lean();
+        const categories = await Category.find().select('-imageOptions').lean();
         const categoryMap = new Map();
 
         categories.forEach(category => {
@@ -166,7 +264,7 @@ const getNestedCategories = async (req, res) => {
         if (categoryKey) {
             const upperKey = categoryKey.toUpperCase();
             const category = categories.find(c => c.key === upperKey);
-             if (!category) {
+            if (!category) {
                 return res.status(404).json({ message: 'Category not found' });
             }
             // we need to get the category from the map to get children
@@ -189,7 +287,7 @@ const getChildrenByCategoryId = async (req, res) => {
             return res.status(404).json({ message: 'Parent category not found' });
         }
 
-        const children = await Category.find({ parentId: parentId });
+        const children = await Category.find({ parentId: parentId }).select('-imageOptions');
         res.status(200).json(children);
     } catch (error) {
         logger.error(`Error fetching children for category ${req.params.id}`, 'getChildrenByCategoryId', error);
@@ -205,7 +303,7 @@ const getChildrenByCategoryKey = async (req, res) => {
             return res.status(404).json({ message: 'Parent category not found with provided key.' });
         }
 
-        const children = await Category.find({ parentId: parentCategory._id });
+        const children = await Category.find({ parentId: parentCategory._id }).select('-imageOptions');
         res.status(200).json(children);
     } catch (error) {
         logger.error(`Error fetching children for category key ${req.params.key}`, 'getChildrenByCategoryKey', error);
@@ -233,6 +331,7 @@ const searchCategories = async (req, res) => {
 
 
 
+        projection.imageOptions = 0; // Exclude imageOptions by default for backward compatibility
         const categories = await Category.find(query, projection);
         res.status(200).json(categories);
 
@@ -329,7 +428,7 @@ const getBusinessCategoriesWithInventory = async (req, res) => {
                     updatedAt: { $first: '$rootCategory.updatedAt' }
                 }
             },
-             // 9. Reformat the output
+            // 9. Reformat the output
             {
                 $project: {
                     _id: '$_id',
@@ -356,7 +455,73 @@ const getBusinessCategoriesWithInventory = async (req, res) => {
     }
 };
 
-export { createCategory, getCategories, getCategoryById, updateCategory, deleteCategory, getNestedCategories, getChildrenByCategoryId, getChildrenByCategoryKey, searchCategories, getBusinessCategoriesWithInventory };
+const getCategoriesWithImageOptions = async (req, res) => {
+    try {
+        const { categoryIds, categoryKeys } = req.query;
+        let query = {};
+
+        if (categoryIds) {
+            const ids = categoryIds.split(',').map(id => new mongoose.Types.ObjectId(id.trim()));
+            query._id = { $in: ids };
+        }
+
+        if (categoryKeys) {
+            const keys = categoryKeys.split(',').map(key => key.trim().toUpperCase());
+            query.key = { $in: keys };
+        }
+
+        if (Object.keys(query).length === 0) {
+            return res.status(400).json({ message: 'Please provide at least one categoryId or categoryKey.' });
+        }
+
+        const categories = await Category.find(query); // Image options are included by default now
+
+        if (!categories || categories.length === 0) {
+            return res.status(404).json({ message: 'No categories found for the provided IDs or keys.' });
+        }
+
+        res.status(200).json(categories);
+    } catch (error) {
+        logger.error('Error fetching categories with image options', 'getCategoriesWithImageOptions', error);
+        res.status(500).json({ message: 'Error fetching categories with image options', error: error.message });
+    }
+};
 
 
+const deleteImageOption = async (req, res) => {
+    const { id } = req.params;
+    const { imageUrl } = req.body;
 
+    if (!imageUrl) {
+        return res.status(400).json({ message: 'Image URL to delete is required.' });
+    }
+
+    try {
+        const category = await Category.findById(id);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found.' });
+        }
+
+        const initialImageOptionsCount = category.imageOptions.length;
+        category.imageOptions = category.imageOptions.filter(url => url !== imageUrl);
+
+        if (category.imageOptions.length === initialImageOptionsCount) {
+            return res.status(404).json({ message: 'Image URL not found in category options.' });
+        }
+
+        // Attempt to delete from S3
+        await deleteFromS3(imageUrl).catch(err => {
+            logger.warn(`Failed to delete S3 image ${imageUrl} during image option removal. Error: ${err.message}`, 'deleteImageOption');
+            // Continue even if S3 deletion fails, as the URL is removed from DB.
+        });
+
+        await category.save();
+        res.status(200).json({ message: 'Image option deleted successfully.', category });
+    } catch (error) {
+        logger.error(`Error deleting image option for category ${id}`, 'deleteImageOption', error);
+        res.status(500).json({ message: 'Error deleting image option', error: error.message });
+    }
+};
+
+
+export { createCategory, deleteImageOption, getCategories, getCategoryById, updateCategory, deleteCategory, getNestedCategories, getChildrenByCategoryId, getChildrenByCategoryKey, searchCategories, getBusinessCategoriesWithInventory, getCategoriesWithImageOptions };
