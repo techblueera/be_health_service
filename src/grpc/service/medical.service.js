@@ -1,7 +1,7 @@
 import grpc from '@grpc/grpc-js';
-import Order from '../../models/pharmacyModels/order.model.js';
-import Inventory from '../../models/pharmacyModels/inventory.model.js';
-import ProductVariant from '../../models/pharmacyModels/productVariant.model.js';
+import Order from '../../models/order.model.js';
+import Inventory from '../../models/inventory.model.js';
+import ProductVariant from '../../models/productVariant.model.js';
 
 // --- Helper: Mongoose to gRPC Mapper ---
 const toGrpcObj = (doc) => {
@@ -65,7 +65,7 @@ const getInventoryDetails = async (call, callback) => {
 
         const inventories = await Inventory.find({ _id: { $in: inventoryIds } })
             .populate({
-                path: 'productVariantId',
+                path: 'productVariant',
                 populate: { path: 'product' }
             });
 
@@ -81,10 +81,10 @@ const getInventoryDetails = async (call, callback) => {
             const safeStr = val => val ? val.toString() : "";
             
             let productVariant = null;
-            if(invObj.productVariantId) {
+            if(invObj.productVariant) {
                 let product = null;
-                if(invObj.productVariantId.product) {
-                    const p = invObj.productVariantId.product;
+                if(invObj.productVariant.product) {
+                    const p = invObj.productVariant.product;
                     product = {
                         ...p,
                         id: safeStr(p._id),
@@ -95,7 +95,7 @@ const getInventoryDetails = async (call, callback) => {
                     delete product._id;
                     delete product.__v;
                 }
-                const pv = invObj.productVariantId;
+                const pv = invObj.productVariant;
                 productVariant = {
                     ...pv,
                     id: safeStr(pv._id),
@@ -115,7 +115,6 @@ const getInventoryDetails = async (call, callback) => {
                 updatedAt: invObj.updatedAt ? invObj.updatedAt.toISOString() : "",
                 productVariant: productVariant
             };
-            delete result.productVariantId;
             delete result._id;
             delete result.__v;
             return result;
@@ -192,3 +191,4 @@ export default {
     GetInventoryDetails: getInventoryDetails,
     GetProductDetailsByVariantId: getProductDetailsByVariantId,
 };
+
