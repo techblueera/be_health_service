@@ -217,7 +217,7 @@ router.get('/:id', getCategoryById);
 
 /**
  * @swagger
- * /api/categories/with-image-options:
+ * /api/ms/categories/with-image-options:
  *   get:
  *     summary: Retrieve category data with image options for one or more categories.
  *     tags: [Categories]
@@ -389,7 +389,7 @@ router.delete('/:id', deleteCategory);
 
 /**
  * @swagger
- * /api/categories/{id}/image-options:
+ * /api/ms/categories/{id}/image-options:
  *   delete:
  *     summary: Delete a specific image URL from a category's optional images.
  *     tags: [Categories]
