@@ -192,7 +192,7 @@ router.get('/search', searchCategories);
  * @swagger
  * /api/ms/categories/{id}:
  *   get:
- *     summary: Retrieve a single category by ID
+ *     summary: Retrieve a single category by ID with image options.
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -214,34 +214,6 @@ router.get('/search', searchCategories);
  *         description: Server error
  */
 router.get('/with-image-options', getCategoriesWithImageOptions);
-
-/**
- * @swagger
- * /api/ms/categories/{id}:
- *   get:
- *     summary: Retrieve a single category by ID
- *     tags: [Categories]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The category ID
- *     responses:
- *       200:
- *         description: A single category
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Category'
- *       404:
- *         description: Category not found
- *       500:
- *         description: Server error
- */
-router.get('/:id', getCategoryById);
-
 /**
  * @swagger
  * /api/ms/categories/{id}/children:
