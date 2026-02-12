@@ -65,12 +65,16 @@ const upload = multer({ storage: storage });
  *                   format: binary
  *                 description: Array of optional images for the category.
  *     responses:
- *       201:
- *         description: Category created successfully
- *       400:
- *         description: Bad request, e.g., image moderation failed
- *       409:
- *         description: Conflict, category with name or key already exists
+ *       200:
+ *         description: A list of categories with their image options.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: No categories found for the provided IDs or keys.
  *       500:
  *         description: Server error
  */
@@ -190,26 +194,32 @@ router.get('/search', searchCategories);
 
 /**
  * @swagger
- * /api/ms/categories/{id}:
+ * /api/ms/categories/with-image-options:
  *   get:
- *     summary: Retrieve a single category by ID with image options.
+ *     summary: Retrieve category data with image options for one or more categories.
  *     tags: [Categories]
  *     parameters:
- *       - in: path
- *         name: id
- *         required: true
+ *       - in: query
+ *         name: categoryIds
  *         schema:
  *           type: string
- *         description: The category ID
+ *         description: Comma-separated list of category IDs.
+ *       - in: query
+ *         name: categoryKeys
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of category keys.
  *     responses:
  *       200:
- *         description: A single category
+ *         description: A list of categories with their image options.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Category'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Category'
  *       404:
- *         description: Category not found
+ *         description: No categories found for the provided IDs or keys.
  *       500:
  *         description: Server error
  */
