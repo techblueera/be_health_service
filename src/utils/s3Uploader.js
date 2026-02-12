@@ -60,8 +60,7 @@ export const uploadToS3 = async (file, key) => {
     Bucket: process.env.AWS_S3_BUCKET_NAME_HOSPITAL_SERVICE,
     Key: uniqueKey,
     Body: file.buffer,
-    ContentType: file.mimetype,
-    ACL: "public-read" // Optional: switch to 'private' if using signed URLs or CloudFront
+    ContentType: file.mimetype
   };
   console.log(chalk.blue('[DEBUG S3] S3 PutObjectCommand parameters prepared for Bucket:', params.Bucket, 'and Key:', params.Key));
   console.log(chalk.blue('[DEBUG S3] ContentType:', params.ContentType));
@@ -171,7 +170,6 @@ export const generateUploadUrl = async (req, res) => {
       Bucket: process.env.AWS_S3_BUCKET_NAME_HOSPITAL_SERVICE,
       Key: uniqueKey,
       ContentType: fileType,
-      ACL: "public-read", // makes the final object public
     });
 
     // 30-minute window for the upload itself
