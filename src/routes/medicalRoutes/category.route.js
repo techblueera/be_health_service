@@ -213,40 +213,34 @@ router.get('/search', searchCategories);
  *       500:
  *         description: Server error
  */
-router.get('/:id', getCategoryById);
+router.get('/with-image-options', getCategoriesWithImageOptions);
 
 /**
  * @swagger
- * /api/ms/categories/with-image-options:
+ * /api/ms/categories/{id}:
  *   get:
- *     summary: Retrieve category data with image options for one or more categories.
+ *     summary: Retrieve a single category by ID
  *     tags: [Categories]
  *     parameters:
- *       - in: query
- *         name: categoryIds
+ *       - in: path
+ *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         description: Comma-separated list of category IDs.
- *       - in: query
- *         name: categoryKeys
- *         schema:
- *           type: string
- *         description: Comma-separated list of category keys.
+ *         description: The category ID
  *     responses:
  *       200:
- *         description: A list of categories with their image options.
+ *         description: A single category
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Category'
+ *               $ref: '#/components/schemas/Category'
  *       404:
- *         description: No categories found for the provided IDs or keys.
+ *         description: Category not found
  *       500:
  *         description: Server error
  */
-router.get('/with-image-options', getCategoriesWithImageOptions);
+router.get('/:id', getCategoryById);
 
 /**
  * @swagger

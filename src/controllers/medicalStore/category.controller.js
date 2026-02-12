@@ -185,7 +185,7 @@ const updateCategory = async (req, res) => {
         category.name = name ?? category.name;
         category.key = key ?? category.key;
         category.description = description ?? category.description;
-        category.parentId = parentId ?? category.parentId;
+        category.parentId = (parentId === '' ? null : parentId) ?? category.parentId;
         category.level = level ?? category.level;
         category.isActive = isActive ?? category.isActive;
         category.image = newMainImage;
