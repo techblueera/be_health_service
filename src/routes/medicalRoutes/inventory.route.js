@@ -232,7 +232,7 @@ router.delete(
 
 /**
  * @swagger
- * /api/inventory:
+ * /api/ms/inventory:
  *   post:
  *     summary: "[Business] Create inventory records for one or more product variants"
  *     tags: [Inventory]

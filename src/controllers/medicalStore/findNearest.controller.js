@@ -17,10 +17,16 @@ export const findNearestPharmacies = async (req, res) => {
     let pharmacies;
 
     const lookupStages = [
+      // Stage to convert businessId string to ObjectId for lookups
+      {
+        $addFields: {
+          convertedBusinessId: { $convert: { input: "$businessId", to: 7, onError: "$businessId", onNull: "$businessId" } } // Type 7 is ObjectId
+        }
+      },
       {
         $lookup: {
           from: "pharmacytestimonials",
-          localField: "businessId",
+          localField: "convertedBusinessId",
           foreignField: "businessId",
           as: "testimonials",
         },
@@ -28,60 +34,60 @@ export const findNearestPharmacies = async (req, res) => {
       {
         $lookup: {
           from: "pharmacyaboutus",
-          localField: "businessId",
+          localField: "convertedBusinessId",
           foreignField: "businessId",
           as: "about",
         },
       },
       // Additional lookups for other medical models
-      {
-        $lookup: {
-          from: 'categories',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'categories'
-        }
-      },
+      // {
+      //   $lookup: {
+      //     from: 'categories',
+      //     localField: 'convertedBusinessId',
+      //     foreignField: 'businessId',
+      //     as: 'categories'
+      //   }
+      // },
       {
         $lookup: {
           from: 'inventories',
-          localField: 'businessId',
+          localField: 'convertedBusinessId',
           foreignField: 'businessId',
           as: 'inventories'
         }
       },
-      {
-        $lookup: {
-          from: 'orders',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'orders'
-        }
-      },
-      {
-        $lookup: {
-          from: 'products',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'products'
-        }
-      },
-      {
-        $lookup: {
-          from: 'productvariants',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'productVariants'
-        }
-      },
-      {
-        $lookup: {
-          from: 'productvariantchangerequests',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'productVariantChangeRequests'
-        }
-      },
+      // {
+      //   $lookup: {
+      //     from: 'orders',
+      //     localField: 'convertedBusinessId',
+      //     foreignField: 'businessId',
+      //     as: 'orders'
+      //   }
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'products',
+      //     localField: 'convertedBusinessId',
+      //     foreignField: 'businessId',
+      //     as: 'products'
+      //   }
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'productvariants',
+      //     localField: 'convertedBusinessId',
+      //     foreignField: 'businessId',
+      //     as: 'productVariants'
+      //   }
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'productvariantchangerequests',
+      //     localField: 'convertedBusinessId',
+      //     foreignField: 'businessId',
+      //     as: 'productVariantChangeRequests'
+      //   }
+      // },
       {
         $addFields: {
           averageRating: { $avg: "$testimonials.rating" },
