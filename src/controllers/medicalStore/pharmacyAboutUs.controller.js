@@ -1,5 +1,5 @@
 // controllers/pharmacyControllers/pharmacyAboutUs.controller.js
-import PharmacyAboutUs from "../../models/pharmacyModels/aboutUs.model.js";
+import PharmacyAboutUs from '../../models/medicalModels/aboutUs.model.js';
 
 // Create or Update Pharmacy About Us
 export const upsertPharmacyAboutUs = async (req, res) => {

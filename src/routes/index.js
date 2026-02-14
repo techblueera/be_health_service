@@ -22,15 +22,15 @@ import findNearestRoutes from './hospitalRoutes/findNearest.routes.js';
 // import productRoutes from './pharmacyRoutes/product.routes.js'
 // import productVariantRoutes from './pharmacyRoutes/productVariant.routes.js'
 // import pharmacySearchRoutes from './pharmacyRoutes/search.routes.js'
-// import pharmacyContactRoutes from './pharmacyRoutes/pharmacyContact.routes.js';
-// import findNearestPharmacyRoutes from './pharmacyRoutes/findNearest.routes.js';
-// import pharmacyTestimonialRoutes from './pharmacyRoutes/pharmacyTestimonial.routes.js';
-// import pharmacyAboutUsRoutes from './pharmacyRoutes/pharmacyAboutUs.routes.js';
+import pharmacyContactRoutes from '../routes/medicalRoutes/pharmacyContact.routes.js';
+import pharmacyTestimonialRoutes from '../routes/medicalRoutes/pharmacyTestimonial.routes.js';
+import pharmacyAboutUsRoutes from '../routes/medicalRoutes/pharmacyAboutUs.routes.js';
 
 import categoryRouter from "../routes/medicalRoutes/category.route.js";
 import productRouter from "../routes/medicalRoutes/product.route.js";
 import inventoryRouter from "../routes/medicalRoutes/inventory.route.js";
 import orderRouter from "../routes/medicalRoutes/order.route.js";
+import findNearestPharmacyRoutes from "./medicalRoutes/findNearest.routes.js";
 
 
 const router = express.Router();
@@ -58,10 +58,10 @@ router.use("/hp/hospitals/nearest", findNearestRoutes);
 // router.use('/ms/products', productRoutes);
 // router.use('/ms/product-variants', productVariantRoutes)
 // router.use('/ms/search', pharmacySearchRoutes);
-// router.use('/ms/contact', pharmacyContactRoutes);
-// router.use('/ms/nearest', findNearestPharmacyRoutes);
-// router.use('/ms/testimonials', pharmacyTestimonialRoutes);
-// router.use('/ms/about-us', pharmacyAboutUsRoutes);
+router.use('/ms/contact', pharmacyContactRoutes);
+router.use('/ms/nearest', findNearestPharmacyRoutes);
+router.use('/ms/testimonials', pharmacyTestimonialRoutes);
+router.use('/ms/about-us', pharmacyAboutUsRoutes);
 
 
 router.use("/ms/categories", categoryRouter);

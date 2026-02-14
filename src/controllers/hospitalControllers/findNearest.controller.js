@@ -22,14 +22,14 @@ export const findNearestHospitals = async (req, res) => {
     };
 
     const hospitals = await Contact.aggregate([
-      {
-        $geoNear: {
-          near: userLocation,
-          distanceField: "distance",
-          maxDistance: radius * 1000, // convert km to meters
-          spherical: true
-        }
-      },
+      // {
+      //   $geoNear: {
+      //     near: userLocation,
+      //     distanceField: "distance",
+      //     maxDistance: radius * 1000, // convert km to meters
+      //     spherical: true
+      //   }
+      // },
       {
         $lookup: {
           from: 'facilities',

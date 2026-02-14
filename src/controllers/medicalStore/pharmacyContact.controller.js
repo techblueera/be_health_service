@@ -1,5 +1,5 @@
 // controllers/pharmacyControllers/pharmacyContact.controller.js
-import { PharmacyContact } from "../../models/pharmacyModels/index.js";
+import PharmacyContact from '../../models/medicalModels/contact.model.js';
 import geocoder from "../../utils/geocoder.js";
 
 // Create Pharmacy Contact

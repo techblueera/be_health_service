@@ -1,5 +1,5 @@
 // controllers/pharmacyControllers/findNearest.controller.js
-import { PharmacyContact } from "../../models/pharmacyModels/index.js";
+import PharmacyContact from '../../models/medicalModels/contact.model.js';
 import geocoder from "../../utils/geocoder.js";
 
 // Find nearest pharmacies
@@ -22,14 +22,14 @@ export const findNearestPharmacies = async (req, res) => {
     };
 
     const pharmacies = await PharmacyContact.aggregate([
-      {
-        $geoNear: {
-          near: userLocation,
-          distanceField: "distance",
-          maxDistance: radius * 1000, // convert km to meters
-          spherical: true,
-        },
-      },
+      // {
+      //   $geoNear: {
+      //     near: userLocation,
+      //     distanceField: "distance",
+      //     maxDistance: radius * 1000, // convert km to meters
+      //     spherical: true,
+      //   },
+      // },
       {
         $lookup: {
           from: "pharmacytestimonials",

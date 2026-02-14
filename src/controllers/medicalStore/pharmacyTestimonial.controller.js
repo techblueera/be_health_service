@@ -1,5 +1,5 @@
 // controllers/pharmacyControllers/pharmacyTestimonial.controller.js
-import { PharmacyTestimonial } from "../../models/pharmacyModels/index.js";
+import PharmacyTestimonial from "../../models/medicalModels/testimonial.model.js";
 
 // Create Testimonial
 export const createPharmacyTestimonial = async (req, res) => {
