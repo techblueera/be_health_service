@@ -7,19 +7,19 @@ export const findNearestPharmacies = async (req, res) => {
   try {
     const { pincode, radius } = req.body; // radius in kilometers
 
-    if (!pincode || !radius) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a pincode and a radius",
-      });
-    }
+    // if (!pincode || !radius) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Please provide a pincode and a radius",
+    //   });
+    // }
 
     // Geocode the user's pincode
-    const loc = await geocoder.geocode(pincode);
-    const userLocation = {
-      type: "Point",
-      coordinates: [loc[0].longitude, loc[0].latitude],
-    };
+    // const loc = await geocoder.geocode(pincode);
+    // const userLocation = {
+    //   type: "Point",
+    //   coordinates: [loc[0].longitude, loc[0].latitude],
+    // };
 
     const pharmacies = await PharmacyContact.aggregate([
       // {
