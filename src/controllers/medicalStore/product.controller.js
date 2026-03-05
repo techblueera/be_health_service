@@ -3,306 +3,137 @@ import { uploadToS3, deleteFromS3 } from '../../utils/s3Uploader.js';
 import logger from '../../utils/appLogger.js';
 import mongoose from 'mongoose';
 
-const createProductAdmin = async (req, res) => {
+/**
+ * CREATE PRODUCT (ADMIN)
+ * Uses a transaction to ensure both Product and Variants are created together.
+ * Expects images as an array of {url, altText} objects.
+ */
+ const createProductAdmin = async (req, res) => {
     const { productData, variantData } = req.body;
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    const uploadedImageUrls = [];
-
     try {
-        if (!productData || !variantData) {
-            return res.status(400).json({ message: 'productData and variantData are required.' });
+        if (!productData || !variantData || !Array.isArray(variantData)) {
+            return res.status(400).json({ message: 'productData and an array of variantData are required.' });
         }
 
-        let parsedProductData;
-        let parsedVariantData;
-        try {
-            parsedProductData = JSON.parse(productData);
-            // Expect variantData to be an array of variants
-            parsedVariantData = JSON.parse(variantData); 
-            if (!Array.isArray(parsedVariantData)) {
-                throw new Error("variantData should be an array.")
-            }
-        } catch (e) {
-            return res.status(400).json({ message: `Invalid JSON format in productData or variantData. ${e.message}` });
-        }
-
-        const category = await Category.findById(parsedProductData.category).session(session);
+        // 1. Verify Category
+        const category = await Category.findById(productData.category).session(session);
         if (!category) {
-            return res.status(404).json({ message: `Category with id ${parsedProductData.category} not found.` });
+            return res.status(404).json({ message: 'Category not found.' });
         }
 
-        // Group uploaded files by their fieldname
-        const imageFiles = {};
-        if (req.files) {
-            for (const file of req.files) {
-                if (!imageFiles[file.fieldname]) {
-                    imageFiles[file.fieldname] = [];
-                }
-                imageFiles[file.fieldname].push(file);
-            }
-        }
-
-        const processImages = async (files) => {
-            const imageUrls = [];
-            if (files && files.length > 0) {
-                for (const file of files) {
-                    const uploadedUrl = await uploadToS3(file);
-                    uploadedImageUrls.push(uploadedUrl);
-                    imageUrls.push({ url: uploadedUrl });
-                }
-            }
-            return imageUrls;
-        };
-
-        const productImages = await processImages(imageFiles['productImages']);
-
-        const newProduct = new Product({
-            ...parsedProductData,
-            images: productImages,
-        });
+        // 2. Save Product
+        const newProduct = new Product(productData);
         await newProduct.save({ session });
 
-        const newVariants = [];
-        for (let i = 0; i < parsedVariantData.length; i++) {
-            const variant = parsedVariantData[i];
-            const variantImageFiles = imageFiles[`variantImages[${i}]`] || [];
-            const variantImages = await processImages(variantImageFiles);
+        // 3. Save Variants
+        const variantPromises = variantData.map(v => {
+            return new ProductVariant({
+                ...v,
+                product: newProduct._id
+            }).save({ session });
+        });
 
-            const newVariant = new ProductVariant({
-                ...variant,
-                product: newProduct._id,
-                images: variantImages,
-            });
-            await newVariant.save({ session });
-            newVariants.push(newVariant);
-        }
+        const savedVariants = await Promise.all(variantPromises);
 
         await session.commitTransaction();
-        session.endSession();
-
-        res.status(201).json({ product: newProduct, variants: newVariants });
+        res.status(201).json({ 
+            success: true, 
+            message: 'Product and Variants created successfully',
+            data: { product: newProduct, variants: savedVariants } 
+        });
 
     } catch (error) {
         await session.abortTransaction();
+        logger.error('Create Product Transaction Failed:', error);
+        
+        const statusCode = error.code === 11000 ? 409 : 500;
+        const message = error.code === 11000 ? 'Duplicate SKU or Barcode detected.' : 'Internal Server Error';
+        
+        res.status(statusCode).json({ success: false, message, error: error.message });
+    } finally {
         session.endSession();
-
-        if (uploadedImageUrls.length > 0) {
-            logger.info('Cleaning up orphaned S3 images due to transaction failure.', 'createProductAdmin');
-            for (const url of uploadedImageUrls) {
-                await deleteFromS3(url);
-            }
-        }
-
-        logger.error('Error creating product (admin)', 'createProductAdmin', error);
-        if (error.code === 11000) {
-            return res.status(409).json({ message: 'A product or variant with the same unique fields (e.g., SKU, barcode) already exists.' });
-        }
-        res.status(500).json({ message: 'Error creating product', error: error.message });
     }
 };
 
-
-const updateProductAdmin = async (req, res) => {
+/**
+ * UPDATE PRODUCT (ADMIN)
+ * Updates product details and manages variant lifecycle (Create, Update, or Delete).
+ */
+ const updateProductAdmin = async (req, res) => {
     const { productId } = req.params;
     const { productData, variantsData } = req.body;
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    const uploadedImageUrls = [];
-    const imagesToDelete = []; // Keep track of old images to delete on success
-
     try {
         if (!mongoose.Types.ObjectId.isValid(productId)) {
-            return res.status(400).json({ message: 'Invalid product ID format.' });
-        }
-        if (!productData && !variantsData) {
-            return res.status(400).json({ message: 'At least one of productData or variantsData must be provided.' });
+            return res.status(400).json({ message: 'Invalid product ID.' });
         }
 
-        let parsedProductData = {};
-        let parsedVariantsData = [];
-        if (productData) {
-            try {
-                parsedProductData = JSON.parse(productData);
-            } catch (e) {
-                return res.status(400).json({ message: 'Invalid JSON format in productData.' });
-            }
-        }
-        if (variantsData) {
-            try {
-                parsedVariantsData = JSON.parse(variantsData);
-                 if (!Array.isArray(parsedVariantsData)) {
-                    throw new Error("variantsData should be an array.")
-                }
-            } catch (e) {
-                return res.status(400).json({ message: `Invalid JSON format in variantsData. ${e.message}` });
-            }
-        }
-
+        // 1. Update main product
         const product = await Product.findById(productId).session(session);
         if (!product) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(404).json({ message: `Product with id ${productId} not found.` });
+            return res.status(404).json({ message: 'Product not found.' });
         }
 
-        // Group uploaded files by their fieldname
-        const imageFiles = {};
-        if (req.files) {
-            for (const file of req.files) {
-                if (!imageFiles[file.fieldname]) {
-                    imageFiles[file.fieldname] = [];
-                }
-                imageFiles[file.fieldname].push(file);
-            }
-        }
-
-        const processImages = async (files) => {
-            const imageUrls = [];
-            if (files && files.length > 0) {
-                for (const file of files) {
-                    const uploadedUrl = await uploadToS3(file);
-                    uploadedImageUrls.push(uploadedUrl); // For cleanup on failure
-                    imageUrls.push({ url: uploadedUrl });
-                }
-            }
-            return imageUrls;
-        };
-
-        // --- Update Product ---
         if (productData) {
-            // Unset fields that are explicitly set to null
-            Object.keys(parsedProductData).forEach(key => {
-                if (parsedProductData[key] === null) {
-                    product.set(key, undefined);
-                    delete parsedProductData[key];
-                }
-            });
-
-            Object.assign(product, parsedProductData);
-
-            // Handle product image additions
-            const newProductImages = await processImages(imageFiles['productImages']);
-            if (newProductImages.length > 0) {
-                product.images = product.images.concat(newProductImages);
-            }
-            
-            // Handle product image removals
-            if (parsedProductData.imagesToRemove && Array.isArray(parsedProductData.imagesToRemove)) {
-                product.images = product.images.filter(img => {
-                    const shouldRemove = parsedProductData.imagesToRemove.includes(img.url);
-                    if (shouldRemove) imagesToDelete.push(img.url);
-                    return !shouldRemove;
-                });
-            }
+            Object.assign(product, productData);
+            await product.save({ session });
         }
-        await product.save({ session });
 
+        // 2. Handle Variants if provided
+        if (variantsData && Array.isArray(variantsData)) {
+            const incomingIds = variantsData.map(v => v._id).filter(id => id);
 
-        // --- Update Variants ---
-        if (variantsData) {
-            const incomingVariantIds = parsedVariantsData.map(v => v._id).filter(id => id);
-
-            // Delete variants that are not in the incoming list
+            // A. Remove variants not in the update list
             const variantsToDelete = await ProductVariant.find({ 
                 product: productId, 
-                _id: { $nin: incomingVariantIds } 
+                _id: { $nin: incomingIds } 
             }).session(session);
 
-            for (const variant of variantsToDelete) {
-                const invCount = await Inventory.countDocuments({ productVariant: variant._id }).session(session);
-                if (invCount > 0) {
-                    throw new Error(`Cannot delete variant ${variant.variantName} (${variant.sku}) as it has existing inventory.`);
+            for (const v of variantsToDelete) {
+                const hasInventory = await Inventory.countDocuments({ productVariant: v._id }).session(session);
+                if (hasInventory > 0) {
+                    throw new Error(`Variant ${v.sku} cannot be deleted because it has active inventory.`);
                 }
-                variant.images.forEach(img => imagesToDelete.push(img.url));
-                await ProductVariant.findByIdAndDelete(variant._id, { session });
+                await ProductVariant.findByIdAndDelete(v._id, { session });
             }
 
-            // Update existing and create new variants
-            for (let i = 0; i < parsedVariantsData.length; i++) {
-                const variantData = parsedVariantsData[i];
-                const variantImageFiles = imageFiles[`variantImages[${i}]`] || [];
-
-                if (variantData._id) { // Existing variant
-                    const variant = await ProductVariant.findById(variantData._id).session(session);
-                    if (!variant) throw new Error(`Variant with id ${variantData._id} not found.`);
-
-                    Object.keys(variantData).forEach(key => {
-                        if (variantData[key] === null) {
-                            variant.set(key, undefined);
-                            delete variantData[key];
-                        }
-                    });
-                    Object.assign(variant, variantData);
-
-                    const newVariantImages = await processImages(variantImageFiles);
-                    if (newVariantImages.length > 0) {
-                        variant.images = variant.images.concat(newVariantImages);
-                    }
-                    if (variantData.imagesToRemove && Array.isArray(variantData.imagesToRemove)) {
-                        variant.images = variant.images.filter(img => {
-                            const shouldRemove = variantData.imagesToRemove.includes(img.url);
-                            if (shouldRemove) imagesToDelete.push(img.url);
-                            return !shouldRemove;
-                        });
-                    }
-
-                    await variant.save({ session });
-                } else { // New variant
-                    const newVariantImages = await processImages(variantImageFiles);
-                    const newVariant = new ProductVariant({
-                        ...variantData,
-                        product: productId,
-                        images: newVariantImages,
-                    });
-                    await newVariant.save({ session });
+            // B. Update or Create variants
+            for (const vData of variantsData) {
+                if (vData._id) {
+                    // Update existing
+                    await ProductVariant.findByIdAndUpdate(vData._id, vData, { session, runValidators: true });
+                } else {
+                    // Create new
+                    await new ProductVariant({ ...vData, product: productId }).save({ session });
                 }
             }
         }
-
 
         await session.commitTransaction();
-        
-        // Cleanup old images from S3 after transaction is successful
-        if (imagesToDelete.length > 0) {
-            logger.info('Cleaning up old S3 images after successful update.', 'updateProductAdmin');
-            for (const url of imagesToDelete) {
-                await deleteFromS3(url);
-            }
-        }
-        
-        // Refetch the product to return the fully updated state
-        const updatedProduct = await Product.findById(productId);
-        const updatedVariants = await ProductVariant.find({ product: productId });
 
-        session.endSession();
+        // Fetch fresh data for response
+        const updatedProduct = await Product.findById(productId).lean();
+        const updatedVariants = await ProductVariant.find({ product: productId }).lean();
 
-        res.status(200).json({ message: 'Product updated successfully.', data: { ...updatedProduct.toObject(), variants: updatedVariants } });
+        res.status(200).json({
+            success: true,
+            message: 'Product and variants updated successfully',
+            data: { ...updatedProduct, variants: updatedVariants }
+        });
 
     } catch (error) {
         await session.abortTransaction();
+        logger.error('Update Product Transaction Failed:', error);
+        res.status(500).json({ success: false, message: error.message });
+    } finally {
         session.endSession();
-
-        if (uploadedImageUrls.length > 0) {
-            logger.info('Cleaning up newly uploaded S3 images due to transaction failure.', 'updateProductAdmin');
-            for (const url of uploadedImageUrls) {
-                await deleteFromS3(url);
-            }
-        }
-
-        logger.error(`Error updating product ${productId} (admin)`, 'updateProductAdmin', error);
-         if (error.message.includes('Cannot delete variant')) {
-            return res.status(400).json({ message: error.message });
-        }
-        if (error.code === 11000) {
-            return res.status(409).json({ message: 'A product or variant with the same unique fields (e.g., SKU, barcode) already exists.' });
-        }
-        res.status(500).json({ message: 'Error updating product', error: error.message });
     }
 };
-
 
 const searchProducts = async (req, res) => {
     try {
