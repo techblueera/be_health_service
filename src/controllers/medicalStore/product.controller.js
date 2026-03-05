@@ -984,40 +984,54 @@ const getAllProductsAdmin = async (req, res) => {
     try {
         const { page = 1, limit = 10, categoryStatus = 'all' } = req.query;
 
-        const pageNum = parseInt(page, 10);
-        const limitNum = parseInt(limit, 10);
+        const pageNum = Math.max(1, parseInt(page, 10));
+        const limitNum = Math.max(1, parseInt(limit, 10));
         const skip = (pageNum - 1) * limitNum;
 
         const query = {};
 
-        if (categoryStatus === 'valid') {
+        // Category filtering logic
+        if (categoryStatus !== 'all') {
             const validCategoryIds = await Category.find().distinct('_id');
-            query.category = { $in: validCategoryIds };
-        } else if (categoryStatus === 'invalid') {
-            const validCategoryIds = await Category.find().distinct('_id');
-            query.category = { $nin: validCategoryIds };
+            query.category = categoryStatus === 'valid' 
+                ? { $in: validCategoryIds } 
+                : { $nin: validCategoryIds };
         }
 
-        const products = await Product.find(query)
-            .populate('category', 'name') // Populate only the name of the category
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limitNum)
-            .lean(); // Use lean for better performance on read-heavy operations
+        // 1. Fetch Products and Total Count in parallel
+        const [products, total] = await Promise.all([
+            Product.find(query)
+                .populate('category', 'name')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum)
+                .lean(),
+            Product.countDocuments(query)
+        ]);
 
-        const total = await Product.countDocuments(query);
+        // 2. Fetch all variants for the products on the current page
+        const productIds = products.map(p => p._id);
+        const allVariants = await ProductVariant.find({ product: { $in: productIds } })
+            .select('product variantName unit quantity sku barcode pricing images')
+            .lean();
 
-        const processedProducts = products.map(product => {
-            if (!product.category) {
-                // If populate does not find the category, it returns null.
-                // We'll replace it with a placeholder object.
-                product.category = { name: 'Invalid Category' };
-            }
-            return product;
+        // 3. Map variants to their respective products
+        const data = products.map(product => {
+            // Filter variants belonging to this product
+            const variants = allVariants.filter(v => 
+                v.product.toString() === product._id.toString()
+            );
+
+            return {
+                ...product,
+                category: product.category || { name: 'Invalid Category' },
+                variants: variants || [] // Adding the variant data here
+            };
         });
 
         res.status(200).json({
-            data: processedProducts,
+            success: true,
+            data,
             pagination: {
                 total,
                 page: pageNum,
@@ -1027,11 +1041,10 @@ const getAllProductsAdmin = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error('Error getting all products for admin', 'getAllProductsAdmin', error);
+        console.error('Error getting all products for admin:', error);
         res.status(500).json({ message: 'Error getting products', error: error.message });
     }
 };
-
 
 const getSimilarProducts = async (req, res) => {
     try {

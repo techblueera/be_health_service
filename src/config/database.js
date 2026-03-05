@@ -7,8 +7,8 @@ export const connectDB = async () => {
     // if (!process.env.MONGO_URI_HEALTH_CARE_SERVICE) {
     //   throw new Error('MONGO_URI_HEALTH_CARE_SERVICE is not defined in environment variables.');
     // }
-    // await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE);
-    await mongoose.connect(`mongodb+srv://user:gBRn8BztnvLcMatV@healthcare-service.xhpng05.mongodb.net/?appName=HealthCare-service`);
+    await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE);
+;
     logger.info("MongoDB connected successfully.", 'DB_CONNECT');
 
     mongoose.connection.on('disconnected', () => {
