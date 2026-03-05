@@ -813,23 +813,54 @@ const searchProductsForUser = async (req, res) => {
 
 const getAllProductsAdmin = async (req, res) => {
     try {
-        const { page = 1, limit = 10, categoryStatus = 'all' } = req.query;
+        const { 
+            page = 1, 
+            limit = 10, 
+            categoryStatus = 'all', 
+            search = '', // General search string
+            categoryId   // Specific category ID search
+        } = req.query;
 
         const pageNum = Math.max(1, parseInt(page, 10));
         const limitNum = Math.max(1, parseInt(limit, 10));
         const skip = (pageNum - 1) * limitNum;
 
-        const query = {};
+        // Base query object
+        let query = {};
 
-        // Category filtering logic
-        if (categoryStatus !== 'all') {
-            const validCategoryIds = await Category.find().distinct('_id');
-            query.category = categoryStatus === 'valid' 
-                ? { $in: validCategoryIds } 
-                : { $nin: validCategoryIds };
+        // 1. Logic for Search (Name, Generic Name, Brand, or Category Key)
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            
+            // Find categories whose name matches the search string (Category Key search)
+            const matchedCategories = await Category.find({ 
+                name: searchRegex 
+            }).distinct('_id');
+
+            query.$or = [
+                { name: searchRegex },
+                { generic_name: searchRegex },
+                { brand: searchRegex },
+                { category: { $in: matchedCategories } } // Search by category key
+            ];
         }
 
-        // 1. Fetch Products and Total Count in parallel
+        // 2. Direct Category ID Filter
+        if (categoryId) {
+            query.category = categoryId;
+        }
+
+        // 3. Category Status Logic (Valid vs Invalid)
+        if (categoryStatus !== 'all') {
+            const validCategoryIds = await Category.find().distinct('_id');
+            if (categoryStatus === 'valid') {
+                query.category = { ...query.category, $in: validCategoryIds };
+            } else if (categoryStatus === 'invalid') {
+                query.category = { ...query.category, $nin: validCategoryIds };
+            }
+        }
+
+        // 4. Parallel Data Fetching
         const [products, total] = await Promise.all([
             Product.find(query)
                 .populate('category', 'name')
@@ -840,25 +871,17 @@ const getAllProductsAdmin = async (req, res) => {
             Product.countDocuments(query)
         ]);
 
-        // 2. Fetch all variants for the products on the current page
+        // 5. Variant Injection
         const productIds = products.map(p => p._id);
         const allVariants = await ProductVariant.find({ product: { $in: productIds } })
             .select('product variantName unit quantity sku barcode pricing images')
             .lean();
 
-        // 3. Map variants to their respective products
-        const data = products.map(product => {
-            // Filter variants belonging to this product
-            const variants = allVariants.filter(v => 
-                v.product.toString() === product._id.toString()
-            );
-
-            return {
-                ...product,
-                category: product.category || { name: 'Invalid Category' },
-                variants: variants || [] // Adding the variant data here
-            };
-        });
+        const data = products.map(product => ({
+            ...product,
+            category: product.category || { name: 'Invalid Category' },
+            variants: allVariants.filter(v => v.product.toString() === product._id.toString())
+        }));
 
         res.status(200).json({
             success: true,
@@ -873,7 +896,7 @@ const getAllProductsAdmin = async (req, res) => {
 
     } catch (error) {
         console.error('Error getting all products for admin:', error);
-        res.status(500).json({ message: 'Error getting products', error: error.message });
+        res.status(500).json({ success: false, message: 'Error getting products', error: error.message });
     }
 };
 

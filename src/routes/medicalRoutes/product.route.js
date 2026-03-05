@@ -413,17 +413,17 @@ router.post(
  *                 description: The full list of variants (Sync Pattern).
  *                 items:
  *                   type: object
- *                   example:
- *                     _id: "60d0fe4f5311236168a109cb"
+ *                 example:
+ *                   - _id: "60d0fe4f5311236168a109cb"
  *                     variantName: "1kg Premium Pack"
  *                     pricing:
  *                       - mrp: 160
  *                         sellingPrice: 155
- *                     - variantName: "2kg Jumbo Box"
- *                       sku: "FFA-APL-2KG"
- *                       pricing:
- *                         - mrp: 300
- *                           sellingPrice: 280
+ *                   - variantName: "2kg Jumbo Box"
+ *                     sku: "FFA-APL-2KG"
+ *                     pricing:
+ *                       - mrp: 300
+ *                         sellingPrice: 280
  *     responses:
  *       200:
  *         description: Product and variants updated successfully.
@@ -442,64 +442,64 @@ router.put(
 );
 
 
+
 /**
  * @swagger
- * /api/ms/products/admin/all:
- *   get:
- *     summary: "[Admin] Get all products with pagination"
+ * /api/ms/products/admin/{productId}:
+ *   put:
+ *     summary: "[Admin] Update a product and its variants"
+ *     description: "Updates product details and synchronizes variants. To delete a variant, omit it from the variantsData array. To add a new variant, omit the _id field."
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number for pagination.
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of results per page.
- *       - in: query
- *         name: categoryStatus
+ *       - in: path
+ *         name: productId
+ *         required: true
  *         schema:
  *           type: string
- *           enum: [all, valid, invalid]
- *           default: all
- *         description: "Filter products by category status. 'valid' for products with a valid category, 'invalid' for products with a missing or invalid category, 'all' for all products."
+ *         description: The ID of the product to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productData:
+ *                 type: object
+ *                 description: Product fields to update.
+ *                 example:
+ *                   name: "Premium Organic Apples"
+ *                   images:
+ *                     - url: "https://s3.amazonaws.com/bucket/new-apple.jpg"
+ *               variantsData:
+ *                 type: array
+ *                 description: The full list of variants (Sync Pattern).
+ *                 items:
+ *                   type: object
+ *                 example:
+ *                   - _id: "60d0fe4f5311236168a109cb"
+ *                     variantName: "1kg Premium Pack"
+ *                     pricing:
+ *                       - mrp: 160
+ *                         sellingPrice: 155
+ *                   - variantName: "2kg Jumbo Box"
+ *                     sku: "FFA-APL-2KG"
+ *                     pricing:
+ *                       - mrp: 300
+ *                         sellingPrice: 280
  *     responses:
  *       200:
- *         description: A paginated list of products with their category populated.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *       401:
- *         description: Not authorized.
- *       403:
- *         description: Forbidden.
+ *         description: Product and variants updated successfully.
+ *       400:
+ *         description: Cannot delete variant with existing inventory.
+ *       404:
+ *         description: Product not found.
  *       500:
  *         description: Internal Server Error.
  */
+
 router.get(
     '/admin/all',
     protect,
