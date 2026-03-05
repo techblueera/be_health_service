@@ -15,6 +15,10 @@ const productVariantSchema = new Schema({
         type: String,
         required: true,
     },
+    quantity: { 
+        type: String,
+        trim: true,
+    },
     sku: {
         type: String,
         trim: true,
