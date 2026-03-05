@@ -320,56 +320,62 @@ router.get('/:productId', getProductById);
  * /api/ms/products/admin:
  *   post:
  *     summary: "[Admin] Create a new product and its variants"
+ *     description: "Creates a product and multiple variants in a single transaction. Images must be uploaded to S3 first using the pre-signed URL utility."
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - productData
+ *               - variantData
  *             properties:
  *               productData:
- *                 type: string
- *                 description: A JSON string of the product object.
- *                 example: '{"name": "Organic Apples", "description": "Fresh organic apples from the farm.", "brand": "FarmFresh", "category": "60d0fe4f5311236168a109ca", "tags": ["organic", "fruit", "fresh"], "isVegetarian": true, "countryOfOrigin": "India"}'
+ *                 type: object
+ *                 description: Main product details including S3 image URLs.
+ *                 example:
+ *                   name: "Organic Apples"
+ *                   description: "Fresh organic apples from the farm."
+ *                   brand: "FarmFresh"
+ *                   category: "60d0fe4f5311236168a109ca"
+ *                   tags: ["organic", "fruit"]
+ *                   images:
+ *                     - url: "https://s3.amazonaws.com/bucket/apple-main.jpg"
+ *                       altText: "Front View"
  *               variantData:
- *                 type: string
- *                 description: A JSON string of an array of product variant objects.
- *                 example: '[{"variantName": "1kg Pack", "unit": "kg", "sku": "FFA-APL-1KG", "barcode": "9876543210123", "pricing": [{"pincode": "110001", "cityName": "Delhi", "mrp": 150, "sellingPrice": 140}], "weight": 500}, {"variantName": "500g Pack", "unit": "g", "sku": "FFA-APL-500G", "barcode": "9876543210124", "pricing": [{"pincode": "110001", "cityName": "Delhi", "mrp": 80, "sellingPrice": 75}], "weight": 250}]'
- *               productImages:
  *                 type: array
+ *                 description: Array of variants belonging to this product.
  *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Images for the main product (use fieldname 'productImages').
- *               "variantImages[n]":
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: "Images for the variant at index 'n' in the variantData array. E.g., 'variantImages[0]', 'variantImages[1]'."
+ *                   type: object
+ *                   example:
+ *                     variantName: "1kg Pack"
+ *                     unit: "kg"
+ *                     sku: "FFA-APL-1KG"
+ *                     pricing:
+ *                       - pincode: "110001"
+ *                         mrp: 150
+ *                         sellingPrice: 140
+ *                     images:
+ *                       - url: "https://s3.amazonaws.com/bucket/apple-1kg.jpg"
  *     responses:
  *       201:
  *         description: Product and variants created successfully.
  *       400:
- *         description: Bad Request - Invalid input, JSON parsing error, or image moderation failure.
- *       401:
- *         description: Not authorized.
- *       404:
- *         description: Category not found.
+ *         description: Bad Request - Missing data or invalid IDs.
  *       409:
- *         description: Conflict - A product or variant with the same unique fields (e.g., SKU) already exists.
+ *         description: Conflict - Duplicate SKU or Barcode.
  *       500:
  *         description: Internal Server Error.
  */
 router.post(
-    '/admin',
-    protect, 
-    authorizeRoles('ADMIN'),
-    upload.any(),
-    createProductAdmin
+  '/admin',
+  protect,
+  authorizeRoles('ADMIN'),
+  createProductAdmin
 );
 
 /**
@@ -377,6 +383,7 @@ router.post(
  * /api/ms/products/admin/{productId}:
  *   put:
  *     summary: "[Admin] Update a product and its variants"
+ *     description: "Updates product details and synchronizes variants. To delete a variant, omit it from the variantsData array. To add a new variant, omit the _id field."
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -390,60 +397,50 @@ router.post(
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               productData:
- *                 type: string
- *                 description: "A JSON string of the product fields to update. To remove images, include an 'imagesToRemove' array with image URLs."
- *                 example: '{"name": "Premium Organic Apples", "brand": "FarmFresh Supreme", "imagesToRemove": ["https://s3.amazonaws.com/bucket/old-image.jpg"]}'
+ *                 type: object
+ *                 description: Product fields to update.
+ *                 example:
+ *                   name: "Premium Organic Apples"
+ *                   images:
+ *                     - url: "https://s3.amazonaws.com/bucket/new-apple.jpg"
  *               variantsData:
- *                 type: string
- *                 description: "A JSON string of the COMPLETE array of product variants. To update a variant, include its '_id'. To create a new one, omit '_id'. Variants not in this array will be DELETED (if they have no inventory)."
- *                 example: '[{"_id": "60d0fe4f5311236168a109cb", "variantName": "1kg Premium Pack", "pricing": [{"mrp": 160, "sellingPrice": 155}]}, {"variantName": "2kg Box", "sku": "FFA-APL-2KG", "pricing": [{"pincode": "110001", "cityName": "Delhi", "mrp": 300, "sellingPrice": 280}]}]'
- *               productImages:
  *                 type: array
+ *                 description: The full list of variants (Sync Pattern).
  *                 items:
- *                   type: string
- *                   format: binary
- *                 description: New images to ADD to the main product. These are appended to the existing images.
- *               "variantImages[n]":
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: "New images to ADD for the variant at index 'n' in the variantsData array. These are appended to existing images for that variant."
+ *                   type: object
+ *                   example:
+ *                     _id: "60d0fe4f5311236168a109cb"
+ *                     variantName: "1kg Premium Pack"
+ *                     pricing:
+ *                       - mrp: 160
+ *                         sellingPrice: 155
+ *                     - variantName: "2kg Jumbo Box"
+ *                       sku: "FFA-APL-2KG"
+ *                       pricing:
+ *                         - mrp: 300
+ *                           sellingPrice: 280
  *     responses:
  *       200:
  *         description: Product and variants updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/ProductWithVariants'
  *       400:
- *         description: Bad Request - Invalid input, JSON parsing error, image moderation failure, or trying to delete variant with inventory.
- *       401:
- *         description: Not authorized.
+ *         description: Cannot delete variant with existing inventory.
  *       404:
- *         description: Product or a specified variant not found.
- *       409:
- *         description: Conflict - A product or variant with the same unique fields (e.g., SKU) already exists.
+ *         description: Product not found.
  *       500:
  *         description: Internal Server Error.
  */
 router.put(
-    '/admin/:productId',
-    protect,
-    authorizeRoles('ADMIN'),
-    upload.any(),
-    updateProductAdmin
+  '/admin/:productId',
+  protect,
+  authorizeRoles('ADMIN'),
+  updateProductAdmin
 );
+
 
 /**
  * @swagger
