@@ -38,7 +38,7 @@ const productSchema = new Schema({
   tags: [String],
   filterKeywords: [String],
   images: [{
-      url: { type: String, required: true },
+      url: { type: String },
       altText: { type: String }
   }],
   isActive: {
