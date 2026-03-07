@@ -860,10 +860,26 @@ const getAllProductsAdmin = async (req, res) => {
             }
         }
 
-        // 4. Parallel Data Fetching
+        // 4. Parallel Data Fetching with Recursive Category Population
+        // We nest 'populate' to get the parent chain
         const [products, total] = await Promise.all([
             Product.find(query)
-                .populate('category', 'name')
+                .populate({
+                    path: 'category',
+                    select: 'name parent',
+                    populate: {
+                        path: 'parent',
+                        select: 'name parent',
+                        populate: {
+                            path: 'parent',
+                            select: 'name parent',
+                            populate: {
+                                path: 'parent',
+                                select: 'name parent'
+                            }
+                        }
+                    }
+                })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limitNum)
@@ -877,11 +893,19 @@ const getAllProductsAdmin = async (req, res) => {
             .select('product variantName unit quantity sku barcode pricing images')
             .lean();
 
-        const data = products.map(product => ({
-            ...product,
-            category: product.category || { name: 'Invalid Category' },
-            variants: allVariants.filter(v => v.product.toString() === product._id.toString())
-        }));
+        // 6. Map variants to their respective products
+        const data = products.map(product => {
+            // Filter variants belonging to this product
+            const variants = allVariants.filter(v => 
+                v.product.toString() === product._id.toString()
+            );
+
+            return {
+                ...product,
+                category: product.category || { name: 'Invalid Category' },
+                variants: variants || []
+            };
+        });
 
         res.status(200).json({
             success: true,
