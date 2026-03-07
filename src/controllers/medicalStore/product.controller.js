@@ -820,7 +820,7 @@ const getAllProductsAdmin = async (req, res) => {
             search = '', 
             categoryId 
         } = req.query;
-
+//comment to deploy
         const pageNum = Math.max(1, parseInt(page, 10));
         const limitNum = Math.max(1, parseInt(limit, 10));
         const skip = (pageNum - 1) * limitNum;
