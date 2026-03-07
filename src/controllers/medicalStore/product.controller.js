@@ -811,46 +811,45 @@ const searchProductsForUser = async (req, res) => {
     }
 };
 
-const getAllProductsAdmin = async (req, res) => {
+export const getAllProductsAdmin = async (req, res) => {
     try {
         const { 
             page = 1, 
             limit = 10, 
             categoryStatus = 'all', 
-            search = '', // General search string
-            categoryId   // Specific category ID search
+            search = '', 
+            categoryId 
         } = req.query;
 
         const pageNum = Math.max(1, parseInt(page, 10));
         const limitNum = Math.max(1, parseInt(limit, 10));
         const skip = (pageNum - 1) * limitNum;
 
-        // Base query object
+        // --- 1. Dynamic Query Building ---
         let query = {};
 
-        // 1. Logic for Search (Name, Generic Name, Brand, or Category Key)
         if (search) {
             const searchRegex = new RegExp(search, 'i');
             
-            // Find categories whose name matches the search string (Category Key search)
+            // Search Categories by name/key to include them in Product results
             const matchedCategories = await Category.find({ 
-                name: searchRegex 
+                $or: [{ name: searchRegex }, { key: searchRegex }] 
             }).distinct('_id');
 
             query.$or = [
                 { name: searchRegex },
-                { generic_name: searchRegex },
                 { brand: searchRegex },
-                { category: { $in: matchedCategories } } // Search by category key
+                { tags: { $in: [searchRegex] } },
+                { category: { $in: matchedCategories } }
             ];
         }
 
-        // 2. Direct Category ID Filter
+        // If a specific category ID is provided via filter
         if (categoryId) {
             query.category = categoryId;
         }
 
-        // 3. Category Status Logic (Valid vs Invalid)
+        // Handle category validation status (Checking if category exists in Category collection)
         if (categoryStatus !== 'all') {
             const validCategoryIds = await Category.find().distinct('_id');
             if (categoryStatus === 'valid') {
@@ -860,22 +859,22 @@ const getAllProductsAdmin = async (req, res) => {
             }
         }
 
-        // 4. Parallel Data Fetching with Recursive Category Population
-        // We nest 'populate' to get the parent chain
+        // --- 2. Parallel Database Execution ---
+        // Recursive population using your schema field 'parentId'
         const [products, total] = await Promise.all([
             Product.find(query)
                 .populate({
                     path: 'category',
-                    select: 'name parent',
+                    select: 'name key level parentId',
                     populate: {
-                        path: 'parent',
-                        select: 'name parent',
+                        path: 'parentId',
+                        select: 'name key level parentId',
                         populate: {
-                            path: 'parent',
-                            select: 'name parent',
+                            path: 'parentId',
+                            select: 'name key level parentId',
                             populate: {
-                                path: 'parent',
-                                select: 'name parent'
+                                path: 'parentId',
+                                select: 'name key level parentId'
                             }
                         }
                     }
@@ -887,26 +886,29 @@ const getAllProductsAdmin = async (req, res) => {
             Product.countDocuments(query)
         ]);
 
-        // 5. Variant Injection
+        // --- 3. Variant Fetching & Injection ---
         const productIds = products.map(p => p._id);
+        
+        // Fetching all variants for the current batch of products
         const allVariants = await ProductVariant.find({ product: { $in: productIds } })
-            .select('product variantName unit quantity sku barcode pricing images')
+            .select('product variantName unit quantity sku barcode pricing images value specification')
             .lean();
 
-        // 6. Map variants to their respective products
+        // Merging data
         const data = products.map(product => {
-            // Filter variants belonging to this product
             const variants = allVariants.filter(v => 
                 v.product.toString() === product._id.toString()
             );
 
             return {
                 ...product,
-                category: product.category || { name: 'Invalid Category' },
+                // Fallback for orphaned products
+                category: product.category || { name: 'Invalid/Deleted Category', _id: null },
                 variants: variants || []
             };
         });
 
+        // --- 4. Final Response ---
         res.status(200).json({
             success: true,
             data,
@@ -919,8 +921,12 @@ const getAllProductsAdmin = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error getting all products for admin:', error);
-        res.status(500).json({ success: false, message: 'Error getting products', error: error.message });
+        console.error('Error in getAllProductsAdmin:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error getting products', 
+            error: error.message 
+        });
     }
 };
 
