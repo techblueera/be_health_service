@@ -811,7 +811,7 @@ const searchProductsForUser = async (req, res) => {
     }
 };
 
-export const getAllProductsAdmin = async (req, res) => {
+const getAllProductsAdmin = async (req, res) => {
     try {
         const { 
             page = 1, 
