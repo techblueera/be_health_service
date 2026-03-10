@@ -820,36 +820,51 @@ const getAllProductsAdmin = async (req, res) => {
             search = '', 
             categoryId 
         } = req.query;
-//comment to deploy
+
         const pageNum = Math.max(1, parseInt(page, 10));
         const limitNum = Math.max(1, parseInt(limit, 10));
         const skip = (pageNum - 1) * limitNum;
 
-        // --- 1. Dynamic Query Building ---
         let query = {};
 
+        // --- 1. RECURSIVE CATEGORY SEARCH LOGIC ---
         if (search) {
             const searchRegex = new RegExp(search, 'i');
             
-            // Search Categories by name/key to include them in Product results
-            const matchedCategories = await Category.find({ 
+            // Step A: Find the initial matched categories (Level 0, 1, or 2)
+            const rootMatchedCategories = await Category.find({ 
                 $or: [{ name: searchRegex }, { key: searchRegex }] 
             }).distinct('_id');
+
+            // Step B: Fetch all descendants to ensure Level 0 search finds Level 3 products
+            // Find Level 1 children
+            const level1Ids = await Category.find({ parentId: { $in: rootMatchedCategories } }).distinct('_id');
+            // Find Level 2 children
+            const level2Ids = await Category.find({ parentId: { $in: level1Ids } }).distinct('_id');
+            // Find Level 3 children
+            const level3Ids = await Category.find({ parentId: { $in: level2Ids } }).distinct('_id');
+
+            // Combine all levels for the final product query
+            const allMatchedCategoryIds = [
+                ...rootMatchedCategories, 
+                ...level1Ids, 
+                ...level2Ids, 
+                ...level3Ids
+            ];
 
             query.$or = [
                 { name: searchRegex },
                 { brand: searchRegex },
                 { tags: { $in: [searchRegex] } },
-                { category: { $in: matchedCategories } }
+                { category: { $in: allMatchedCategoryIds } }
             ];
         }
 
-        // If a specific category ID is provided via filter
+        // --- 2. CATEGORY FILTERS ---
         if (categoryId) {
             query.category = categoryId;
         }
 
-        // Handle category validation status (Checking if category exists in Category collection)
         if (categoryStatus !== 'all') {
             const validCategoryIds = await Category.find().distinct('_id');
             if (categoryStatus === 'valid') {
@@ -859,8 +874,7 @@ const getAllProductsAdmin = async (req, res) => {
             }
         }
 
-        // --- 2. Parallel Database Execution ---
-        // Recursive population using your schema field 'parentId'
+        // --- 3. EXECUTION & DEEP POPULATION ---
         const [products, total] = await Promise.all([
             Product.find(query)
                 .populate({
@@ -886,29 +900,19 @@ const getAllProductsAdmin = async (req, res) => {
             Product.countDocuments(query)
         ]);
 
-        // --- 3. Variant Fetching & Injection ---
+        // --- 4. VARIANT MERGING ---
         const productIds = products.map(p => p._id);
-        
-        // Fetching all variants for the current batch of products
         const allVariants = await ProductVariant.find({ product: { $in: productIds } })
             .select('product variantName unit quantity sku barcode pricing images value specification')
             .lean();
 
-        // Merging data
-        const data = products.map(product => {
-            const variants = allVariants.filter(v => 
-                v.product.toString() === product._id.toString()
-            );
+        const data = products.map(product => ({
+            ...product,
+            category: product.category || { name: 'Invalid Category', _id: null },
+            variants: allVariants.filter(v => v.product.toString() === product._id.toString())
+        }));
 
-            return {
-                ...product,
-                // Fallback for orphaned products
-                category: product.category || { name: 'Invalid/Deleted Category', _id: null },
-                variants: variants || []
-            };
-        });
-
-        // --- 4. Final Response ---
+        // --- 5. RESPONSE ---
         res.status(200).json({
             success: true,
             data,
@@ -929,7 +933,6 @@ const getAllProductsAdmin = async (req, res) => {
         });
     }
 };
-
 const getSimilarProducts = async (req, res) => {
     try {
         const { productIds, pincode } = req.body;
