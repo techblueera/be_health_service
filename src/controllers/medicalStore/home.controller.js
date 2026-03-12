@@ -4,7 +4,7 @@ import PharmacyContact from '../../models/medicalModels/contact.model.js';
 import PharmacyAboutUs from '../../models/medicalModels/aboutUs.model.js';
 import PharmacyTestimonial from '../../models/medicalModels/testimonial.model.js';
 import Inventory from '../../models/medicalModels/inventory.model.js';
-import { getBusinessById } from '../../clients/businessClient.js'; // Adjust path to your gRPC client
+import { getBusinessById } from '../../grpc/clients/businessClient.js'; // Adjust path to your gRPC client
 import logger from '../../utils/appLogger.js';
 
 export const getMedicalHomeProfile = async (req, res) => {

@@ -1,5 +1,5 @@
 import galleryModel from '../../models/medicalModels/gallery.model.js';
-import logger from '../utils/appLogger.js';
+import logger from '../../utils/appLogger.js';
 
 // Create a new gallery entry with multiple photos
 export const createGalleryPhoto = async (req, res) => {

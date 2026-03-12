@@ -6,14 +6,15 @@ import {
   updateGalleryPhoto,
   deleteGalleryPhoto,
   deleteGalleryImage,
-} from '../controllers/medicalStore/gallery.controller.js';
-import { validate } from '../utils/validate.js';
+} from '../../controllers/medicalStore/gallery.controller.js';
+import { validate } from '../../utils/validate.js';
 import { 
   createGalleryPhotoSchema, 
   updateGalleryPhotoSchema,
   deleteGalleryImageSchema,
-} from '../validations/gallery.validation.js';
-import { protect } from '../middlewares/auth.middlewares.js';
+} from '../../validations/gallery.validation.js';
+// import { protect } from '../../middlewares/auth.middlewares.js';
+import { protect } from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
