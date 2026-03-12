@@ -27,6 +27,8 @@ import pharmacyTestimonialRoutes from '../routes/medicalRoutes/pharmacyTestimoni
 import pharmacyAboutUsRoutes from '../routes/medicalRoutes/pharmacyAboutUs.routes.js';
 
 import categoryRouter from "../routes/medicalRoutes/category.route.js";
+import homeRouter from "../routes/medicalRoutes/home.routes.js";
+import galleryRouter from "../routes/medicalRoutes/gallery.routes.js";
 import productRouter from "../routes/medicalRoutes/product.route.js";
 import inventoryRouter from "../routes/medicalRoutes/inventory.route.js";
 import orderRouter from "../routes/medicalRoutes/order.route.js";
@@ -68,6 +70,8 @@ router.use("/ms/categories", categoryRouter);
 router.use("/ms/products", productRouter);
 router.use("/ms/inventory", inventoryRouter);
 router.use("/ms/orders", orderRouter);
+router.use("/ms/medical-profile", homeRouter);
+router.use("/ms/gallery", galleryRouter);
 
 router.use("/upload", uploadRoutes)
 export default router;
