@@ -23,7 +23,7 @@ const getCityNameFromPincode = async (pincode) => {
 };
 
 const createBusinessInventory = async (req, res) => {
-    const businessId = req.user._id;
+    const businessId = req.user.business_id || req.user.business;
     const inventoryItems = req.body;
 
     if (!Array.isArray(inventoryItems) || inventoryItems.length === 0) {
@@ -107,7 +107,7 @@ const createBusinessInventory = async (req, res) => {
 
 const getBusinessProducts = async (req, res) => {
     try {
-        const businessId = req.user._id;
+        const businessId = req.user.business_id || req.user.business;
         const { categoryId, page = 1, limit = 10 } = req.query;
 
         const pageNum = parseInt(page, 10);
@@ -308,7 +308,7 @@ const getBusinessProducts = async (req, res) => {
 const updateInventory = async (req, res) => {
     try {
         const { id } = req.params;
-        const businessId = req.user._id;
+        const businessId = req.user.business_id || req.user.business;
         const updateData = req.body;
 
         // Optionally, if productVariant is updated, ensure it exists
@@ -342,7 +342,7 @@ const updateInventory = async (req, res) => {
 const deleteInventory = async (req, res) => {
     try {
         const { id } = req.params;
-        const businessId = req.user._id;
+        const businessId = req.user.business_id || req.user.business;
 
         const inventory = await Inventory.findOneAndDelete({ _id: id, businessId: businessId });
 

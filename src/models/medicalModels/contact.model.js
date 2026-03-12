@@ -18,6 +18,7 @@ const pharmacyContactSchema = new Schema({
   },
   phone: String,
   email: String,
+  description:String,
   openFrom: String,
   openTill: String
 }, { timestamps: true });

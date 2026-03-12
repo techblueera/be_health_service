@@ -5,7 +5,7 @@ import PharmacyTestimonial from "../../models/medicalModels/testimonial.model.js
 export const createPharmacyTestimonial = async (req, res) => {
   try {
     const testimonial = new PharmacyTestimonial({
-      businessId: req.user._id,
+      businessId: req.user.business_id,
       ...req.body,
     });
     await testimonial.save();
@@ -27,7 +27,7 @@ export const createPharmacyTestimonial = async (req, res) => {
 export const getAllPharmacyTestimonials = async (req, res) => {
   try {
     const testimonials = await PharmacyTestimonial.find({
-      businessId: req.user._id,
+      businessId: req.user.business_id,
     });
     res.status(200).json({
       success: true,
@@ -47,7 +47,7 @@ export const getAllPharmacyTestimonials = async (req, res) => {
 export const getActivePharmacyTestimonials = async (req, res) => {
   try {
     const testimonials = await PharmacyTestimonial.find({
-      businessId: req.user._id,
+      businessId: req.user.business_id,
       isActive: true,
     });
     res.status(200).json({
@@ -69,7 +69,7 @@ export const getPharmacyTestimonialById = async (req, res) => {
   try {
     const testimonial = await PharmacyTestimonial.findOne({
       _id: req.params.id,
-      businessId: req.user._id,
+      businessId: req.user.business_id,
     });
     if (!testimonial) {
       return res.status(404).json({
@@ -95,7 +95,7 @@ export const getPharmacyTestimonialById = async (req, res) => {
 export const updatePharmacyTestimonial = async (req, res) => {
   try {
     const testimonial = await PharmacyTestimonial.findOneAndUpdate(
-      { _id: req.params.id, businessId: req.user._id },
+      { _id: req.params.id, businessId: req.user.business_id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -124,7 +124,7 @@ export const deletePharmacyTestimonial = async (req, res) => {
   try {
     const testimonial = await PharmacyTestimonial.findOneAndDelete({
       _id: req.params.id,
-      businessId: req.user._id,
+      businessId: req.user.business_id,
     });
     if (!testimonial) {
       return res.status(404).json({
@@ -150,7 +150,7 @@ export const togglePharmacyTestimonialStatus = async (req, res) => {
   try {
     const testimonial = await PharmacyTestimonial.findOne({
       _id: req.params.id,
-      businessId: req.user._id,
+      businessId: req.user.business_id,
     });
     if (!testimonial) {
       return res.status(404).json({

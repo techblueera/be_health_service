@@ -5,7 +5,7 @@ import PharmacyAboutUs from '../../models/medicalModels/aboutUs.model.js';
 export const upsertPharmacyAboutUs = async (req, res) => {
   try {
     const aboutUs = await PharmacyAboutUs.findOneAndUpdate(
-      { businessId: req.user._id },
+      { businessId: req.user.business_id },
       req.body,
       { new: true, upsert: true, runValidators: true }
     );
@@ -26,7 +26,7 @@ export const upsertPharmacyAboutUs = async (req, res) => {
 // Get Pharmacy About Us
 export const getPharmacyAboutUs = async (req, res) => {
   try {
-    const aboutUs = await PharmacyAboutUs.findOne({ businessId: req.user._id });
+    const aboutUs = await PharmacyAboutUs.findOne({ businessId: req.user.business_id });
     if (!aboutUs) {
       return res.status(404).json({ message: "Pharmacy about us not found" });
     }

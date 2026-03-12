@@ -17,7 +17,7 @@ export const createPharmacyContact = async (req, res) => {
     }
 
     const contact = new PharmacyContact({
-      businessId: req.user._id,
+      businessId: req.user.business_id,
       ...req.body,
       location,
     });
@@ -39,7 +39,7 @@ export const createPharmacyContact = async (req, res) => {
 // Get Pharmacy Contact
 export const getPharmacyContact = async (req, res) => {
   try {
-    const contact = await PharmacyContact.findOne({ businessId: req.user._id });
+    const contact = await PharmacyContact.findOne({ businessId: req.user.business_id });
     if (!contact) {
       return res.status(404).json({ message: "Pharmacy contact not found" });
     }
@@ -71,7 +71,7 @@ export const updatePharmacyContact = async (req, res) => {
     }
 
     const contact = await PharmacyContact.findOneAndUpdate(
-      { businessId: req.user._id },
+      { businessId: req.user.business_id },
       req.body,
       { new: true, upsert: true, runValidators: true }
     );
@@ -93,7 +93,7 @@ export const updatePharmacyContact = async (req, res) => {
 export const deletePharmacyContact = async (req, res) => {
   try {
     const contact = await PharmacyContact.findOneAndDelete({
-      businessId: req.user._id,
+      businessId: req.user.business_id,
     });
     if (!contact) {
       return res.status(404).json({ message: "Pharmacy contact not found" });

@@ -9,6 +9,8 @@ import pharmacyContactRoutes from './pharmacyContact.routes.js';
 import findNearestPharmacyRoutes from './findNearest.routes.js';
 import pharmacyTestimonialRoutes from './pharmacyTestimonial.routes.js';
 import pharmacyAboutUsRoutes from './pharmacyAboutUs.routes.js';
+import galleryRoutes from './gallery.routes.js';
+import homeRoutes from './home.routes.js';
 const router = express.Router();
 
 router.use("/hello", helloRouter);
@@ -21,5 +23,7 @@ router.use('/contact', pharmacyContactRoutes);
 router.use('/nearest', findNearestPharmacyRoutes);
 router.use('/testimonials', pharmacyTestimonialRoutes);
 router.use('/about-us', pharmacyAboutUsRoutes);
+router.use('/gallery', galleryRoutes);
+router.use('/medical-profile', homeRoutes);
 
 export default router;
