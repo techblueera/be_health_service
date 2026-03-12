@@ -1,5 +1,9 @@
+import express from 'express';
 import { getMedicalHomeProfile } from "../../controllers/medicalStore/home.controller.js";
 import { protect } from "../../middlewares/auth.middleware.js";
+
+const router = express.Router();
+
 
 /**
  * @swagger
@@ -125,3 +129,6 @@ import { protect } from "../../middlewares/auth.middleware.js";
  *         description: Internal Server Error.
  */
 router.get('/:businessId',protect ,getMedicalHomeProfile);
+
+
+export default router;
