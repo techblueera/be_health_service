@@ -343,7 +343,7 @@ const searchCategories = async (req, res) => {
 
 const getBusinessCategoriesWithInventory = async (req, res) => {
     try {
-        const businessId = req.user._id;
+        const businessId = req.user.business_id;
 
         const pipeline = [
             // 1. Match inventory for the specific business
