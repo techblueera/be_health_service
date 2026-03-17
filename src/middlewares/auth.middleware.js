@@ -55,6 +55,7 @@ const protectWithGrpc = async (req, res, next) => {
         _id: user.id,
         account_type: user.account_type,
         role: user.account_type ? user.account_type.toLowerCase() : undefined,
+      
       };
 
       logger.info(`✅ Auth (gRPC): User ID ${req.user._id}`, 'protectWithGrpc');
@@ -84,6 +85,7 @@ const protectWithJwt = (req, res, next) => {
           _id: decoded._id._id,
           account_type: decoded._id.account_type,
           role: decoded._id.account_type ? decoded._id.account_type.toLowerCase() : undefined,
+          business_id : decoded._id.business_id || decoded._id.business || decoded.business_id
         };
       } else {
         req.user = {
