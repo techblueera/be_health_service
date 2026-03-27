@@ -2,12 +2,24 @@ import jwt from 'jsonwebtoken';
 import { validateSession } from '../grpc/clients/authClient.js';
 import logger from '../utils/appLogger.js';
 
-// Global toggle for session validation strategy. Default to false for local dev.
-let isGrpcSessionValidationEnabled =  false;
+// Global toggle for session validation strategy.
+// Initialized as null — resolved lazily on first request to ensure secrets are loaded.
+let isGrpcSessionValidationEnabled = null;
+let isToggleManuallySet = false;
 
-logger.info(`gRPC Session Validation Enabled: ${isGrpcSessionValidationEnabled}`, 'AuthMiddleware');
+logger.info('gRPC Session Validation: will resolve from env on first request', 'AuthMiddleware');
 
 // --- Start of new logic with feature toggle ---
+
+// Resolve the toggle value (lazy, safe for pre-secret module load)
+const resolveGrpcToggle = () => {
+  if (isToggleManuallySet) return isGrpcSessionValidationEnabled;
+  if (isGrpcSessionValidationEnabled === null) {
+    isGrpcSessionValidationEnabled = process.env.GRPC_SESSION_VALIDATION !== 'false';
+    logger.info(`gRPC Session Validation resolved to: ${isGrpcSessionValidationEnabled}`, 'AuthMiddleware');
+  }
+  return isGrpcSessionValidationEnabled;
+};
 
 // Expose functions to manage the toggle at runtime
 export const toggleGrpcSessionValidation = (status) => {
@@ -15,14 +27,15 @@ export const toggleGrpcSessionValidation = (status) => {
     throw new Error('Status must be a boolean.');
   }
   isGrpcSessionValidationEnabled = status;
+  isToggleManuallySet = true;
   logger.info(`gRPC Session Validation Enabled set to: ${isGrpcSessionValidationEnabled}`, 'AuthMiddleware');
 };
 
-export const getSessionValidationStatus = () => ({ isGrpcSessionValidationEnabled });
+export const getSessionValidationStatus = () => ({ isGrpcSessionValidationEnabled: resolveGrpcToggle() });
 
 // The main authentication middleware
 export const protect = async (req, res, next) => {
-  if (isGrpcSessionValidationEnabled) {
+  if (resolveGrpcToggle()) {
     return await protectWithGrpc(req, res, next);
   } else {
     return protectWithJwt(req, res, next);

@@ -26,7 +26,7 @@ const authProto = grpc.loadPackageDefinition(packageDefinition).auth_service;
 
 // In-memory cache with TTL
 const sessionCache = new Map();
-const CACHE_TTL = process.env.SESSION_CACHE_TTL || 60000; // 1 minute default
+const CACHE_TTL = process.env.SESSION_CACHE_TTL || 15000; // 15 seconds default
 
 class AuthClient {
   constructor(
