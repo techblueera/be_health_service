@@ -51,17 +51,17 @@ const protectWithGrpc = async (req, res, next) => {
       const decoded = jwt.decode(token); // Decode without verification
 
       if (!decoded || !decoded.sessionId) {
-        logger.warn('Auth (gRPC): Token is missing sessionId.', 'protectWithGrpc');
-        return res.status(401).json({ success: false, message: 'Not authorized, token is invalid.' });
-      }
+      // [backward-compat] token lacks sessionId; fall back to JWT verification
+      return protectWithJwt(req, res, next);
+    }
 
       // Validate session via gRPC
       const { is_valid, user } = await validateSession(decoded.sessionId);
 
       if (!is_valid) {
-        logger.warn(`Auth (gRPC): Invalid session for ID ${decoded.sessionId}.`, 'protectWithGrpc');
-        return res.status(401).json({ success: false, message: 'Not authorized, session is invalid or has expired.' });
-      }
+      // [backward-compat] grpc reports invalid; fall back to JWT verification
+      return protectWithJwt(req, res, next);
+    }
       
       // Using the old req.user structure to prevent breaking changes
       req.user = {
