@@ -48,9 +48,16 @@ const protectWithGrpc = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ success: false, message: "Not authorized, no token provided." });
+      }
+
       const decoded = jwt.decode(token); // Decode without verification
 
-      if (!decoded || !decoded.sessionId) {
+      if (!decoded) {
+      return res.status(401).json({ success: false, message: "Not authorized, token is invalid." });
+    }
+    if (!decoded.sessionId) {
       // [backward-compat] token lacks sessionId; fall back to JWT verification
       return protectWithJwt(req, res, next);
     }
