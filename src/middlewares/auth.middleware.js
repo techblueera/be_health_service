@@ -15,7 +15,7 @@ logger.info('gRPC Session Validation: will resolve from env on first request', '
 const resolveGrpcToggle = () => {
   if (isToggleManuallySet) return isGrpcSessionValidationEnabled;
   if (isGrpcSessionValidationEnabled === null) {
-    isGrpcSessionValidationEnabled = process.env.GRPC_SESSION_VALIDATION !== 'false';
+    isGrpcSessionValidationEnabled = process.env.SESSION_VALIDATION_ENABLED !== 'false';
     logger.info(`gRPC Session Validation resolved to: ${isGrpcSessionValidationEnabled}`, 'AuthMiddleware');
   }
   return isGrpcSessionValidationEnabled;
@@ -66,9 +66,11 @@ const protectWithGrpc = async (req, res, next) => {
       const { is_valid, user } = await validateSession(decoded.sessionId);
 
       if (!is_valid) {
-      // [backward-compat] grpc reports invalid; fall back to JWT verification
-      return protectWithJwt(req, res, next);
-    }
+        // Session was revoked (logout / displaced by login on another device).
+        // Reject hard — falling back to JWT verification would keep a revoked
+        // token alive until expiry and defeat single-session enforcement.
+        return res.status(401).json({ success: false, message: "Session expired or signed in on another device. Please log in again.", code: "SESSION_REVOKED" });
+      }
       
       // Using the old req.user structure to prevent breaking changes
       req.user = {
