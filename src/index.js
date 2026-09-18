@@ -60,6 +60,15 @@ app.get("/swagger.json", (req, res) => {
   try {
     await connectDB();
     // await seedCategories();
+    // Inactivity data-retention: erase this service's copy of a dormant
+    // user's data when the user service says so. The account itself is
+    // never touched — the user must still be able to log in afterwards.
+    // Un-awaited: a Kafka outage must not stop the HTTP server booting.
+    import("./kafka/inactivityPurgeConsumer.js")
+      .then((m) => m.startInactivityPurgeConsumer())
+      .catch((err) =>
+        console.error("Failed to start inactivity purge consumer:", err)
+      );
     app.listen(PORT, () => {
       appLogger.info(`Server listening on http://localhost:${PORT}`, 'SERVER');
       appLogger.info(`API documentation available at http://localhost:${PORT}/api-docs`, 'SERVER');
