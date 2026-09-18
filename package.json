@@ -29,6 +29,7 @@
     "haversine-distance": "^1.2.4",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
+    "kafkajs": "^2.2.4",
     "moment-timezone": "^0.6.0",
     "mongoose": "^8.23.0",
     "multer": "^2.0.2",
