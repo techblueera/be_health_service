@@ -23,7 +23,7 @@ const medicalProto = grpc.loadPackageDefinition(packageDefinition).medical_servi
 
 class MedicalClient {
   constructor(
-    serverAddress = process.env.GRPC_MEDICAL_SERVICE_ADDRESS || "medical-service:50051"
+    serverAddress = process.env.GRPC_MEDICAL_SERVICE_ADDRESS || "medical-service:50054"
     // serverAddress = "localhost:50052"
 
   ) {
