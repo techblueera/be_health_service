@@ -43,7 +43,7 @@ const createBusinessInventory = async (req, res) => {
                 throw new Error('Each inventory item must include productVariant, pincode, and batches.');
             }
 
-            const variant = await ProductVariant.findById(productVariantId).session(session);
+            const variant = await ProductVariant.findById(productVariantId).select('_id').session(session).lean();
             if (!variant) {
                 throw new Error(`ProductVariant with id ${productVariantId} not found.`);
             }
@@ -313,7 +313,7 @@ const updateInventory = async (req, res) => {
 
         // Optionally, if productVariant is updated, ensure it exists
         if (updateData.productVariant) {
-            const variant = await ProductVariant.findById(updateData.productVariant);
+            const variant = await ProductVariant.findById(updateData.productVariant).select('_id').lean();
             if (!variant) {
                 return res.status(404).json({ message: `ProductVariant with id ${updateData.productVariant} not found.` });
             }

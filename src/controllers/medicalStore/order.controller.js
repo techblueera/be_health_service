@@ -20,6 +20,9 @@ const createOrder = async (req, res) => {
         let totalItems = 0;
         let totalMRP = 0;
         let grandTotal = 0;
+        // businessId per inventory, kept from the stock check so the
+        // self-pickup enrichment below does not re-read each inventory.
+        const businessIdByInventory = new Map();
 
         for (const item of items) {
             const { inventory: inventoryId, quantity } = item;
@@ -54,6 +57,7 @@ const createOrder = async (req, res) => {
                 }
                 inventory.batches = inventory.batches.filter(b => b.quantity > 0);
                 await inventory.save({ session });
+                businessIdByInventory.set(inventory._id.toString(), inventory.businessId);
             }
 
             // Recalculate totals on the backend
@@ -82,12 +86,11 @@ const createOrder = async (req, res) => {
             const populatedItems = await Promise.all(responseOrder.items.map(async (item) => {
                 if (!item.inventory) return item;
 
-                // We need to fetch inventory to get the businessId
-                const inventory = await Inventory.findById(item.inventory).session(session).lean();
-                if (!inventory || !inventory.businessId) return item;
+                const inventoryBusinessId = businessIdByInventory.get(item.inventory.toString());
+                if (!inventoryBusinessId) return item;
 
                 try {
-                    const businessDetails = await getBusinessByUserId(inventory.businessId.toString());
+                    const businessDetails = await getBusinessByUserId(inventoryBusinessId.toString());
                     if (businessDetails && businessDetails.business && businessDetails.business.business_location) {
                         return {
                             ...item,
@@ -95,7 +98,7 @@ const createOrder = async (req, res) => {
                         };
                     }
                 } catch (error) {
-                    logger.error(`Failed to retrieve business location for businessId ${inventory.businessId} on order ${savedOrder._id}`, 'createOrder', error);
+                    logger.error(`Failed to retrieve business location for businessId ${inventoryBusinessId} on order ${savedOrder._id}`, 'createOrder', error);
                     // If gRPC call fails, we just don't add the location. The order itself is still valid.
                 }
 
@@ -143,7 +146,7 @@ const updateOrder = async (req, res) => {
             return res.status(400).json({ message: 'No update data provided.' });
         }
 
-        const order = await Order.findById(id);
+        const order = await Order.findById(id).select('userId orderStatus');
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found.' });

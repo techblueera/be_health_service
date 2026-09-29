@@ -19,7 +19,7 @@ import mongoose from 'mongoose';
         }
 
         // 1. Verify Category
-        const category = await Category.findById(productData.category).session(session);
+        const category = await Category.findById(productData.category).select('_id').session(session).lean();
         if (!category) {
             return res.status(404).json({ message: 'Category not found.' });
         }
@@ -159,7 +159,7 @@ const searchProducts = async (req, res) => {
             if (categoryId) {
                 startCategoryId = new mongoose.Types.ObjectId(categoryId);
             } else if (key) {
-                const requestedCategory = await Category.findOne({ key: key.toUpperCase() });
+                const requestedCategory = await Category.findOne({ key: key.toUpperCase() }).select('_id').lean();
                 if (requestedCategory) {
                     startCategoryId = requestedCategory._id;
                 }
@@ -294,7 +294,7 @@ const createProductVariant = async (req, res) => {
             return res.status(400).json({ message: 'Invalid JSON format in variantData.' });
         }
 
-        const product = await Product.findById(productId).session(session);
+        const product = await Product.findById(productId).select('_id').session(session).lean();
         if (!product) {
             return res.status(404).json({ message: `Product with id ${productId} not found.` });
         }
@@ -303,7 +303,7 @@ const createProductVariant = async (req, res) => {
         if (parsedVariantData.pricing && parsedVariantData.pricing.length > 0) {
             const firstPricing = parsedVariantData.pricing[0];
             if (!firstPricing.pincode || !firstPricing.cityName) {
-                const anotherVariant = await ProductVariant.findOne({ product: productId }).session(session);
+                const anotherVariant = await ProductVariant.findOne({ product: productId }).select('pricing').session(session).lean();
                 if (anotherVariant && anotherVariant.pricing && anotherVariant.pricing.length > 0) {
                     const referencePricing = anotherVariant.pricing[0];
                     for (const price of parsedVariantData.pricing) {
@@ -647,7 +647,7 @@ const searchProductsForUser = async (req, res) => {
         let targetCategoryIds = [];
 
         if (key) {
-            const requestedCategory = await Category.findOne({ key: key.toUpperCase() });
+            const requestedCategory = await Category.findOne({ key: key.toUpperCase() }).select('_id').lean();
             if (requestedCategory) {
                 const categoryHierarchy = await Category.aggregate([
                     { $match: { _id: requestedCategory._id } },
