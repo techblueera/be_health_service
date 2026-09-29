@@ -9,7 +9,7 @@ import { load } from "@grpc/grpc-js";
 await loadSecrets()
 
 async function connectDB() {
-  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE);
+  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE, { maxPoolSize: 2 });
   console.log("✅ MongoDB Connected");
 }
 

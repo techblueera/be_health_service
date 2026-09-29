@@ -10,7 +10,7 @@ await loadSecrets();
 const level0Name = process.argv[2];
 
 async function connectDB() {
-  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE);
+  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE, { maxPoolSize: 2 });
   console.log("✅ MongoDB Connected");
 }
 
