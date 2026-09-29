@@ -146,28 +146,42 @@ export const getHomePageDetails = async (req, res) => {
       isActive: true 
     }).lean();
 
-    const ipd = await Promise.all(
-      activeWards.map(async (ward) => {
-        const totalBeds = await Bed.countDocuments({ 
-          wardId: ward._id, 
-          businessId 
-        });
-        const occupiedBeds = await Bed.countDocuments({ 
-          wardId: ward._id, 
-          businessId,
-          isOccupied: true 
-        });
-        
-        return {
-          _id: ward._id,
-          name: ward.name,
-          type: ward.type,
-          totalBeds: totalBeds,
-          availableBeds: totalBeds - occupiedBeds,
-          fees: ward.fees
-        };
-      })
-    );
+    // One grouped count for all wards instead of two countDocuments per ward.
+    // Bed.wardId/businessId are String paths and aggregate() does not cast,
+    // so stringify here the way countDocuments() would have.
+    const bedCounts = activeWards.length
+      ? await Bed.aggregate([
+          {
+            $match: {
+              businessId: businessId == null ? businessId : String(businessId),
+              wardId: { $in: activeWards.map(ward => String(ward._id)) }
+            }
+          },
+          {
+            $group: {
+              _id: '$wardId',
+              total: { $sum: 1 },
+              occupied: { $sum: { $cond: [{ $eq: ['$isOccupied', true] }, 1, 0] } }
+            }
+          }
+        ])
+      : [];
+    const bedCountMap = new Map(bedCounts.map(c => [c._id, c]));
+
+    const ipd = activeWards.map((ward) => {
+      const counts = bedCountMap.get(String(ward._id));
+      const totalBeds = counts ? counts.total : 0;
+      const occupiedBeds = counts ? counts.occupied : 0;
+
+      return {
+        _id: ward._id,
+        name: ward.name,
+        type: ward.type,
+        totalBeds: totalBeds,
+        availableBeds: totalBeds - occupiedBeds,
+        fees: ward.fees
+      };
+    });
 
     // 5. EMERGENCY & CRITICAL CARE
     const emergencyServices = await EmergencyService.find({ 

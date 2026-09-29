@@ -9,5 +9,8 @@ export const getMongoPoolOptions = (overrides = {}) => ({
   minPoolSize: Number(process.env.MONGO_MIN_POOL_SIZE || 0),
   maxIdleTimeMS: Number(process.env.MONGO_MAX_IDLE_MS || 60000),
   appName: process.env.MONGO_APP_NAME || "be_health_service",
+  // "poll" keeps one monitoring socket per replica-set member instead of two
+  // (streaming + RTT pinger). Failover is noticed within heartbeatFrequencyMS.
+  serverMonitoringMode: process.env.MONGO_SERVER_MONITORING_MODE || "poll",
   ...overrides,
 });
