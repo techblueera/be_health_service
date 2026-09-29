@@ -282,7 +282,7 @@ const getNestedCategories = async (req, res) => {
 const getChildrenByCategoryId = async (req, res) => {
     try {
         const parentId = req.params.id;
-        const parentCategory = await Category.findById(parentId);
+        const parentCategory = await Category.findById(parentId).select('_id').lean();
         if (!parentCategory) {
             return res.status(404).json({ message: 'Parent category not found' });
         }
@@ -298,7 +298,7 @@ const getChildrenByCategoryId = async (req, res) => {
 const getChildrenByCategoryKey = async (req, res) => {
     try {
         const parentKey = req.params.key;
-        const parentCategory = await Category.findOne({ key: parentKey.toUpperCase() }); // Assuming keys are stored uppercase
+        const parentCategory = await Category.findOne({ key: parentKey.toUpperCase() }).select('_id').lean(); // Assuming keys are stored uppercase
         if (!parentCategory) {
             return res.status(404).json({ message: 'Parent category not found with provided key.' });
         }

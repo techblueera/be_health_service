@@ -152,7 +152,7 @@ export const getSubDepartments = async (req, res) => {
   try {
     const anyDepts = await Department.findOne({
       businessId: req.user._id,
-    });
+    }).select('_id').lean();
 
     if (!anyDepts) {
       await seedDefaultDepartments(req.user._id);
@@ -183,7 +183,7 @@ export const getDepartmentWithChildren = async (req, res) => {
     // Check if departments exist for this business
     const existingDepts = await Department.findOne({
       businessId: req.user._id,
-    });
+    }).select('_id').lean();
 
     // If no departments exist, seed default ones
     if (!existingDepts) {

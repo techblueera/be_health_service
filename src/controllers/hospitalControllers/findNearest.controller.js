@@ -66,14 +66,7 @@ export const findNearestHospitals = async (req, res) => {
           as: 'careers'
         }
       },
-      {
-        $lookup: {
-          from: 'departments',
-          localField: 'businessId',
-          foreignField: 'businessId',
-          as: 'departments'
-        }
-      },
+      // No 'departments' lookup: the $project below does not return it.
       {
         $lookup: {
           from: 'doctors',

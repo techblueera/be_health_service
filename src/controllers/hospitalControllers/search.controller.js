@@ -55,7 +55,7 @@ export const searchAcrossModels = async (req, res) => {
         if (city) locationQuery['address'] = { $regex: city, $options: 'i' };
         if (state) locationQuery['address'] = { $regex: state, $options: 'i' };
         if (Object.keys(locationQuery).length > 0) {
-          const matchingContacts = await Contact.find(locationQuery).lean();
+          const matchingContacts = await Contact.find(locationQuery).select('businessId').lean();
           businessIds = matchingContacts.map(c => c.businessId);
         }
       }
@@ -133,7 +133,9 @@ export const searchAcrossModels = async (req, res) => {
       Object.values(results).forEach(resObj => resObj.data.forEach(item => item.businessId && allBusinessIds.add(item.businessId)));
       const uniqueIds = Array.from(allBusinessIds);
 
-      const hospitalContacts = await Contact.find({ businessId: { $in: uniqueIds } }).lean();
+      const hospitalContacts = await Contact.find({ businessId: { $in: uniqueIds } })
+        .select('businessId hospitalName address phone email website')
+        .lean();
       const contactMap = hospitalContacts.reduce((acc, h) => {
         acc[h.businessId] = { hospitalName: h.hospitalName, address: h.address, phone: h.phone, email: h.email, website: h.website };
         return acc;
