@@ -22,7 +22,7 @@ const riderProto = grpc.loadPackageDefinition(packageDefinition).rider_service;
 
 class RiderServiceClient {
   constructor(
-    serverAddress = process.env.GRPC_RIDER_SERVER_ADDRESS || "localhost:50052"
+    serverAddress = process.env.GRPC_RIDER_SERVER_ADDRESS || "rider-service:50051"
   ) {
     this.serverAddress = serverAddress;
     this.client = new riderProto.RiderService(

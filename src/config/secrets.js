@@ -4,8 +4,8 @@ import logger from '../utils/appLogger.js';
 
 export const loadSecrets = async () => {
 
-  const secretName = "prod/be-prod-microservices"
-  const region = "ap-south-1";
+  const secretName = process.env.SECRET_NAME || "prod/be-prod-microservices"
+  const region = process.env.AWS_REGION || "ap-south-1";
   if (!secretName || !region) {
     logger.error('SECRET_NAME or AWS_REGION is not defined in environment variables.', 'SECRETS');
     process.exit(1);

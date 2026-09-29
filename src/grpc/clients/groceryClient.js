@@ -23,7 +23,7 @@ const groceryProto = grpc.loadPackageDefinition(packageDefinition).grocery_servi
 class GroceryClient {
   constructor(
     // serverAddress = process.env.GRPC_GROCERY_SERVICE_ADDRESS || "localhost:50055"
-    serverAddress = "localhost:50052"
+    serverAddress = process.env.GRPC_GROCERY_SERVICE_ADDRESS || "grocery-service:50051"
 
   ) {
     this.serverAddress = serverAddress;

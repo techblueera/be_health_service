@@ -22,7 +22,7 @@ const postsProto = grpc.loadPackageDefinition(packageDefinition).posts;
 
 class PostsClient {
   constructor(
-    serverAddress = process.env.GRPC_POST_SERVICE || "localhost:50052"
+    serverAddress = process.env.GRPC_POST_SERVICE || "posts-service:50051"
     // serverAddress = "localhost:50051"
   ) {
     this.serverAddress = serverAddress;

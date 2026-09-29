@@ -26,10 +26,10 @@ const businessProto = grpc.loadPackageDefinition(packageDefinition).business;
 
 class BusinessClient {
   constructor(
-    serverAddress = process.env.GRPC_USER_SERVER_ADDRESS || "localhost:50051"
+    serverAddress = process.env.GRPC_USER_SERVER_ADDRESS || "user-service:50051"
     // serverAddress = "localhost:50053"
   ) {
-    this.serverAddress = serverAddress || process.env.GRPC_USER_SERVER_ADDRESS || "localhost:50051";
+    this.serverAddress = serverAddress || process.env.GRPC_USER_SERVER_ADDRESS || "user-service:50051";
     this.client = new businessProto.BusinessService(
       this.serverAddress,
       grpc.credentials.createInsecure()

@@ -22,7 +22,7 @@ const providerProto = grpc.loadPackageDefinition(packageDefinition).provider;
 
 class MapProviderClient {
   constructor(
-    serverAddress = process.env.GRPC_MAP_PROVIDER_SERVER_ADDRESS || "localhost:50052"
+    serverAddress = process.env.GRPC_MAP_PROVIDER_SERVER_ADDRESS || "map-service:50051"
   ) {
     this.serverAddress = serverAddress;
     this.client = new providerProto.LiveLocation(

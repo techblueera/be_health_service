@@ -22,7 +22,7 @@ const channelProto = grpc.loadPackageDefinition(packageDefinition).channel;
 
 class ChannelClient {
   constructor(
-    serverAddress = process.env.GRPC_CHANNEL_SERVICE_ADDRESS || "13.232.95.53:50051"
+    serverAddress = process.env.GRPC_CHANNEL_SERVICE_ADDRESS || "channel-service:50051"
   ) {
     this.serverAddress = serverAddress;
     this.client = new channelProto.ChannelService(
