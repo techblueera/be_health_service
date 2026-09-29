@@ -170,7 +170,7 @@ async function main() {
   }
 
   console.log('🔌 Connecting to MongoDB...');
-  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE);
+  await mongoose.connect(process.env.MONGO_URI_HEALTH_CARE_SERVICE, { maxPoolSize: 2 });
   console.log('✅ Connected.\n');
 
   await loadLevel3Categories();
