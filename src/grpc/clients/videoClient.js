@@ -22,7 +22,7 @@ const videoProto = grpc.loadPackageDefinition(packageDefinition).video;
 
 class VideoClient {
   constructor(
-    serverAddress = process.env.GRPC_VIDEO_SERVICE_ADDRESS || "localhost:50053"
+    serverAddress = process.env.GRPC_VIDEO_SERVICE_ADDRESS || "video-service:50051"
         // serverAddress = "localhost:50054"
 
   ) {

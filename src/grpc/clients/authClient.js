@@ -30,7 +30,7 @@ const CACHE_TTL = process.env.SESSION_CACHE_TTL || 15000; // 15 seconds default
 
 class AuthClient {
   constructor(
-    serverAddress = process.env.GRPC_AUTH_SERVER_ADDRESS || "localhost:50051"
+    serverAddress = process.env.GRPC_AUTH_SERVER_ADDRESS || "auth-service:50051"
   ) {
     this.serverAddress = serverAddress;
     this.client = new authProto.AuthService(

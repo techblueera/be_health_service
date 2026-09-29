@@ -22,7 +22,7 @@ const productsProto = grpc.loadPackageDefinition(packageDefinition).products;
 
 class ProductsClient {
   constructor(
-    serverAddress = process.env.GRPC_PRODUCT_SERVICE || "localhost:50054"
+    serverAddress = process.env.GRPC_PRODUCT_SERVICE || "product-service:50051"
         // serverAddress = "localhost:50052"
 
   ) {

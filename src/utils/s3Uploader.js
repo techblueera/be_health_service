@@ -14,16 +14,14 @@ import path from "path";
 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
+import { awsCredentials } from "./awsCredentials.js";
 
 
 // same helper you already wrote
 const createS3Client = () =>
   new S3Client({
     region: process.env.AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.NEW_AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.NEW_AWS_SECRET_ACCESS_KEY,
-    },
+    credentials: awsCredentials(process.env.NEW_AWS_ACCESS_KEY_ID, process.env.NEW_AWS_SECRET_ACCESS_KEY),
   });
 
 /**
@@ -37,10 +35,7 @@ export const uploadToS3 = async (file, key) => {
   console.log(chalk.blue('[DEBUG S3] Initializing S3Client...'));
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.NEW_AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.NEW_AWS_SECRET_ACCESS_KEY
-    }
+    credentials: awsCredentials(process.env.NEW_AWS_ACCESS_KEY_ID, process.env.NEW_AWS_SECRET_ACCESS_KEY)
   });
   console.log(chalk.green('[DEBUG S3] S3Client initialized. Region:', process.env.AWS_REGION));
   console.log(chalk.blue('[DEBUG S3] Entering uploadToS3 function.'));
@@ -103,10 +98,7 @@ export const deleteFromS3 = async (fileUrl) => {
   // Initialize S3 Client (can be reused or created per function call)
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.NEW_AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.NEW_AWS_SECRET_ACCESS_KEY
-    }
+    credentials: awsCredentials(process.env.NEW_AWS_ACCESS_KEY_ID, process.env.NEW_AWS_SECRET_ACCESS_KEY)
   });
 
   // Extract the S3 Key from the URL

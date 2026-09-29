@@ -22,7 +22,7 @@ const userProto = grpc.loadPackageDefinition(packageDefinition).user;
 
 class UserClient {
   constructor(
-    serverAddress = process.env.GRPC_USER_SERVER_ADDRESS || "localhost:50051"
+    serverAddress = process.env.GRPC_USER_SERVER_ADDRESS || "user-service:50051"
         // serverAddress = "localhost:50053"
 
   ) {
