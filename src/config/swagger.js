@@ -18,7 +18,7 @@ const options = {
     },
     servers: [
       {
-        url: "https://be.blueera.ai/api/health-service/",
+        url: `${process.env.PUBLIC_API_BASE_URL || "https://be.beapp.in/api"}/health-service/`,
         description: "Production server",
       },
       { url: "http://localhost:3000", description: "Development server" },

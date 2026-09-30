@@ -14,8 +14,8 @@ export const startGrpcServer = () => {
   console.log(chalk.blue("ℹ️  Starting gRPC Server..."));
 
   // Config
-  const GRPC_PORT =  "50051";
-  const GRPC_HOST = "0.0.0.0";
+  const GRPC_PORT = process.env.GRPC_PORT || "50051";
+  const GRPC_HOST = process.env.GRPC_HOST || "0.0.0.0";
 
   // Create Server
   const server = new grpc.Server();

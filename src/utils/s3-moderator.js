@@ -14,9 +14,10 @@ const s3 = new S3Client({});
 const rekognition = new RekognitionClient({});
 
 // CONFIG
-const QUARANTINE_BUCKET =
+// Read at call time so values from Secrets Manager / container env apply.
+const quarantineBucket = () =>
   process.env.QUARANTINE_BUCKET || "grocery-service-quarantine-s3-bucket";
-const MIN_CONFIDENCE = parseFloat(process.env.MIN_CONFIDENCE || "75.0");
+const minConfidence = () => parseFloat(process.env.MIN_CONFIDENCE || "75.0");
 const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png"]);
 
 const prohibitedLabels = new Set([
@@ -219,7 +220,7 @@ async function analyzeImage(bucket, key) {
   const response = await rekognition.send(
     new DetectModerationLabelsCommand({
       Image: { S3Object: { Bucket: bucket, Name: key } },
-      MinConfidence: MIN_CONFIDENCE,
+      MinConfidence: minConfidence(),
     })
   );
 
@@ -240,6 +241,7 @@ async function analyzeImage(bucket, key) {
 }
 
 async function quarantineObject(bucket, key, reason) {
+  const QUARANTINE_BUCKET = quarantineBucket();
   const quarantineKey = `${bucket}/${Date.now()}-${key}`; // avoid collisions
   await s3.send(
     new CopyObjectCommand({
@@ -289,7 +291,7 @@ export async function moderateContentFromUrl(url) {
       const quarantineKey = await quarantineObject(bucket, key, reason);
       return {
         status: "quarantined",
-        bucket: QUARANTINE_BUCKET,
+        bucket: quarantineBucket(),
         key: quarantineKey,
         reason,
       };

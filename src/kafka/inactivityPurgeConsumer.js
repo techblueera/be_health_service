@@ -18,6 +18,9 @@
 
 import { Kafka, Partitioners } from "kafkajs";
 import mongoose from "mongoose";
+import { TOPICS, CONSUMED_TOPICS } from "./topics.js";
+import { ensureTopics } from "./ensureTopics.js";
+import { setDependencyReady } from "../utils/readiness.js";
 import Order from "../models/medicalModels/order.model.js";
 import VariantChangeRequest from "../models/medicalModels/productVariantChangeRequest.model.js";
 
@@ -35,9 +38,12 @@ const buildTargets = (uid, uidStr) => [
 const SERVICE_NAME = "be_health_service";
 const LOG = "[inactivity-purge]";
 
-const TOPIC_PURGE = "user.inactivity_purge";
-const TOPIC_ACK = "user.inactivity_purge_ack";
-const GROUP_ID = `${SERVICE_NAME}-inactivity-purge`;
+const TOPIC_PURGE = TOPICS.USER_INACTIVITY_PURGE;
+const TOPIC_ACK = TOPICS.USER_INACTIVITY_PURGE_ACK;
+// KAFKA_GROUP_ID overrides the group; the default keeps the existing group
+// (and its committed offsets).
+const groupId = () =>
+  process.env.KAFKA_GROUP_ID || `${SERVICE_NAME}-inactivity-purge`;
 
 let kafka = null;
 let consumer = null;
@@ -145,10 +151,38 @@ export const handlePurgeCommand = async (payload) => {
   }
 };
 
+const RETRY_MIN_MS = 5000;
+const RETRY_MAX_MS = 60000;
+let stopping = false;
+
+/**
+ * Connect, subscribe and run — retried forever with backoff (5 s doubling to
+ * 60 s). A consumer that is not running is reported on GET /ready, never
+ * silently skipped.
+ */
 export const startInactivityPurgeConsumer = async () => {
-  for (let attempt = 1; ; attempt++) {
+  setDependencyReady("kafka", false);
+  let delay = RETRY_MIN_MS;
+  for (let attempt = 1; !stopping; attempt++) {
     try {
-      consumer = client().consumer({ groupId: GROUP_ID, sessionTimeout: 60000 });
+      await ensureTopics(client(), CONSUMED_TOPICS);
+      consumer = client().consumer({
+        groupId: groupId(),
+        sessionTimeout: 60000,
+        maxWaitTimeInMs: Number(process.env.KAFKA_MAX_WAIT_MS) || 5000,
+      });
+      consumer.on(consumer.events.GROUP_JOIN, () => setDependencyReady("kafka", true));
+      consumer.on(consumer.events.CRASH, ({ payload }) => {
+        setDependencyReady("kafka", false);
+        // kafkajs restarts by itself on retriable errors; otherwise start over.
+        if (payload?.restart === false && !stopping) {
+          console.error(`${LOG} consumer crashed, restarting: ${payload?.error?.message}`);
+          const crashed = consumer;
+          consumer = null;
+          crashed?.disconnect().catch(() => {});
+          startInactivityPurgeConsumer();
+        }
+      });
       await consumer.connect();
       await consumer.subscribe({ topic: TOPIC_PURGE, fromBeginning: false });
       await consumer.run({
@@ -161,17 +195,28 @@ export const startInactivityPurgeConsumer = async () => {
           }
         },
       });
-      break;
+      console.log(`${LOG} consumer running (topic ${TOPIC_PURGE}, group ${groupId()})`);
+      return;
     } catch (err) {
       console.error(
-        `${LOG} subscribe failed (attempt ${attempt}): ${err.message}`
+        `${LOG} subscribe failed (attempt ${attempt}, retry in ${delay / 1000}s): ${err.message}`
       );
       await consumer?.disconnect().catch(() => {});
       consumer = null;
-      await new Promise((r) => setTimeout(r, Math.min(30000, attempt * 5000)));
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay * 2, RETRY_MAX_MS);
     }
   }
-  console.log(`${LOG} consumer running (topic ${TOPIC_PURGE}, group ${GROUP_ID})`);
+};
+
+/** Disconnect the consumer and the ack producer (graceful shutdown). */
+export const stopInactivityPurgeConsumer = async () => {
+  stopping = true;
+  setDependencyReady("kafka", false);
+  await consumer?.disconnect().catch(() => {});
+  await producer?.disconnect().catch(() => {});
+  consumer = null;
+  producer = null;
 };
 
 export default startInactivityPurgeConsumer;
