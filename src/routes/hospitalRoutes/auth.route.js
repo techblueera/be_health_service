@@ -3,8 +3,20 @@ import {
   toggleValidation,
   getValidationStatus,
 } from "../../controllers/auth.controller.js";
+import { protect } from "../../middlewares/auth.middleware.js";
 
 const router = express.Router();
+
+// Admin-only guard for the session-validation toggle (QA 2026-10-08, P0).
+// The toggle used to be public, so anyone could switch off gRPC session checks
+// and keep logged-out / displaced tokens working. Runs after protect.
+const adminOnly = (req, res, next) => {
+  const accountType = req.user?.account_type || req.user?._id?.account_type;
+  if (String(accountType || "").toLowerCase() !== "admin") {
+    return res.status(403).json({ success: false, message: "Admin access required" });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -81,6 +93,6 @@ router.get("/session-validation/status", getValidationStatus);
  *       500:
  *         description: Internal server error.
  */
-router.put("/session-validation/toggle", toggleValidation);
+router.put("/session-validation/toggle", protect, adminOnly, toggleValidation);
 
 export default router;
