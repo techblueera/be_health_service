@@ -16,6 +16,16 @@ import {
 } from '../../controllers/medicalStore/category.controller.js';
 import { protect } from '../../middlewares/auth.middleware.js';
 
+// Category writes were public. Only admin-panel accounts (product-management
+// logs in as Admin or SubAdmin) may change the medical category master.
+const catalogAdmin = (req, res, next) => {
+  const accountType = String(
+    req.user?.account_type || req.user?._id?.account_type || ''
+  ).toLowerCase();
+  if (accountType === 'admin' || accountType === 'subadmin') return next();
+  return res.status(403).json({ success: false, message: 'Admin access required' });
+};
+
 const router = express.Router();
 
 // Multer setup for in-memory file storage
@@ -78,7 +88,7 @@ const upload = multer({ storage: storage });
  *       500:
  *         description: Server error
  */
-router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), createCategory);
+router.post('/', protect, catalogAdmin, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), createCategory);
 
 /**
  * @swagger
@@ -336,7 +346,7 @@ router.get('/key/:key/children', getChildrenByCategoryKey);
  *       500:
  *         description: Server error
  */
-router.put('/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), updateCategory);
+router.put('/:id', protect, catalogAdmin, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageOptions', maxCount: 10 }]), updateCategory);
 
 /**
  * @swagger
@@ -361,7 +371,7 @@ router.put('/:id', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'image
  *       500:
  *         description: Server error
  */
-router.delete('/:id', deleteCategory);
+router.delete('/:id', protect, catalogAdmin, deleteCategory);
 
 /**
  * @swagger
@@ -402,6 +412,6 @@ router.delete('/:id', deleteCategory);
  *       500:
  *         description: Server error.
  */
-router.delete('/:id/image-options', protect, deleteImageOption);
+router.delete('/:id/image-options', protect, catalogAdmin, deleteImageOption);
 
 export default router;

@@ -137,10 +137,23 @@ const protectWithJwt = (req, res, next) => {
 // --- End of new logic ---
 
 
-// Role-based authorization (unchanged)
+// Was a no-op that let every caller through, so routes guarded with
+// authorizeRoles('admin') were open to any logged-in user. Matches account_type
+// or role, case-insensitively. An admin route also admits SubAdmin: the admin
+// panel and product-management log in with both.
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    next();
+    if (roles.length === 0) return next();
+    const allowed = roles.map((r) => String(r).toLowerCase());
+    if (allowed.includes('admin')) allowed.push('subadmin');
+    const accountType = String(
+      req.user?.account_type || req.user?._id?.account_type || ''
+    ).toLowerCase();
+    const role = String(req.user?.role || '').toLowerCase();
+    if (allowed.includes(accountType) || allowed.includes(role)) return next();
+    return res
+      .status(403)
+      .json({ success: false, message: 'Forbidden: insufficient role.' });
   };
 };
 
